@@ -1,0 +1,50 @@
+//
+//  PDHelper.h
+//  PlayDate
+//
+//  Created by Vakul on 01/05/14.
+//  Copyright (c) 2014 iAppTechnologies. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import <SystemConfiguration/SystemConfiguration.h>
+#import <netinet/in.h>
+#import <sys/socket.h>
+
+#define COLOR_FROM_RGB(RED, GREEN, BLUE, ALPHA)  [UIColor colorWithRed:RED/255.0 green:GREEN/255.0 blue:BLUE/255.0 alpha:ALPHA]
+
+typedef void (^PDImagePickerBlock) (UIImage *image);
+
+@interface PDHelper : NSObject
+
+@property(strong, nonatomic) NSString *strUd_Id;
+@property(strong, nonatomic) NSMutableArray *recentArray;
+
++(PDHelper *)sharedHelper;
+
+
+-(BOOL)isInternetAvailable;
+-(BOOL)isIOS7;
+-(BOOL)isIPhone5;
+
+-(BOOL)isCameraAvailable;
+-(BOOL)isPhotoGalleryAvailable;
+-(BOOL)validateEmail:(NSString *)inputText;
+
+
+
+-(UIImage *)imageFromView:(UIView *)view;
+
+-(UIColor *)applicationBackgroundColor;
+-(UIColor *)applicationThemeBlueColor;
+-(UIColor *)applicationThemeGreenColor;
+
+-(UIFont *)applicationFontWithSize:(CGFloat)size;
+-(NSDateFormatter *)backEndDateFormatter;
+-(CGSize)perfectSizeOfImage:(UIImage *)image withMaximumHeight:(CGFloat)maxHeight andMaximumWidth:(CGFloat)maxWidth;
+
+-(void)openGalleryFromController:(UIViewController *)controller withCompletionBlock:(PDImagePickerBlock)block;
+-(void)openCameraFromController:(UIViewController *)controller withCompletionBlock:(PDImagePickerBlock)block;
+-(void)addRecent:(NSMutableArray *)array;
+
+@end

@@ -1,0 +1,19 @@
+//
+//  PDFriendListViewController.h
+//  PlayDate
+//
+//  Created by Simpy on 18/06/14.
+//  Copyright (c) 2014 iAppTechnologies. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface PDFriendListViewController : UIViewController
+{
+    NSArray *friendDetailArray;
+}
+
+@property(nonatomic,strong)NSString *strFacebook_Ids;
+@property(nonatomic,strong)NSString *strSet_Id;
+
+@end

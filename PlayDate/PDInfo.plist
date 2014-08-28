@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ChildHobbies</key>
+	<array>
+		<string>COOKING</string>
+		<string>DANCE</string>
+		<string>DRAMA</string>
+		<string>DRAWING</string>
+		<string>LEGO BUILDING</string>
+		<string>MAGIC</string>
+		<string>MODEL BUILDING</string>
+		<string>PAINTING</string>
+		<string>PUZZELS</string>
+		<string>READING</string>
+		<string>SCRAPBOOKING</string>
+		<string>SCULPTING</string>
+		<string>SEWING</string>
+		<string>SINGING</string>
+		<string>VIDEO GAMING</string>
+		<string>WOODWORKING</string>
+		<string>WRITING</string>
+		<string>RUGBY</string>
+		<string>SKITING</string>
+		<string>SKIING</string>
+		<string>SURFING</string>
+		<string>SNOWBOARING</string>
+		<string>SWIMMING</string>
+		<string>WATER SPOTS</string>
+		<string>AMERICAN FOOTBALL</string>
+		<string>BASEBAL</string>
+		<string>BASKETBAL</string>
+		<string>CLIMBING</string>
+		<string>CRICKET</string>
+		<string>CYCLING</string>
+		<string>FOOTBALL</string>
+		<string>JUDO</string>
+		<string>RUNNING</string>
+		<string>SWIMMING</string>
+		<string>TABLE TENNIS</string>
+		<string>TENNIS</string>
+	</array>
+	<key>ChildAllergies</key>
+	<array>
+		<string>NUTS</string>
+		<string>MILK</string>
+		<string>EDD</string>
+		<string>WHEAT</string>
+		<string>SOY</string>
+		<string>FISH</string>
+		<string>CORN</string>
+		<string>GELATIN</string>
+		<string>MEAT</string>
+		<string>SEEDS</string>
+		<string>SPICES</string>
+		<string>GRASS</string>
+		<string>BANANA</string>
+		<string>DAIRY</string>
+		<string>ANAPHYLAXIS</string>
+		<string>ASTHMA</string>
+		<string>ECZEMA</string>
+		<string>HAYFEAVER</string>
+		<string>INSECT STINGS</string>
+		<string>LACTOSE CELIAC</string>
+		<string>GLUTEN</string>
+	</array>
+</dict>
+</plist>

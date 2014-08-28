@@ -1,0 +1,168 @@
+//
+//  PDUpgradeViewController.m
+//  PlayDate
+//
+//  Created by Simpy on 12/06/14.
+//  Copyright (c) 2014 iAppTechnologies. All rights reserved.
+//
+
+#import "PDUpgradeViewController.h"
+#import "RecipeProducts.h"
+#import "PDCalenderViewController.h"
+#import "PDRequestArrangeViewController.h"
+#import "PDMainViewController.h"
+#import "PDExtentedPermissions.h"
+
+@interface PDUpgradeViewController ()<RecipeProductsDelegate>
+{
+    IBOutlet UIButton *addAddminBtn;
+    IBOutlet UIButton *addAccountBtn;
+    IBOutlet UIButton *syncBtn;
+    IBOutlet UIButton *upgradeBtn;
+    RecipeProducts *recipeProducts;
+    NSArray *allProducts;
+}
+
+@end
+
+@implementation PDUpgradeViewController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
+-(void)viewDidDisappear:(BOOL)animated
+{
+    [recipeProducts  cancelRequest];
+}
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    
+    [self setUpViewContents];
+    
+    recipeProducts = [RecipeProducts sharedInstance];
+    [recipeProducts initialize];
+    
+    [recipeProducts setDelegate:self];
+    recipeProducts.controller = self;
+
+        if (recipeProducts.products == nil)
+            [recipeProducts requestProductsWithCompletionHandler:^(BOOL success, NSArray *products)
+             {
+                 if (success)
+                 {
+                     allProducts = products;
+                 }
+                 else
+                 {
+                     UIAlertView *alert =[[UIAlertView alloc] initWithTitle:@"Alert!!" message:@"Please wait While Product is loaded" delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+                     [alert show];
+                 }
+             }];
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - Methods
+-(void)setUpViewContents
+{
+    CGRect rect;
+    
+    CGFloat totalHeight = [UIScreen mainScreen].bounds.size.height;
+    if (![[PDHelper sharedHelper] isIOS7])
+    {
+        totalHeight -= 20.0;
+    }
+    else
+    {
+        for (UIView *subView in self.view.subviews)
+        {
+            if ([subView isKindOfClass:[UIView class]])
+            {
+                rect = subView.frame;
+                rect.origin.y += 20.0;
+                subView.frame = rect;
+            }
+        }
+    }
+}
+#pragma mark InAppPurchase delegate
+-(void)didFinishWithTransaction:(SKPaymentTransaction *)transaction
+{
+    
+}
+-(void)didFailWithError:(NSError *)error transaction:(SKPaymentTransaction *)transaction
+{
+    
+}
+#pragma mark - Button Actions
+-(IBAction)menuAction:(id)sender
+{
+    [self.menuContainerViewController toggleLeftSideMenuCompletion:^{
+        
+        
+        
+    }];
+}
+
+-(IBAction)upgradeBtn:(id)sender
+{
+//    if ([allProducts count]>0)
+//    {
+//        if ([recipeProducts productIsAlreadyPurchased:@"com.ilyakuznetsov.phoenix1.WaterMark"])
+//       {
+//        }
+//        else
+//        {
+//            SKProduct *product = allProducts[0];
+//            [recipeProducts buyProduct:product];
+//        }
+//    }
+//    else
+//    {
+//        UIAlertView *alert =[[UIAlertView alloc] initWithTitle:@"Alert!!" message:@"Please wait While Product is loaded" delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+//        [alert show];
+//
+//    }
+    
+    PDExtentedPermissions *objPDExtentedPermissions=[[PDExtentedPermissions alloc]initWithNibName:@"PDExtentedPermissions" bundle:nil];
+    [self.navigationController pushViewController:objPDExtentedPermissions animated:YES];
+    
+}
+-(IBAction)menuArrange:(id)sender
+{
+    PDRequestArrangeViewController *arrangeViewController = [[PDRequestArrangeViewController alloc]initWithNibName:@"PDRequestArrangeViewController" bundle:nil];
+    UINavigationController *navigationController = self.menuContainerViewController.centerViewController;
+    NSArray *controllers = [NSArray arrayWithObject:arrangeViewController];
+    navigationController.viewControllers = controllers;
+    [self.menuContainerViewController setMenuState:MFSideMenuStateClosed];
+    
+}
+-(IBAction)menuCalender:(id)sender
+{
+    PDCalenderViewController *calendarViewController = [[PDCalenderViewController alloc]initWithNibName:@"PDCalenderViewController" bundle:nil];
+    UINavigationController *navigationController = self.menuContainerViewController.centerViewController;
+    NSArray *controllers = [NSArray arrayWithObject:calendarViewController];
+    navigationController.viewControllers = controllers;
+    [self.menuContainerViewController setMenuState:MFSideMenuStateClosed];
+}
+-(IBAction)menuHome:(id)sender
+{
+    PDMainViewController *mainViewController = [[PDMainViewController alloc] initWithNibName:@"PDMainViewController" bundle:nil];
+    
+    UINavigationController *navigationController = self.menuContainerViewController.centerViewController;
+    NSArray *controllers = [NSArray arrayWithObject:mainViewController];
+    navigationController.viewControllers = controllers;
+    [self.menuContainerViewController setMenuState:MFSideMenuStateClosed];
+}
+@end

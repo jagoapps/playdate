@@ -1,0 +1,1876 @@
+//
+//  PDRequestArrangeViewController.m
+//  PlayDate
+//
+//  Created by Simpy on 10/06/14.
+//  Copyright (c) 2014 iAppTechnologies. All rights reserved.
+//
+
+#import "PDRequestArrangeViewController.h"
+#import "PDDateTimePicker.h"
+#import "UIImageView+WebCache.h"
+#import "PDCalenderViewController.h"
+#import "PDMainViewController.h"
+//  if (self.startDate!=nil)
+
+@interface PDRequestArrangeViewController ()<UITextFieldDelegate, UITextViewDelegate>
+{
+    IBOutlet UIScrollView *scrollView;
+    IBOutlet UIView *dropDownView;
+ //   IBOutlet UIButton *saveBtn;
+    IBOutlet UIButton *sendBtn;
+    IBOutlet UILabel *tfChildName;
+    IBOutlet UILabel *tfGuardianFrndChildName;
+    IBOutlet UIImageView *imgVwGuardianFrndChildName;
+    IBOutlet UIImageView *imgVwChildName;
+
+    
+    IBOutlet UIButton    *alternateButton;
+    IBOutlet UITextField *tfDate1;
+    IBOutlet UITextField *tfDate2;
+    IBOutlet UITextField *tfDate3;
+    IBOutlet UITextField *tfDate4;
+    IBOutlet UITextField *tfStartTime1;
+    IBOutlet UITextField *tfStartTime2;
+    IBOutlet UITextField *tfStartTime3;
+    IBOutlet UITextField *tfStartTime4;
+    IBOutlet UITextField *tfEndTime1;
+    IBOutlet UITextField *tfEndTime2;
+    IBOutlet UITextField *tfEndTime3;
+    IBOutlet UITextField *tfEndTime4;
+    IBOutlet UITextView *tfLocation;
+    IBOutlet UITextView *tVNotes;
+    
+    IBOutlet UIView *containerView;
+    IBOutlet UILabel *lblChild;
+    IBOutlet UIView *vwBackView;
+    IBOutlet UIScrollView *scrollvw;
+    IBOutlet UIView *vwChildDetail;
+    ///
+    
+    
+    
+    
+    IBOutlet UILabel  *lblName;
+    IBOutlet UILabel  *lblDob;
+    
+    IBOutlet UILabel *lblFreetime;
+    IBOutlet UIView *vwFreetime;
+    
+    IBOutlet UILabel *lblAllergies;;
+    IBOutlet UIView *vwAllergies;
+    IBOutlet UILabel *lblHobbies;
+    IBOutlet UIView *vwHobbies;
+    IBOutlet UIView *vwSchool;
+    IBOutlet UIView *vwYouthClub;
+    IBOutlet UILabel  *lblSchool;
+    IBOutlet UILabel *lblYouthclub;
+
+    
+    PDDateTimePicker *datePicker;
+    PDDateTimePicker *freeTimePicker;
+
+    NSArray *child;
+    NSArray *friendChild;
+    UITapGestureRecognizer *tapOnDropDown;
+    UITapGestureRecognizer *tapOnRow;
+    NSInteger index;
+    BOOL getChild;
+    BOOL firstClicked;
+    BOOL secondClicked;
+    BOOL thirdClicked;
+     BOOL anyOneClick;
+    BOOL anyOneClickTime;
+    NSArray *arrFriendChild;
+    NSArray *arrChild;
+    NSArray *arrTableData;
+    
+    NSString *str_Me_slected_Childname;
+  NSString *str_Friend_slected_Childname;
+    
+    NSString *str_Me_slected_Child_Id;
+    NSString *str_Friend_slected_Child_Id;
+    NSString *str_Friend_slected_Child_g_id;
+
+    
+    NSString *str_Whilch_childtable_open;
+    
+    
+    
+    IBOutlet UIView *childScrollViewContainer;
+    IBOutlet UIScrollView *childScrollView;
+    
+    BOOL val_Save_Send;
+    BOOL edit_info;
+    
+    NSString *strEventId;
+    NSDictionary *dictSlectd_ChildInfo;
+    NSDictionary *dictSlectdFriend_ChildInfo;
+    
+}
+
+@end
+
+@implementation PDRequestArrangeViewController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
+-(void)viewDidAppear:(BOOL)animated
+{
+    [[PDAppDelegate sharedDelegate] showActivityWithTitle:@"Loading..."];
+    [self performSelector:@selector(callFacebookFriend) withObject:nil afterDelay:0.1];
+
+   }
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    arrFriendChild=[[NSArray alloc]init];
+    arrTableData=[[NSArray alloc]init];
+    arrChild=[[NSArray alloc]init];
+    tfChildName.enabled = NO;
+    tfGuardianFrndChildName.enabled = NO;
+    // Do any additional setup after loading the view from its nib.
+    [self setContentInsectOfEachTextField];
+    [self.view addSubview:dropDownView];
+    [alternateButton setUserInteractionEnabled:YES];
+    firstClicked = NO;
+    secondClicked = NO;
+    thirdClicked = NO;
+     anyOneClick = NO;
+    dropDownView.hidden = YES;
+    anyOneClickTime = NO;
+
+    
+   childScrollViewContainer.layer.borderWidth = 5.0;
+    childScrollViewContainer.layer.borderColor = [UIColor whiteColor].CGColor;
+    childScrollViewContainer.layer.shadowOffset = CGSizeMake(1.0, 1.0);
+    childScrollViewContainer.layer.shadowRadius = 2.0;
+    childScrollViewContainer.layer.shadowOpacity = 0.5;
+
+    
+    [tfDate2 setHidden:YES];
+    [tfDate3 setHidden:YES];
+    [tfDate4 setHidden:YES];
+    [tfEndTime2 setHidden:YES];
+    [tfEndTime3 setHidden:YES];
+    [tfEndTime4 setHidden:YES];
+    [tfStartTime2 setHidden:YES];
+    [tfStartTime3 setHidden:YES];
+    [tfStartTime4 setHidden:YES];
+    
+    // DATE PICKER && FREE TIME PICKER
+    datePicker = [[PDDateTimePicker alloc] initWithType:PDPickerTypeDate];
+    freeTimePicker = [[PDDateTimePicker alloc] initWithType:PDPickerTypeFreeTime];
+
+    
+    // DONE BUTTON INPUT VIEW FOR PHONE NUMBER PAD
+    UIView *inputView = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, 320.0, 40.0)];
+    inputView.backgroundColor = [PDHelper sharedHelper].applicationThemeBlueColor;
+    
+    UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [btn setFrame:CGRectMake(260.0, 0.0, 60.0, 40.0)];
+    [btn setTitle:@"Done" forState:UIControlStateNormal];
+    [inputView addSubview:btn];
+    [btn addTarget:self action:@selector(resignPhonePad) forControlEvents:UIControlEventTouchUpInside];
+    
+    tfLocation.inputAccessoryView = inputView;
+    tVNotes.inputAccessoryView = inputView;
+
+    if ([self.dictEventInfo_edit count] )
+    {
+        
+        NSLog(@"%@",[self.dictEventInfo_edit valueForKey:@"date"]);
+
+        NSString *strdate=[self.dictEventInfo_edit valueForKey:@"date"];
+        NSDateFormatter *format =[[NSDateFormatter alloc]init];
+        [format setDateFormat:@"yyyy-MM-dd"];
+        
+      NSDate *date = [format dateFromString:strdate];
+       [format setDateFormat:@"dd-MMMM-yyyy"];
+        NSString *strSetDate=[format stringFromDate:date];
+       NSLog(@"%@",strSetDate);
+        
+        edit_info=1;
+     //   sendBtn.hidden=YES;
+        NSLog(@"%@",self.dictEventInfo_edit);
+        str_Friend_slected_Child_g_id=[self.dictEventInfo_edit valueForKey:@"receiver_id"];
+
+        str_Friend_slected_Child_Id=[self.dictEventInfo_edit valueForKey:@"friend_childid"];
+        str_Me_slected_Child_Id=[self.dictEventInfo_edit valueForKey:@"Child_id"];
+        tfGuardianFrndChildName.text=[self.dictEventInfo_edit valueForKey:@"friendname"];
+        tfChildName.text=[self.dictEventInfo_edit valueForKey:@"child_name"];
+        tfLocation.text=[self.dictEventInfo_edit valueForKey:@"location"];
+        tVNotes.text=[self.dictEventInfo_edit valueForKey:@"notes"];
+        tfStartTime1.text=[self.dictEventInfo_edit valueForKey:@"Starttime"];
+        tfDate1.text=strSetDate;
+        tfEndTime1.text=[self.dictEventInfo_edit valueForKey:@"endtime"];
+         strEventId=[self.dictEventInfo_edit valueForKey:@"Eventid"];
+
+
+        NSString *strStartTime1= [self.dictEventInfo_edit valueForKey:@"Starttime1"];
+        if (strStartTime1.length!=0)   // start date1 then
+        {
+            
+            NSString *strdate=[self.dictEventInfo_edit valueForKey:@"date1"];
+            NSDateFormatter *format =[[NSDateFormatter alloc]init];
+            [format setDateFormat:@"yyyy-MM-dd"];
+            
+            NSDate *date = [format dateFromString:strdate];
+            [format setDateFormat:@"dd-MMMM-yyyy"];
+            NSString *strSetDate=[format stringFromDate:date];
+            NSLog(@"%@",strSetDate);
+            
+            tfStartTime2.text=[self.dictEventInfo_edit valueForKey:@"Starttime1"];
+            tfDate2.text=strSetDate;
+            tfEndTime2.text=[self.dictEventInfo_edit valueForKey:@"endtime1"];
+            firstClicked=YES;
+            [self firstAlternateClick];
+            secondClicked = YES;
+        }
+        
+        NSString *strStartTime2=  [self.dictEventInfo_edit valueForKey:@"Starttime2"];
+        if (strStartTime2.length!=0)
+        {
+            
+            NSString *strdate=[self.dictEventInfo_edit valueForKey:@"date2"];
+            NSDateFormatter *format =[[NSDateFormatter alloc]init];
+            [format setDateFormat:@"yyyy-MM-dd"];
+            
+            NSDate *date = [format dateFromString:strdate];
+            [format setDateFormat:@"dd-MMMM-yyyy"];
+            NSString *strSetDate=[format stringFromDate:date];
+            NSLog(@"%@",strSetDate);
+
+            tfStartTime3.text=[self.dictEventInfo_edit valueForKey:@"Starttime2"];
+            tfDate3.text=strSetDate;
+            tfEndTime3.text=[self.dictEventInfo_edit valueForKey:@"endtime2"];
+
+            secondClicked=YES;
+         
+            [self secondAlternateClick];
+               thirdClicked=NO;
+        }
+        NSString *strStartTime3=  [self.dictEventInfo_edit valueForKey:@"Starttime3"];
+        if (strStartTime3.length!=0)
+        {
+            
+            
+            NSString *strdate=[self.dictEventInfo_edit valueForKey:@"date3"];
+            NSDateFormatter *format =[[NSDateFormatter alloc]init];
+            [format setDateFormat:@"yyyy-MM-dd"];
+            
+            NSDate *date = [format dateFromString:strdate];
+            [format setDateFormat:@"dd-MMMM-yyyy"];
+            NSString *strSetDate=[format stringFromDate:date];
+            NSLog(@"%@",strSetDate);
+
+            tfStartTime4.text=[self.dictEventInfo_edit valueForKey:@"Starttime3"];
+            tfDate4.text=strSetDate;
+            tfEndTime4.text=[self.dictEventInfo_edit valueForKey:@"endtime3"];
+
+            thirdClicked=YES;
+            
+            [self thirdAlternateClick];
+        }
+
+           [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
+    }
+    
+    
+      [self setUpView];
+      [self setUpViewContents];
+    
+    // Getrure
+    
+    UITapGestureRecognizer *gestureImgVwGuardianFrndChildInfo=[[UITapGestureRecognizer alloc]init];
+    [gestureImgVwGuardianFrndChildInfo addTarget:self action:@selector(gestureActionFrndChildInfo:)];
+
+    [imgVwGuardianFrndChildName addGestureRecognizer:gestureImgVwGuardianFrndChildInfo];
+    
+    UITapGestureRecognizer *gestureImgVwChildInfo=[[UITapGestureRecognizer alloc]init];
+    [gestureImgVwChildInfo addTarget:self action:@selector(gestureActionChildInfo:)];
+    [imgVwChildName addGestureRecognizer:gestureImgVwChildInfo];
+    
+    UITapGestureRecognizer *gestureChildDetail_VW=[[UITapGestureRecognizer alloc]init];
+    [gestureChildDetail_VW addTarget:self action:@selector(gestureActionChildDetail_VW:)];
+    [vwChildDetail addGestureRecognizer:gestureChildDetail_VW];
+
+      tapOnDropDown = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(dismissView)];
+      [dropDownView addGestureRecognizer:tapOnDropDown];
+    
+        
+}
+
+-(void)viewWillAppear:(BOOL)animated
+{
+    if (!firstClicked)
+    {
+        [self setUpView];
+//        [self setUpViewContents];
+    }
+    
+    NSLog(@"%@",NSStringFromCGRect(containerView.frame));
+    NSLog(@"%@",NSStringFromCGRect(alternateButton.frame));
+}
+
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+-(void)dismissView
+{
+    dropDownView.hidden = YES;
+}
+
+-(void)childListView
+{
+}
+
+-(void)callFacebookFriend
+{
+    [self facebookFriends];
+    
+}
+-(void)guardianFriendListView
+{
+}
+
+#pragma mark - Reload Childs
+-(void)reloadChilds
+{
+    // REMOVE ALL SUBVIEWS
+//    for (id obj in dropDownView.subviews)
+//        [obj removeFromSuperview];
+    
+    // ADD SUBVIEWS
+//    CGFloat rowHeight = 51.0;
+  //  CGFloat rowWidth  = dropDownScrollView.frame.size.width;
+   // CGFloat row_X = 0.0;
+    CGFloat row_Y = 0.0;
+    
+    UIView *row;
+  
+    UILabel *titleView;
+    
+    if (getChild) {
+        for (int i=0; i<[child count]; i++)
+        {
+            NSLog(@"%d",index);
+            index = i;
+            NSDictionary *detail = [child objectAtIndex:i];
+            
+          //  row = [[UIView alloc] initWithFrame:CGRectMake(row_X, row_Y, rowWidth, rowHeight)];
+            
+            CALayer *bottomBorder = [CALayer layer];
+       //     bottomBorder.frame = CGRectMake(0.0, rowHeight-1.0, rowWidth, 1.0);
+            bottomBorder.backgroundColor = [PDHelper sharedHelper].applicationBackgroundColor.CGColor;
+            [row.layer addSublayer:bottomBorder];
+            
+            
+      //      titleView = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 0.0, dropDownScrollView.frame.size.width-55.0, 50.0)];
+            titleView.font = [[PDHelper sharedHelper] applicationFontWithSize:13.0];
+            titleView.text = [detail objectForKey:PDWebChildName];
+            titleView.textColor =[UIColor blackColor];
+            titleView.numberOfLines = 0;
+            [row addSubview:titleView];
+         //   [dropDownScrollView addSubview:row];
+            row_Y = row_Y + 50.0;
+            tapOnRow = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(rowClickAtindex)];
+            [row addGestureRecognizer:tapOnRow];
+        }
+
+    }
+    else
+    {
+        for (int i=0; i<[friendChild count]; i++)
+        {
+            
+            index = i;
+            
+            NSDictionary *detail = [friendChild objectAtIndex:i];
+            
+         //   row = [[UIView alloc] initWithFrame:CGRectMake(row_X, row_Y, rowWidth, rowHeight)];
+            
+            CALayer *bottomBorder = [CALayer layer];
+      //      bottomBorder.frame = CGRectMake(0.0, rowHeight-1.0, rowWidth, 1.0);
+            bottomBorder.backgroundColor = [PDHelper sharedHelper].applicationBackgroundColor.CGColor;
+            [row.layer addSublayer:bottomBorder];
+            
+            
+        //    titleView = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 0.0, dropDownScrollView.frame.size.width-55.0, 50.0)];
+            titleView.font = [[PDHelper sharedHelper] applicationFontWithSize:13.0];
+            titleView.text = [detail objectForKey:PDWebChildName];
+            titleView.textColor = [[PDHelper sharedHelper] applicationThemeBlueColor];
+            titleView.numberOfLines = 0;
+            [row addSubview:titleView];
+         //   [dropDownScrollView addSubview:row];
+            row_Y = row_Y + 50.0;
+            tapOnRow = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(rowClickAtindex)];
+            [row addGestureRecognizer:tapOnRow];
+        }
+
+    }
+    
+   // [dropDownScrollView setContentSize:CGSizeMake(dropDownScrollView.frame.size.width, row_Y)];
+    
+}
+
+-(void)rowClickAtindex
+{
+   
+    tfChildName.text = [[child objectAtIndex:index] objectForKey:@"Childname"];
+    tfGuardianFrndChildName.text = [[friendChild objectAtIndex:index]objectForKey:@"Childname"];
+}
+
+-(void)setContentInsectOfEachTextField
+{
+    for (UITextField *tF in containerView.subviews)
+    {
+        if ([tF isKindOfClass:[UITextField class]]) {
+            
+            UIView *leftView = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, 10.0, tF.frame.size.height)];
+            leftView.backgroundColor = tF.backgroundColor;
+            tF.leftView = leftView;
+            tF.leftViewMode = UITextFieldViewModeAlways;
+        }
+    }
+}
+
+
+-(void)setUpViewContents
+{
+    CGRect rect;
+    
+    CGFloat totalHeight = [UIScreen mainScreen].bounds.size.height;
+    if (![[PDHelper sharedHelper] isIOS7])
+    {
+        totalHeight -= 20.0;
+    }
+    else
+    {
+        for (UIView *subView in self.view.subviews)
+        {
+            if ([subView isKindOfClass:[UIView class]])
+            {
+                rect = subView.frame;
+                rect.origin.y += 20.0;
+                subView.frame = rect;
+            }
+        }
+    }
+    
+    rect = scrollView.frame;
+//    rect.origin.y = CGRectGetMaxY(self.topMenuView.frame);
+//    rect.size.height = totalHeight - CGRectGetMaxY(self.topMenuView.frame);
+//    scrollView.frame = rect;
+    
+    [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
+}
+
+-(void)setUpView
+{
+    CGRect rect = alternateButton.frame;
+    rect.origin.y = 235.0;
+    alternateButton.frame = rect;
+    rect = tfLocation.frame;
+    rect.origin.y = 270.0;
+    tfLocation.frame = rect;
+    rect = tVNotes.frame;
+    rect.origin.y = 310.0;
+    tVNotes.frame = rect;
+    rect = containerView.frame;
+    rect.size.height = 375.0;
+    containerView.frame = rect;
+//    rect = saveBtn.frame;
+//    rect.origin.y = 415.0;
+//    saveBtn.frame = rect;
+    rect = sendBtn.frame;
+    rect.origin.y = 425.0;
+    sendBtn.frame = rect;
+}
+
+
+-(void)AlterMethodTwo
+{
+     if (secondClicked)
+    {
+        secondClicked = NO;
+        thirdClicked = YES;
+        [self secondAlternateClick];
+    }
+   
+}
+-(void)AlterMethodThree
+{
+    if (thirdClicked)
+    {
+        thirdClicked = NO;
+        secondClicked = NO;
+        [self thirdAlternateClick];
+    }
+
+}
+
+-(void)AlternateMethod
+{
+    if (!firstClicked)
+    {
+        firstClicked = YES;
+        secondClicked = YES;
+        [self firstAlternateClick];
+    }
+    if ([self SecondvalidateFields]) {
+        if (secondClicked)
+        {
+            secondClicked = NO;
+            
+            [self secondAlternateClick];
+        }
+
+    }
+    if ([self ThirdValidateFields]) {
+        if (!thirdClicked)
+        {
+            thirdClicked = YES;
+            secondClicked = NO;
+            [self thirdAlternateClick];
+        }
+
+    }
+   
+}
+
+-(void)firstAlternateClick
+{
+    tfDate2.hidden = NO;
+    tfStartTime2.hidden = NO;
+    tfEndTime2.hidden = NO;
+   
+    CGRect rect = alternateButton.frame;
+    rect.origin.y = 340.0;
+    alternateButton.frame = rect;
+    
+    
+    rect = tfLocation.frame;
+    rect.origin.y = 375.0;
+    tfLocation.frame = rect;
+  
+    rect = tVNotes.frame;
+    rect.origin.y =  CGRectGetMaxY( tfLocation.frame)+5.0;
+   tVNotes.frame = rect;
+    
+    
+    rect = containerView.frame;
+    rect.size.height = 485.0;
+    containerView.frame = rect;
+    
+    
+  
+    CGRect rectbtn;
+//    =   saveBtn.frame;
+//    
+//    rectbtn.origin.y =   CGRectGetMaxY(tVNotes.frame)+80;
+//    saveBtn.frame =rectbtn;
+    
+    rectbtn=   sendBtn.frame;
+    
+    rectbtn.origin.y =  CGRectGetMaxY(tVNotes.frame)+10;
+    
+    sendBtn.frame =rectbtn;
+
+    
+    
+    [self viewWillAppear:YES];
+    
+    NSLog(@"%@",NSStringFromCGRect(sendBtn.frame));
+    
+   // [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
+
+ 
+}
+
+-(void)secondAlternateClick
+{
+    tfDate3.hidden = NO;
+    tfStartTime3.hidden = NO;
+    tfEndTime3.hidden = NO;
+    CGRect rect = alternateButton.frame;
+    rect.origin.y = 445.0;
+    alternateButton.frame = rect;
+    rect = tfLocation.frame;
+    rect.origin.y = 484.0;
+    tfLocation.frame = rect;
+    
+    
+    rect = tVNotes.frame;
+    rect.origin.y =  CGRectGetMaxY( tfLocation.frame)+5.0;
+    tVNotes.frame = rect;
+
+    
+    
+    
+//    rect = tVNotes.frame;
+//    rect.origin.y = 522.0;
+//    tVNotes.frame = rect;
+    rect = containerView.frame;
+    rect.size.height = 594.0;
+    containerView.frame = rect;
+    
+    
+//    rect = saveBtn.frame;
+//    rect.origin.y = 616.0;
+//    saveBtn.frame = rect;
+//   
+//    
+//    rect = sendBtn.frame;
+//    rect.origin.y = 653.0;
+//    sendBtn.frame = rect;
+    
+    CGRect rectbtn;
+    //=   saveBtn.frame;
+    
+//    rectbtn.origin.y =   CGRectGetMaxY(tVNotes.frame)+80;
+//    saveBtn.frame =rectbtn;
+//    
+    rectbtn=   sendBtn.frame;
+    
+    rectbtn.origin.y =  CGRectGetMaxY(tVNotes.frame)+10;
+    
+    sendBtn.frame =rectbtn;
+
+    
+    
+    
+    [self viewWillAppear:YES];
+       // [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width,  CGRectGetMaxY(sendBtn.frame) + 40.0)];
+}
+
+-(void)thirdAlternateClick
+{
+    tfDate4.hidden = NO;
+    tfStartTime4.hidden = NO;
+    tfEndTime4.hidden = NO;
+    CGRect rect = alternateButton.frame;
+    rect.origin.y = 550.0;
+    alternateButton.frame = rect;
+    rect = tfLocation.frame;
+    rect.origin.y = 575.0;
+    tfLocation.frame = rect;
+    
+    
+    rect = tVNotes.frame;
+    rect.origin.y =  CGRectGetMaxY( tfLocation.frame)+5.0;
+    tVNotes.frame = rect;
+
+    
+//    rect = tVNotes.frame;
+//    rect.origin.y = 600.0;
+//    tVNotes.frame = rect;
+    rect = containerView.frame;
+    rect.size.height = 680.0;
+    containerView.frame = rect;
+   
+    
+//    rect = saveBtn.frame;
+//    rect.origin.y = 740.0;
+//    saveBtn.frame = rect;
+//    
+//    
+//    rect = sendBtn.frame;
+//    rect.origin.y = 777.0;
+//    sendBtn.frame = rect;
+
+    CGRect rectbtn;
+//    =   saveBtn.frame;
+//    
+//    rectbtn.origin.y =   CGRectGetMaxY(tVNotes.frame)+80;
+//    saveBtn.frame =rectbtn;
+//    
+    rectbtn=   sendBtn.frame;
+    
+    rectbtn.origin.y =  CGRectGetMaxY(tVNotes.frame)+10;
+    
+    sendBtn.frame =rectbtn;
+
+    
+    [self viewWillAppear:YES];
+// [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
+}
+
+-(void)resignKeyBoard
+{
+    [tfDate1 resignFirstResponder];
+    [tfStartTime1 resignFirstResponder];
+    [tfEndTime1 resignFirstResponder];
+    [tfGuardianFrndChildName resignFirstResponder];
+    [tfChildName resignFirstResponder];
+    [tfLocation resignFirstResponder];
+
+}
+
+#pragma mark - TextField Delegates
+
+-(BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
+    
+    [textField resignFirstResponder];
+    
+    return YES;
+}
+
+-(BOOL)textFieldShouldBeginEditing:(UITextField *)textField
+{
+    
+    CGPoint scrollPoint = CGPointMake(0.0,  CGRectGetMaxY(textField.frame)-100);
+    [scrollView setContentOffset:scrollPoint animated:YES];
+ 
+    
+    
+           if ((textField == tfDate1)||(textField == tfDate2)||(textField == tfDate3)||(textField == tfDate4))
+               
+       {
+           
+           NSDateFormatter *df = [[NSDateFormatter alloc] init];
+           [df setDateFormat:@"dd-MMMM-yyyy"];
+           NSString  *strDate = [df stringFromDate:[NSDate date]];
+           NSDate *date=[df dateFromString:strDate];
+   
+           
+       //    datePicker.startDate=date;
+
+           [datePicker showInView:self.view withType:PDPickerTypeDate withPickingBlock:^(NSString *pickedResult) {
+               
+           } andPickerDoneBlock:^(NSString *currentResult) {
+               NSLog(@"%@", currentResult);
+               textField.text = [currentResult uppercaseString];
+               [scrollView setContentOffset:CGPointZero animated:YES];
+           } cancelBlock:^{
+               [scrollView setContentOffset:CGPointZero animated:YES];
+               
+           }];
+
+     }
+    
+    else
+    {
+        
+    if (![[self.view subviews] containsObject:freeTimePicker])
+          {
+            if ([[self.view subviews] containsObject:datePicker])
+                      [datePicker hide];
+              
+            [freeTimePicker showInView:self.view withType:PDPickerTypeFreeTime withPickingBlock:^(NSString *pickedResult) {
+                  
+              } andPickerDoneBlock:^(NSString *currentResult) {
+                  NSLog(@"%@", currentResult);
+                  NSArray *array = [currentResult componentsSeparatedByString:@" "];
+                  if (currentResult.length==0)
+                  {
+                      [[[UIAlertView alloc]initWithTitle:@"Alert" message:@"Start time can't be same as end time" delegate:nil cancelButtonTitle:@"ok'" otherButtonTitles:nil]show];
+                      [scrollView setContentOffset:CGPointZero animated:YES];
+
+                  }
+
+               else  if (textField==tfStartTime1||textField==tfEndTime1)
+                  {
+                      tfStartTime1.text=[array objectAtIndex:1];
+                      tfEndTime1.text=[array objectAtIndex:3];
+                 }
+                  else  if (textField==tfStartTime2||textField==tfEndTime2)
+                  {
+                      tfStartTime2.text=[array objectAtIndex:1];
+                      tfEndTime2.text=[array objectAtIndex:3];
+                      
+                  }
+                  else  if (textField==tfStartTime3||textField==tfEndTime3)
+                  {
+                      tfStartTime3.text=[array objectAtIndex:1];
+                      tfEndTime3.text=[array objectAtIndex:3];
+                      
+                  }
+                  else  if (textField==tfStartTime4||textField==tfEndTime4)
+                  {
+                      tfStartTime4.text=[array objectAtIndex:1];
+                      tfEndTime4.text=[array objectAtIndex:3];
+                  }
+                   [scrollView setContentOffset:CGPointZero animated:YES];
+              } cancelBlock:^{
+                  [scrollView setContentOffset:CGPointZero animated:YES];
+                  
+              }];
+          }
+    }
+
+    return NO;
+}
+
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
+{
+    textField.text = [textField.text stringByReplacingCharactersInRange:range withString:[string uppercaseStringWithLocale:[NSLocale currentLocale]]];
+    
+    return NO;
+}
+
+-(void)textFieldDidBeginEditing:(UITextField *)textField
+{
+  [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
+}
+
+-(BOOL)textFieldShouldClear:(UITextField *)textField
+
+{
+
+    return YES;
+}
+
+
+
+#pragma mark - TextView Delegate
+-(void)textViewDidBeginEditing:(UITextView *)textView
+{
+    [freeTimePicker hide];
+    [datePicker hide];
+    
+    //    CGPoint scrollPoint = CGPointMake(0.0, textView.frame.origin.y+150.0);
+    //    [scrollView setContentOffset:scrollPoint animated:YES];
+    CGPoint scrollPoint;
+    if (tfLocation==textView)
+    {
+        [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 210.0)];
+        
+        scrollPoint = CGPointMake(0.0,  CGRectGetMaxY(tfLocation.frame)-100);
+        [scrollView setContentOffset:scrollPoint animated:YES];
+        
+    }
+    
+    
+    else
+    {
+        [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 180.0)];
+        scrollPoint = CGPointMake(0.0,  CGRectGetMaxY(tVNotes.frame)-100);
+        [scrollView setContentOffset:scrollPoint animated:YES];
+    }
+}
+
+
+- (void)textViewDidChange:(UITextView *)textView
+{
+    CGFloat fixedWidth = textView.frame.size.width;
+    CGSize newSize = [textView sizeThatFits:CGSizeMake(fixedWidth, MAXFLOAT)];
+    CGRect newFrame = textView.frame;
+    newFrame.size = CGSizeMake(fmaxf(newSize.width, fixedWidth), newSize.height);
+    textView.frame = newFrame;
+    
+    [self changeContentsForLocation:textView];
+//    if (tfLocation==textView)
+//        [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 210.0)];
+//
+//    
+//    else
+//     [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 180.0)];
+}
+-(void)changeContentsForLocation:(UITextView *)textvw
+{
+ 
+    if (textvw==tfLocation)
+    {
+        CGRect rect = tVNotes.frame;
+        rect = tVNotes.frame;
+
+    
+        rect.origin.y = CGRectGetMaxY(tfLocation.frame) + 5.0;
+        tVNotes.frame = rect;
+
+        rect = containerView.frame;
+        rect.size.height = CGRectGetMaxY(tVNotes.frame) + 30.0;
+        containerView.frame = rect;
+
+        CGRect rectbtn;//=   saveBtn.frame;
+        
+//        rectbtn.origin.y =   CGRectGetMaxY(tVNotes.frame)+80;
+//        saveBtn.frame =rectbtn;
+        
+        rectbtn=   sendBtn.frame;
+        
+        rectbtn.origin.y =  CGRectGetMaxY(containerView.frame)+20;
+
+        
+        sendBtn.frame =rectbtn;
+    }
+    else
+    {
+    CGRect rect = tVNotes.frame;
+    
+    if (rect.size.height <= 35.0)
+    {
+        rect.size.height = 35.0;
+        tVNotes.frame = rect;
+        
+   }
+    else
+    {
+        rect = containerView.frame;
+        rect.size.height = CGRectGetMaxY(tVNotes.frame) +30.0;
+        containerView.frame = rect;
+    }
+    
+        CGRect rectbtn;//=   saveBtn.frame;
+    
+//    rectbtn.origin.y =   CGRectGetMaxY(tVNotes.frame)+80;
+//    
+//    saveBtn.frame =rectbtn;
+    
+     rectbtn=   sendBtn.frame;
+    
+        rectbtn.origin.y =  CGRectGetMaxY(containerView.frame)+20;
+    
+    sendBtn.frame =rectbtn;
+    }
+    
+}
+
+
+
+-(BOOL)validateFields
+{
+    
+    NSString *stringOnlyRegex = @"[a-z]*";
+  //  NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES[C] %@", stringOnlyRegex];
+    
+    // VALIDATE NAME
+    NSString *str;
+    str = [str stringByReplacingOccurrencesOfString:@" " withString:@""];
+ 
+    str = tfDate1.text;
+    if (str.length>0)
+    {
+    }
+    else
+    {
+        [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter a valid date." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    // VALIDATE FREE TIME
+    str = tfStartTime1.text;
+    if (str.length>0)
+    {
+    }
+    else
+    {
+        [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter start time." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    str = tfEndTime1.text;
+    if (!(str.length>0))
+    {
+        [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter end time." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    str = tfLocation.text;
+    if (!(str.length>0))
+    {
+        [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter location" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    if (str_Me_slected_Child_Id.length==0||str_Friend_slected_Child_Id.length==0)
+    {
+        [[[UIAlertView alloc] initWithTitle:nil message:@"Please select child" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    if ([str_Me_slected_Child_Id isEqualToString:str_Friend_slected_Child_Id])
+        {
+        [[[UIAlertView alloc] initWithTitle:nil message:@"Please select diffent child" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    return YES;
+}
+
+-(BOOL)SecondvalidateFields
+{
+    
+    NSString *stringOnlyRegex = @"[a-z]*";
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES[C] %@", stringOnlyRegex];
+    
+    // VALIDATE NAME
+    NSString *str;
+    str = [str stringByReplacingOccurrencesOfString:@" " withString:@""];
+//    if (str.length>0 && [predicate evaluateWithObject:str])
+//    {
+//        
+//    }
+//    else
+//    {
+//        [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter a valid location." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+//        return NO;
+//    }
+    
+    str = tfDate1.text;
+    if (str.length>0)
+    {
+    }
+    else
+    {
+       // [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter a valid date." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    // VALIDATE TIME
+    str = tfStartTime1.text;
+    if (str.length>0)
+    {
+    }
+    else
+    {
+       // [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter start time." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    str = tfEndTime1.text;
+    if (str.length>0)
+    {
+    }
+    else
+    {
+       // [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter end time." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    str = tfDate2.text;
+    if (str.length>0)
+    {
+    }
+    else
+    {
+       // [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter a valid date." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    // VALIDATE TIME
+    str = tfStartTime2.text;
+    if (str.length>0)
+    {
+    }
+    else
+    {
+       // [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter start time." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    str = tfEndTime2.text;
+    if (str.length>0)
+    {
+    }
+    else
+    {
+       // [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter end time." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+
+    
+    return YES;
+}
+
+-(BOOL)ThirdValidateFields
+{
+    
+    NSString *stringOnlyRegex = @"[a-z]*";
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES[C] %@", stringOnlyRegex];
+    
+    // VALIDATE NAME
+    NSString *str;
+    str = [str stringByReplacingOccurrencesOfString:@" " withString:@""];
+//    if (str.length>0 && [predicate evaluateWithObject:str])
+//    {
+//        
+//    }
+//    else
+//    {
+//        [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter a valid location." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+//        return NO;
+//    }
+    
+    str = tfDate1.text;
+    if (str.length>0)
+    {
+    }
+    else
+    {
+       // [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter a valid date." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    // VALIDATE TIME
+    str = tfStartTime1.text;
+    if (str.length>0)
+    {
+    }
+    else
+    {
+        //[[[UIAlertView alloc] initWithTitle:nil message:@"Please enter start time." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    str = tfEndTime1.text;
+    if (str.length>0)
+    {
+    }
+    else
+    {
+      //  [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter end time." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    str = tfDate2.text;
+    if (str.length>0)
+    {
+    }
+    else
+    {
+        //[[[UIAlertView alloc] initWithTitle:nil message:@"Please enter a valid date." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    // VALIDATE TIME
+    str = tfStartTime2.text;
+    if (str.length>0)
+    {
+    }
+    else
+    {
+      //  [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter start time." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    str = tfEndTime2.text;
+    if (str.length>0)
+    {
+    }
+    else
+    {
+      //  [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter end time." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    str = tfDate3.text;
+    if (str.length>0)
+    {
+    }
+    else
+    {
+      //  [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter a valid date." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    // VALIDATE TIME
+    str = tfStartTime3.text;
+    if (str.length>0)
+    {
+    }
+    else
+    {
+       // [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter start time." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+    str = tfEndTime3.text;
+    if (str.length>0)
+    {
+    }
+    else
+    {
+       // [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter end time." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        return NO;
+    }
+
+    
+    return YES;
+}
+-(IBAction)alternateBtn:(id)sender
+{
+    if (thirdClicked) {
+        thirdClicked = NO;
+        [alternateButton setUserInteractionEnabled:NO];
+    }
+    else if ([self validateFields]) {
+        [self AlternateMethod];
+    }
+    
+    
+    CGRect rectbtn;//=   saveBtn.frame;
+    
+    //    rectbtn.origin.y =   CGRectGetMaxY(tVNotes.frame)+80;
+    //
+    //    saveBtn.frame =rectbtn;
+    
+    rectbtn=   sendBtn.frame;
+    
+    rectbtn.origin.y =  CGRectGetMaxY(containerView.frame)+20;
+    
+    sendBtn.frame =rectbtn;
+    
+    [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
+}
+-(IBAction)btnSend
+{
+    [self resignKeyBoard];
+    [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
+    
+    
+    val_Save_Send=1;
+    
+    if ([self validateFields])
+    {
+        [[PDAppDelegate sharedDelegate] showActivityWithTitle:@"Sending..."];
+        [self performSelector:@selector(activityDidAppear) withObject:nil afterDelay:0.1];
+    }
+
+}
+//-(IBAction)saveAction:(id)sender
+//{
+//    [self resignKeyBoard];
+//    [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
+//    
+//    
+//    val_Save_Send=0;
+//    
+//    if ([self validateFields])
+//    {
+//        [[PDAppDelegate sharedDelegate] showActivityWithTitle:@"Saving..."];
+//        [self performSelector:@selector(activityDidAppear) withObject:nil afterDelay:0.1];
+//    }
+//
+//}
+
+#pragma mark - Activity Appear
+-(void)activityDidAppear
+{
+    
+    NSString *guardianID = [[[[PDUser currentUser] detail] objectForKey:PDUserInfo] objectForKey:PDWebGID];
+    
+ 
+    
+    NSString *Date = [tfDate1 text];
+    NSDateFormatter *df = [[NSDateFormatter alloc] init];
+    [df setDateFormat:@"dd-MMMM-yyyy"];
+    NSDate *date = [df dateFromString:Date];
+    NSString *date1ToSend = [[[PDHelper sharedHelper] backEndDateFormatter] stringFromDate:date];
+    if (!date1ToSend)
+        date1ToSend = @"";
+    
+//    NSData *data = UIImageJPEGRepresentation([btnProfilePic currentImage], 0.1);
+//    Base64Transcoder *base64 = [[Base64Transcoder alloc] init];
+//    NSString *imageString = [base64 base64EncodedStringfromData:data];
+    
+    
+//    NSDateFormatter *dff = [[NSDateFormatter alloc] init];
+//    [df setDateFormat:@"dd-MMMM-yyyy"];
+//    NSDate *date = [df dateFromString:DOB];
+//    NSString *dateToSend = [[[PDHelper sharedHelper] backEndDateFormatter] stringFromDate:date];
+    
+    
+    NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
+   
+    
+    
+  
+    [params setObject:date1ToSend forKey:PDWebDate];
+    [params setObject:tfStartTime1.text forKey:PDWebStartTime];
+    [params setObject:tfEndTime1.text forKey:PDWebEndTime];
+    [params setObject:tfLocation.text forKey:PDWebEventLocation];
+    [params setObject:tVNotes.text forKey:PDWebNotes];
+    
+    if (tfDate2.text .length!=0)
+    {
+        NSString *Date = [tfDate2 text];
+        NSDateFormatter *df = [[NSDateFormatter alloc] init];
+        [df setDateFormat:@"dd-MMMM-yyyy"];
+        NSDate *date = [df dateFromString:Date];
+        NSString *date2ToSend = [[[PDHelper sharedHelper] backEndDateFormatter] stringFromDate:date];
+        if (!date2ToSend)
+            date2ToSend = @"";
+
+        [params setObject:date2ToSend forKey:PDWebDate1];
+
+    }
+    if (tfDate3.text .length!=0)
+    {
+        
+        NSString *Date = [tfDate3 text];
+        NSDateFormatter *df = [[NSDateFormatter alloc] init];
+        [df setDateFormat:@"dd-MMMM-yyyy"];
+        NSDate *date = [df dateFromString:Date];
+        NSString *date3ToSend = [[[PDHelper sharedHelper] backEndDateFormatter] stringFromDate:date];
+        if (!date3ToSend)
+            date3ToSend = @"";
+
+        [params setObject:date3ToSend forKey:PDWebDate2];
+
+    }
+
+    if (tfDate4.text .length!=0)
+    {
+        
+        NSString *Date = [tfDate4 text];
+        NSDateFormatter *df = [[NSDateFormatter alloc] init];
+        [df setDateFormat:@"dd-MMMM-yyyy"];
+        NSDate *date = [df dateFromString:Date];
+        NSString *date4ToSend = [[[PDHelper sharedHelper] backEndDateFormatter] stringFromDate:date];
+        if (!date4ToSend)
+            date4ToSend = @"";
+
+        [params setObject:date4ToSend forKey:PDWebDate3];
+
+    }
+    if (tfStartTime2.text .length!=0)
+    {
+        [params setObject:tfStartTime2.text forKey:PDWebStartTime1];
+
+    }
+    if (tfStartTime3.text .length!=0)
+    {
+        [params setObject:tfStartTime3.text forKey:PDWebStartTime2];
+
+    }
+    if (tfStartTime4.text .length!=0)
+    {
+        [params setObject:tfStartTime4.text forKey:PDWebStartTime3];
+
+    }
+    if (tfEndTime2.text .length!=0)
+    {
+        [params setObject:tfEndTime2.text forKey:PDWebEndTime1];
+
+    }
+    if (tfEndTime3.text .length!=0)
+    {
+        [params setObject:tfEndTime3.text forKey:PDWebEndTime2];
+
+    }
+    if (tfEndTime4.text .length!=0)
+    {
+        [params setObject:tfEndTime4.text forKey:PDWebEndTime3];
+
+    }
+    
+        [params setObject:str_Me_slected_Child_Id forKey:@"child_id"];
+        [params setObject:str_Friend_slected_Child_Id forKey:@"friend_childid"];
+        [params setObject:str_Friend_slected_Child_g_id forKey:@"receiver_id"];
+        [params setObject:[NSString stringWithFormat:@"%d", val_Save_Send] forKey:@"publish"];
+       [params setObject:@"requested" forKey:@"receiver_status"];
+    
+
+    if (edit_info)
+    {
+          [params setObject:strEventId forKey:@"event_id"];
+          [[PDWebHandler sharedWebHandler]editEventWithParams:params forGuardian:guardianID];
+    }
+    else
+        [[PDWebHandler sharedWebHandler]createEventWithParams:params forGuardian:guardianID];
+
+    //[[PDWebHandler sharedWebHandler] addChildWithParams:params forGuardian:guardianID];
+    [[PDWebHandler sharedWebHandler] startRequestWithCompletionBlock:^(id response, NSError *error) {
+        
+        [[PDAppDelegate sharedDelegate] hideActivity];
+        
+        if(error)
+        {
+            [[[UIAlertView alloc] initWithTitle:@"" message:error.description delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        }
+        else
+        {
+            if ([[response objectForKey:PDWebSuccess] boolValue])
+            {
+                // CLEAR ALL FIELDS AND SHOW USER AN ALERT FOR SUCCESSFULLY SAVED
+                
+                
+                if (edit_info)
+                
+                [[[UIAlertView alloc] initWithTitle:@"" message:@"Change successfully." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+                
+                else
+                    [[[UIAlertView alloc] initWithTitle:@"" message:@"Event added successfully." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+//                for (UITextField *tF in infoBackgroundView.subviews)
+//                {
+//                    if ([tF isKindOfClass:[UITextField class]]) {
+//                        [tF setText:@""];
+//                    }
+//                }
+//                
+//                [btnProfilePic setImage:[UIImage imageNamed:@"user_img"] forState:UIControlStateNormal];
+//                
+//                lblAllergies.text = @"";
+//                lblHobbies.text = @"";
+//                
+//                [svAllergies setContentSize:CGSizeZero];
+//                [svHobbies setContentSize:CGSizeZero];
+            }
+            else
+            {
+                [[[UIAlertView alloc] initWithTitle:@"" message:@"An error occured please try again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+            }
+        }
+        
+    }];
+    
+    [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
+}
+
+#pragma mark - Button Actions
+-(IBAction)menuAction:(id)sender
+{
+    [self.menuContainerViewController toggleLeftSideMenuCompletion:^{
+        
+        
+        
+    }];
+}
+-(IBAction)guardianFriendDropDown:(id)sender
+{
+    lblChild.text=@"Select friend's child:";
+    str_Whilch_childtable_open=@"FriendChild";
+    arrTableData=arrFriendChild;
+    [self   reloadChild];
+    dropDownView.hidden=NO;
+}
+-(IBAction)childDropDownBtn:(id)sender
+{
+    lblChild.text= @"Select your child:";
+    
+    str_Whilch_childtable_open=@"MeChild";
+    
+    arrTableData=arrChild;
+    [self   reloadChild];
+    
+    dropDownView.hidden=NO;
+    
+}
+-(void)Adjust_Size_height
+{
+    
+    CGRect rect;
+    rect =vwAllergies.frame;
+    rect.size.height=CGRectGetMaxY(lblAllergies.frame)+5.0;
+    vwAllergies.frame=rect;
+    rect =vwHobbies.frame;
+    rect.size.height=CGRectGetMaxY(lblHobbies.frame)+7.0;
+    vwHobbies.frame=rect;
+    
+    rect =vwHobbies.frame;
+    rect.origin.y=CGRectGetMaxY(vwAllergies.frame)+5.0;
+    vwHobbies.frame=rect;
+    
+    
+    
+    rect =vwSchool.frame;
+    rect.origin.y=CGRectGetMaxY(vwHobbies.frame)+7.0;
+    vwSchool.frame=rect;
+    
+    rect =vwYouthClub.frame;
+    rect.origin.y=CGRectGetMaxY(vwSchool.frame)+7.0;
+    vwYouthClub.frame=rect;
+    
+    rect =vwBackView.frame;
+    rect.size.height=CGRectGetMaxY(vwYouthClub.frame)+25.0;
+    vwBackView.frame=rect;
+    
+   [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(vwBackView.frame) + 37.0)];
+}
+
+-(void)resignPhonePad
+{
+    [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
+    [tVNotes resignFirstResponder];
+    [tfLocation resignFirstResponder];
+}
+
+-(void) gestureActionChildDetail_VW:(UITapGestureRecognizer*)ges
+{
+    [vwChildDetail removeFromSuperview];
+}
+-(void) gestureActionChildInfo:(UITapGestureRecognizer*)ges
+{
+    if (![dictSlectd_ChildInfo count]>0)
+        return;
+    
+
+   NSArray *arrHobbies=[[dictSlectd_ChildInfo valueForKey:@"hobbies"] componentsSeparatedByString:@","];
+    NSMutableString *strHobbies=[[NSMutableString alloc]init];
+    
+    if ([arrHobbies count]>1)
+    {
+        
+    
+    
+    for ( int i=0;i<[arrHobbies count]; i++)
+    {
+        NSString *test = [arrHobbies objectAtIndex:i];
+         if ([test characterAtIndex:0] == 32)
+        {
+            test = [test stringByReplacingCharactersInRange:NSMakeRange(1,1) withString:@""];
+           [strHobbies appendString:test];
+        }
+        else
+           [strHobbies appendString:test];
+        [strHobbies appendString:@"\n"];
+    }
+    }
+    
+    else
+    {
+        [strHobbies appendString:[arrHobbies objectAtIndex:0]];
+        
+    }
+
+        
+    NSArray *arrAllergies=[[dictSlectd_ChildInfo valueForKey:@"allergies"] componentsSeparatedByString:@","];
+    NSMutableString *strAllergies=[[NSMutableString alloc]init];
+    
+    if ([arrHobbies count]>1)
+    {
+    for ( int i=0;i<[arrAllergies count]; i++)
+    {
+        NSString *test = [arrAllergies objectAtIndex:i];
+              if ([test characterAtIndex:0] == 32)
+        {
+            test = [test stringByReplacingCharactersInRange:NSMakeRange(0,1) withString:@""];
+            [strAllergies appendString:test];
+        }
+        else
+            [strAllergies appendString:test];
+        
+        [strAllergies appendString:@"\n"];
+
+    }
+    }
+  else
+  {
+      [strAllergies appendString:[arrAllergies objectAtIndex:0]];
+
+  }
+
+    CGSize maximumLabelSize=CGSizeMake(150, CGFLOAT_MAX);
+    CGSize lblAllergiesSize = [strAllergies sizeWithFont:lblAllergies.font
+                                  constrainedToSize:maximumLabelSize
+                                      lineBreakMode:lblAllergies.lineBreakMode];
+    
+    CGRect rect= lblAllergies.frame;
+    rect.size.height=lblAllergiesSize.height;
+    lblAllergies.frame=rect;
+    
+    
+    CGSize lblHobbiesSize = [strHobbies sizeWithFont:lblHobbies.font
+                                       constrainedToSize:maximumLabelSize
+                                           lineBreakMode:lblHobbies.lineBreakMode];
+    
+    rect= lblHobbies.frame;
+    rect.size.height=lblHobbiesSize.height;
+    lblHobbies.frame=rect;
+    
+    
+    
+    lblName.text=[dictSlectd_ChildInfo valueForKey:@"Childname"];
+    lblDob.text=[[dictSlectd_ChildInfo valueForKey:@"dob"] uppercaseString];
+    lblFreetime.text=[[dictSlectd_ChildInfo valueForKey:@"c_set_fixed_freetime"]uppercaseString];
+    lblAllergies.text=strAllergies;
+    lblHobbies.text=strHobbies;
+    lblYouthclub.text=[dictSlectd_ChildInfo valueForKey:@"youth_club"];
+    lblSchool.text=[dictSlectd_ChildInfo valueForKey:@"school"];
+  
+
+     rect  = lblAllergies.frame;
+    if (rect.size.height < 30.0) {
+        rect.size.height = 30.0;
+        lblAllergies.frame =rect;
+    }
+    rect  = lblHobbies.frame;
+    if (rect.size.height < 30.0) {
+        rect.size.height = 30.0;
+        lblHobbies.frame =rect;
+    }
+    rect  = lblFreetime.frame;
+    if (rect.size.height < 30.0) {
+        rect.size.height = 30.0;
+        lblFreetime.frame =rect;
+    }
+    
+
+    [self.view addSubview:vwChildDetail];
+     [self  Adjust_Size_height];
+
+}
+-(void) gestureActionFrndChildInfo:(UITapGestureRecognizer*)ges
+{
+    
+    if (![dictSlectdFriend_ChildInfo count]>0)
+        return;
+    
+    NSArray *arrHobbies=[[dictSlectdFriend_ChildInfo valueForKey:@"hobbies"] componentsSeparatedByString:@","];
+    NSMutableString *strHobbies=[[NSMutableString alloc]init];
+    if ([arrHobbies count]>1) {
+    
+    
+    for ( int i=0;i<[arrHobbies count]; i++)
+    {
+        NSString *test = [arrHobbies objectAtIndex:i];
+        if ([test characterAtIndex:0] == 32)
+        {
+            test = [test stringByReplacingCharactersInRange:NSMakeRange(1,1) withString:@""];
+            [strHobbies appendString:test];
+        }
+        else
+            [strHobbies appendString:test];
+        [strHobbies appendString:@"\n"];
+    }
+        
+    }
+    else
+    {
+        NSString *test = [arrHobbies objectAtIndex:0];
+          [strHobbies appendString:test];
+
+    }
+    
+   
+    NSArray *arrAllergies=[[dictSlectdFriend_ChildInfo valueForKey:@"allergies"] componentsSeparatedByString:@","];
+    NSMutableString *strAllergies=[[NSMutableString alloc]init];
+
+    if ([arrAllergies count]>1) {
+        
+
+      for ( int i=0;i<[arrAllergies count]; i++)
+    {
+        NSString *test = [arrAllergies objectAtIndex:i];
+        if ([test characterAtIndex:0] == 32)
+        {
+            test = [test stringByReplacingCharactersInRange:NSMakeRange(0,1) withString:@""];
+            [strAllergies appendString:test];
+        }
+        else
+            [strAllergies appendString:test];
+        
+        [strAllergies appendString:@"\n"];
+        
+    }
+    
+    }
+    else
+    {
+        NSString *test = [arrAllergies objectAtIndex:0];
+        [strAllergies appendString:test];
+        
+    }
+
+    CGSize maximumLabelSize=CGSizeMake(150, CGFLOAT_MAX);
+    CGSize lblAllergiesSize = [strAllergies sizeWithFont:lblAllergies.font
+                                       constrainedToSize:maximumLabelSize
+                                           lineBreakMode:lblAllergies.lineBreakMode];
+    
+    CGRect rect= lblAllergies.frame;
+    rect.size.height=lblAllergiesSize.height;
+    lblAllergies.frame=rect;
+    
+    
+    CGSize lblHobbiesSize = [strHobbies sizeWithFont:lblHobbies.font
+                                   constrainedToSize:maximumLabelSize
+                                       lineBreakMode:lblHobbies.lineBreakMode];
+    
+    rect= lblHobbies.frame;
+    rect.size.height=lblHobbiesSize.height;
+    lblHobbies.frame=rect;
+
+    
+    
+    
+    
+    
+ lblName.text=[dictSlectdFriend_ChildInfo valueForKey:@"name"];
+    lblDob.text=[[dictSlectdFriend_ChildInfo valueForKey:@"dob"] uppercaseString];
+    lblFreetime.text=[[dictSlectdFriend_ChildInfo valueForKey:@"c_set_fixed_freetime"]uppercaseString];
+    lblAllergies.text=strAllergies;
+    lblHobbies.text=strHobbies;
+    lblYouthclub.text=[dictSlectdFriend_ChildInfo valueForKey:@"youth_club"];
+       lblSchool.text=[dictSlectd_ChildInfo valueForKey:@"school"];
+    
+        rect  = lblAllergies.frame;
+    if (rect.size.height < 30.0) {
+        rect.size.height = 30.0;
+        lblAllergies.frame =rect;
+    }
+    rect  = lblHobbies.frame;
+    if (rect.size.height < 30.0) {
+        rect.size.height = 30.0;
+        lblHobbies.frame =rect;
+    }
+    rect  = lblFreetime.frame;
+    if (rect.size.height < 30.0) {
+        rect.size.height = 30.0;
+        lblFreetime.frame =rect;
+    }
+
+    [self.view addSubview:vwChildDetail];
+    [self  Adjust_Size_height];
+}
+-(void)facebookFriends
+{
+    NSString *strurl= [NSString stringWithFormat:@"https://graph.facebook.com/v2.0/me/friends?fields=id,name,picture.type(large)&access_token=%@" ,[FBSession activeSession].accessTokenData.accessToken];
+
+    
+    NSURL *url = [NSURL URLWithString:strurl];
+    NSData *data = [NSData dataWithContentsOfURL:url];
+    
+    id friends_result = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:nil];
+    
+    NSArray  *friends_fb_ids = [[friends_result objectForKey:FBData] valueForKey:FBId];
+   
+    NSMutableString *str = [[NSMutableString alloc] init];
+    [friends_fb_ids enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        [str appendFormat:@"'%@'", obj];
+        [str appendString:@","];
+        
+    }];
+    
+    NSLog(@"friends_fb_ids String: \n%@", str);
+    if (str.length > 0){
+        [str deleteCharactersInRange:NSMakeRange(str.length-1, 1)];
+    }
+  
+    NSString *strGid = [[[[PDUser currentUser] detail] objectForKey:PDUserInfo]objectForKey:PDWebGID];
+  
+    NSDictionary *params = @{PDWebGID: strGid,
+                             PDWebFriendFBId: str,};
+    
+    [[PDWebHandler sharedWebHandler]getChildListWithParams:params];
+
+    [[PDWebHandler sharedWebHandler] startRequestWithCompletionBlock:^(id response, NSError *error)
+     {
+         
+         id result =response;
+         if ([result valueForKey:@"success"])
+         {
+         
+           arrFriendChild=     [result valueForKey:@"data"];   //  Friend's Child info
+            arrChild= [result valueForKey:@"guardianchild"];  //  Own's Child info
+         }
+        else
+        {
+            NSLog(@"%@",error.description);
+        }
+
+         [[PDAppDelegate sharedDelegate]hideActivity];
+   
+     }];
+}
+
+
+#pragma mark - Reload Childs
+-(void)reloadChild
+{
+    // REMOVE ALL SUBVIEWS
+    for (id obj in childScrollView.subviews)
+        [obj removeFromSuperview];
+    
+    // ADD SUBVIEWS
+    CGFloat rowHeight = 51.0;
+    CGFloat rowWidth  = childScrollView.frame.size.width;
+    CGFloat row_X = 0.0;
+    CGFloat row_Y = 0.0;
+    
+    UIView *row;
+    UIImageView *imageView;
+    UILabel *titleView;
+       
+    for (int i=0; i<[arrTableData count]; i++)
+    {
+        NSDictionary *detail = [arrTableData objectAtIndex:i];
+        
+        row = [[UIView alloc] initWithFrame:CGRectMake(row_X, row_Y, rowWidth, rowHeight)];
+        row.tag = i;
+        
+        CALayer *bottomBorder = [CALayer layer];
+        bottomBorder.frame = CGRectMake(0.0, rowHeight-1.0, rowWidth, 1.0);
+        bottomBorder.backgroundColor = [PDHelper sharedHelper].applicationBackgroundColor.CGColor;
+        [row.layer addSublayer:bottomBorder];
+        
+        imageView = [[UIImageView alloc] initWithFrame:CGRectMake(7.0, 7.0, 36.0, 36.0)];
+       // [imageView setImageWithURL:[NSURL URLWithString:[detail objectForKey:PDWebProfileImage]] placeholderImage:[UIImage imageNamed:@"user_img"]];
+        
+        imageView.image = [UIImage imageNamed:@"user_img"];
+        imageView.layer.borderWidth = 1.0;
+        imageView.layer.borderColor = [PDHelper sharedHelper].applicationBackgroundColor.CGColor;
+        [row addSubview:imageView];
+        
+        
+        NSString *childName = nil;
+        if (  [str_Whilch_childtable_open isEqualToString:@"FriendChild"] )
+              childName = [detail valueForKey:@"name"];
+        else
+               childName = [detail valueForKey:@"Childname"];
+
+
+        titleView = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 0.0, childScrollView.frame.size.width-55.0, 50.0)];
+        titleView.font = [[PDHelper sharedHelper] applicationFontWithSize:13.0];
+        titleView.text =childName;
+        titleView.textColor = [[PDHelper sharedHelper] applicationThemeBlueColor];
+        titleView.numberOfLines = 0;
+        [row addSubview:titleView];
+        [childScrollView addSubview:row];
+        row_Y = row_Y + 50.0;
+        UIGestureRecognizer *tapGes = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(getChildInfo:)];
+        [row addGestureRecognizer:tapGes];
+        
+        
+        
+    }
+    
+    [childScrollView setContentSize:CGSizeMake(childScrollView.frame.size.width, row_Y)];
+}
+
+
+-(void)getChildInfo:(UIGestureRecognizer *)gesture
+{
+       if (  [str_Whilch_childtable_open isEqualToString:@"FriendChild"] )
+    {
+        dictSlectdFriend_ChildInfo=[arrTableData objectAtIndex:gesture.view.tag];
+        str_Friend_slected_Childname=   [[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"name"];
+        tfGuardianFrndChildName.text=[str_Friend_slected_Childname uppercaseString];
+        str_Friend_slected_Child_Id=  [[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"child_id"];
+        str_Friend_slected_Child_g_id= [[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"g_id"];
+    }
+    else if ([str_Whilch_childtable_open isEqualToString:@"MeChild"])
+    {
+        dictSlectd_ChildInfo=[arrTableData objectAtIndex:gesture.view.tag];
+        str_Me_slected_Childname= [[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"Childname"];
+        tfChildName.text=[str_Me_slected_Childname uppercaseString];
+        str_Me_slected_Child_Id=[[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"child_id"];
+
+    }
+    
+    dropDownView.hidden=YES;
+}
+
+-(IBAction)menuArrange:(id)sender
+{
+    PDRequestArrangeViewController *arrangeViewController = [[PDRequestArrangeViewController alloc]initWithNibName:@"PDRequestArrangeViewController" bundle:nil];
+    UINavigationController *navigationController = self.menuContainerViewController.centerViewController;
+    NSArray *controllers = [NSArray arrayWithObject:arrangeViewController];
+    navigationController.viewControllers = controllers;
+    [self.menuContainerViewController setMenuState:MFSideMenuStateClosed];
+    
+}
+-(IBAction)menuCalender:(id)sender
+{
+    PDCalenderViewController *calendarViewController = [[PDCalenderViewController alloc]initWithNibName:@"PDCalenderViewController" bundle:nil];
+    UINavigationController *navigationController = self.menuContainerViewController.centerViewController;
+    NSArray *controllers = [NSArray arrayWithObject:calendarViewController];
+    navigationController.viewControllers = controllers;
+    [self.menuContainerViewController setMenuState:MFSideMenuStateClosed];
+}
+-(IBAction)menuHome:(id)sender
+{
+    PDMainViewController *mainViewController = [[PDMainViewController alloc] initWithNibName:@"PDMainViewController" bundle:nil];
+    
+    UINavigationController *navigationController = self.menuContainerViewController.centerViewController;
+    NSArray *controllers = [NSArray arrayWithObject:mainViewController];
+    navigationController.viewControllers = controllers;
+    [self.menuContainerViewController setMenuState:MFSideMenuStateClosed];
+}
+
+@end

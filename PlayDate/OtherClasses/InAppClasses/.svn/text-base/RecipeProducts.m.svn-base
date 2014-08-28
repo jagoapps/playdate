@@ -1,0 +1,230 @@
+//
+//  RecipeProducts.m
+//  BPDown
+//
+//  Created by ml2-1 on 11/14/13.
+//  Copyright (c) 2013 TheTiger. All rights reserved.
+//
+
+#import "RecipeProducts.h"
+
+#define ShowTransactionAlert(TITLE, MESSAGE) [[[UIAlertView alloc] initWithTitle:TITLE message:MESSAGE delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show]
+
+
+@interface RecipeProducts () <SKProductsRequestDelegate ,SKPaymentTransactionObserver>
+
+@property (strong, nonatomic) SKProductsRequest *productsRequest;
+@property (strong, nonatomic) RequestProductsCompletionHandler completionHandler;
+
+-(void)addProductToPurchasedList:(NSString *)productIdentifier;
+
+@end
+
+@implementation RecipeProducts
+@synthesize delegate = _delegate;
+@synthesize products = _products;
+@synthesize controller = _controller;
+@synthesize completionHandler = _completionHandler;
+@synthesize productsRequest = _productsRequest;
+
+static RecipeProducts *productsHalper = nil;
+static NSSet *productIdentifiers = nil;
+static NSMutableArray *purchsaedProducts = nil;
+
++(RecipeProducts *)sharedInstance
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        productsHalper = [[RecipeProducts alloc] init];
+    });
+    
+    return productsHalper;
+}
+
+-(void)initialize
+{
+    [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
+    
+    productIdentifiers = [NSSet setWithObjects:@"com.ilyakuznetsov.phoenix1.WaterMark",nil];
+   //  productIdentifiers =[NSSet setWithObjects:@"com.studiomosaic.stickmepremium.bbTaskpaperpack",@"com.studiomosaic.stickmepremium.tSwankypaperpack",@"com.studiomosaic.stickmepremium.unThemepaperpack",@"com.studiomosaic.stickmepremium.zz", nil];
+    
+    //NSLog(@"the products are ...%@",productIdentifiers);
+    purchsaedProducts = [[NSMutableArray alloc] init];
+    // Check for previously purchased products
+    for (NSString *productId in productIdentifiers)
+    {
+        BOOL purchsed = [[NSUserDefaults standardUserDefaults] boolForKey:productId];
+        if (purchsed)
+        {
+            [purchsaedProducts addObject:productId];
+           // CheckPurchasedProduct = [NSArray arrayWithArray:purchsaedProducts];
+        }
+    }
+}
+
+-(void)addProductToPurchasedList:(NSString *)productIdentifier
+{
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:productIdentifier];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    [purchsaedProducts addObject:productIdentifier];
+   // CheckPurchasedProduct = [NSArray arrayWithArray:purchsaedProducts];
+}
+
+-(BOOL)productIsAlreadyPurchased:(NSString *)productIdentifier
+{
+    return [purchsaedProducts containsObject:productIdentifier];
+    
+}
+
+-(void)buyProduct:(SKProduct *)product
+{
+    SKPayment *payment = [SKPayment paymentWithProduct:product];
+    [[SKPaymentQueue defaultQueue] addPayment:payment];
+}
+
+#pragma mark - Request For Products
+-(void)requestProductsWithCompletionHandler:(RequestProductsCompletionHandler)completionHandler
+{
+    self.completionHandler = [completionHandler copy];
+    self.productsRequest = [[SKProductsRequest alloc] initWithProductIdentifiers:productIdentifiers];
+    self.productsRequest.delegate = self;
+    [self.productsRequest start];
+}
+
+-(void)cancelRequest
+{
+    [self.productsRequest cancel];
+}
+
+-(void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response
+{
+    _productsRequest = nil;
+    for(SKProduct *product in response.products)
+    {
+        NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+        [formatter setNumberStyle:NSNumberFormatterCurrencyStyle];
+        [formatter setLocale:product.priceLocale];
+        
+       // NSNumber *rupees = [NSNumber numberWithFloat:[product.price floatValue]];
+        
+       // NSString *formattedRupees = [formatter stringFromNumber:rupees];
+        
+        // NSLog(@"%@", formattedRupees);
+        
+        //[arrayProuct addObject:formattedRupees];
+        NSLog(@".....%@",product.price);
+    }
+
+    self.products = response.products;
+    
+    if ([self.products count]==0) {
+        _completionHandler (NO, self.products);
+        _completionHandler = nil;
+        self.products = nil;
+    }
+    else
+    {
+        _completionHandler (YES, self.products);
+        _completionHandler = nil;
+    }
+
+    
+    
+//    self.productsRequest = nil;
+//    self.products = nil;
+//    self.products = response.products;
+//
+//    
+//    self.completionHandler (YES, self.products);
+//    self.completionHandler = nil;
+}
+
+-(void)request:(SKRequest *)request didFailWithError:(NSError *)error
+{
+    
+//    NSLog(@"Failed to load list of products.");
+//    UIAlertView *alert =[[UIAlertView alloc] initWithTitle:@"Alert!!" message:@"Failed to load list of products" delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil];
+//    [alert show];
+    
+    self.productsRequest = nil;
+    self.completionHandler (NO, nil);
+    self.completionHandler = nil;
+}
+
+#pragma mark - Payment Methods
+-(void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray *)transactions
+{
+    for (SKPaymentTransaction *transaction in transactions)
+    {
+        switch (transaction.transactionState)
+        {
+            case SKPaymentTransactionStatePurchased:
+                [self purchaseTransaction:transaction];
+                break;
+            case SKPaymentTransactionStateFailed:
+                [self failedTransaction:transaction];
+                break;
+            case SKPaymentTransactionStateRestored:
+                [self restoreTransaction:transaction];
+                break;
+            case SKPaymentTransactionStatePurchasing:
+                [self purchasingTransaction:transaction];
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+-(void)purchaseTransaction:(SKPaymentTransaction *)transaction
+{
+    [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+    [self addProductToPurchasedList:transaction.payment.productIdentifier];
+    if ([self.delegate respondsToSelector:@selector(didFinishWithTransaction:)])
+    {
+        [self.delegate didFinishWithTransaction:transaction];
+
+    }
+    else
+    {
+        UIAlertView *alert =[[UIAlertView alloc] initWithTitle:@"" message:@"Thanks for purchasing!" delegate:self.controller cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        alert.tag = 13;
+        [alert show];
+    }
+}
+
+-(void)purchasingTransaction:(SKPaymentTransaction *)transaction
+{
+    
+}
+
+-(void)failedTransaction:(SKPaymentTransaction *)transaction
+{
+   
+    if (transaction.error.code == SKErrorPaymentCancelled) {
+        NSLog(@"Transaction Cancelled");
+        ShowTransactionAlert(@"", @"Transaction cancelled!");
+        if ([self.delegate respondsToSelector:@selector(didFailWithError:transaction:)]) {
+            [self.delegate didFailWithError:nil transaction:transaction];
+        }
+    }
+    else {
+        NSLog(@"Transaction Error: %@", [transaction.error localizedDescription]);
+        NSString *message = [NSString stringWithFormat:@"%@",[transaction.error localizedDescription]];
+        ShowTransactionAlert(@"", message);
+        if ([self.delegate respondsToSelector:@selector(didFailWithError:transaction:)]) {
+            [self.delegate didFailWithError:transaction.error transaction:transaction];
+        }
+    }
+    
+    [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+}
+
+-(void)restoreTransaction:(SKPaymentTransaction *)transaction
+{
+    [self addProductToPurchasedList:transaction.originalTransaction.payment.productIdentifier];
+    [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+}
+
+
+@end

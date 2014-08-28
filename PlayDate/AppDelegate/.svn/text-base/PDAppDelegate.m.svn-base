@@ -1,0 +1,295 @@
+//
+//  PDAppDelegate.m
+//  PlayDate
+//
+//  Created by Vakul on 01/05/14.
+//  Copyright (c) 2014 iAppTechnologies. All rights reserved.
+//
+
+#import "PDAppDelegate.h"
+#import "PDLeftViewController.h"
+#import "PDMainViewController.h"
+#import "PDLoginWithFBViewController.h"
+#import <FacebookSDK/FacebookSDK.h>
+#import "PDMenuBar.h"
+#import "Flurry.h"
+
+@interface PDAppDelegate () <MONActivityIndicatorViewDelegate>
+
+-(void)addMenuBar;
+
+@end
+
+@implementation PDAppDelegate
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+// Remote Notifation inform to Device
+    [[UIApplication sharedApplication] registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound)];
+    application.applicationIconBadgeNumber = 0;
+    
+       [Flurry startSession:@"3CC35X6CJ4ZYX2KWB67B"];
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    // Override point for customization after application launch.
+    
+    
+    // SIDE BAR CONTROLLER
+    PDLeftViewController *leftMenuViewController = [[PDLeftViewController alloc] initWithNibName:@"PDLeftViewController" bundle:nil];
+    
+    // MAIN VIEW CONTROLLER
+    PDMainViewController *mainViewController = [[PDMainViewController alloc] initWithNibName:@"PDMainViewController" bundle:nil];
+    
+    // APP NAVIGATION CONTROLLER
+    self.navigationController = [[UINavigationController alloc] initWithRootViewController:mainViewController];
+    
+    
+    // INTIALIZING SIDE BAR AND MAIN VIEWCONTROLLER AS MENU BAR
+    self.menuController = [MFSideMenuContainerViewController containerWithCenterViewController:self.navigationController
+                                                                        leftMenuViewController:leftMenuViewController
+                                                                       rightMenuViewController:nil];
+    self.menuController.menuWidth = 240.0;
+    
+    self.window.rootViewController = self.menuController;
+    self.window.backgroundColor = [PDHelper sharedHelper].applicationBackgroundColor;
+    [self.window makeKeyAndVisible];
+    
+    
+    // MENU BAR
+    // [self addMenuBar];
+    
+    return YES;
+}
+
+- (void)applicationWillResignActive:(UIApplication *)application
+{
+    // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
+    // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
+    
+    
+    // HERE SAVE CURRENT USER DETAIL
+    [[PDUser currentUser] save];
+}
+
+- (void)applicationDidEnterBackground:(UIApplication *)application
+{
+    // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
+    // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+    
+        NSString *strGid = [[[[PDUser currentUser] detail] objectForKey:PDUserInfo]objectForKey:PDWebGID];
+    // http://54.191.67.152/playdate/badge_counter.php?user_id=
+    [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+    NSString *strurl=[NSString stringWithFormat:@"http://54.191.67.152/playdate/badge_counter.php?user_id=%@",strGid];
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:strurl]];
+    NSURLConnection *connect=[[NSURLConnection alloc] initWithRequest:request delegate:self];
+    
+    if (!connect)
+        [[[UIAlertView alloc]initWithTitle:@"Alert" message:@"Server Problem" delegate:nil cancelButtonTitle:@"ok" otherButtonTitles:nil]show];
+    
+
+    
+}
+
+- (void)applicationWillEnterForeground:(UIApplication *)application
+{
+    // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+}
+
+- (void)applicationDidBecomeActive:(UIApplication *)application
+{
+    // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+    
+    
+    [FBAppCall handleDidBecomeActive];
+    
+    
+    // REUSE CURRENT USER
+    [[PDUser currentUser] reuse];
+
+    NSLog(@"%@", [[[PDUser currentUser] detail] objectForKey:PDUserInfo]);
+    
+    
+    // SHOW LOGIN & REGISTRATION VIEW IF USER IS NOT LOGGED IN
+    if (![[PDUser currentUser] hasDetail]) {
+        PDLoginWithFBViewController *loginView = [[PDLoginWithFBViewController alloc] initWithNibName:@"PDLoginWithFBViewController" bundle:nil];
+        [self.navigationController presentViewController:loginView animated:NO completion:nil];
+    }
+    else {
+        [(PDLeftViewController *)self.menuController.leftMenuViewController setUpUserProfile];
+        
+       NSLog(@"%@", [self.navigationController viewControllers]);
+        PDMainViewController *controller = (PDMainViewController *)[[self.navigationController viewControllers] objectAtIndex:0];
+        if (controller) {
+            [controller viewDidAppear:NO];
+        }
+    }
+
+}
+
+- (void)applicationWillTerminate:(UIApplication *)application
+{
+    // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    
+    [FBSession.activeSession close];
+}
+
+
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+    // attempt to extract a token from the url
+    return [FBAppCall handleOpenURL:url
+                  sourceApplication:sourceApplication fallbackHandler:^(FBAppCall *call) {
+                      
+                  }];
+}
+
+
+#pragma mark - My Methods
++(PDAppDelegate *)sharedDelegate
+{
+    return (PDAppDelegate *)[[UIApplication sharedApplication] delegate];
+}
+
+
+#pragma mark - MenuBar
+-(void)addMenuBar
+{
+    PDMenuBar *menuBAR = [PDMenuBar menuBar];
+    if ([[PDHelper sharedHelper] isIOS7]) {
+        CGRect rect = menuBAR.frame;
+        rect.origin.y = 20.0;
+        menuBAR.frame = rect;
+    }
+    
+    [menuBAR addAction:@selector(menuItemCliecked:) andTarget:self];
+    
+    [self.window addSubview:menuBAR];
+}
+
+-(void)menuItemCliecked:(id)sender
+{
+    [self.menuController toggleLeftSideMenuCompletion:^{
+        
+    }];
+}
+
+
+
+#pragma mark - Activity
+static UIView *activityBGView = nil;
+-(void)showActivityWithTitle:(NSString *)title
+{
+    
+    if (activityBGView == nil) {
+        
+        activityBGView = [[UIView alloc] initWithFrame:self.window.bounds];
+        activityBGView.backgroundColor = [[PDHelper sharedHelper].applicationBackgroundColor colorWithAlphaComponent:0.6];
+        
+        MONActivityIndicatorView *indicatorView = [[MONActivityIndicatorView alloc] init];
+        indicatorView.delegate = self;
+        indicatorView.numberOfCircles = 5;
+        indicatorView.radius = 8;
+        indicatorView.internalSpacing = 3;
+        indicatorView.center = activityBGView.center;
+        indicatorView.tag = 13;
+        [activityBGView addSubview:indicatorView];
+        
+        UILabel *titleView = [[UILabel alloc] init];
+        titleView.backgroundColor = [PDHelper sharedHelper].applicationThemeBlueColor;
+        titleView.textColor = [UIColor whiteColor];
+        titleView.font = [[PDHelper sharedHelper] applicationFontWithSize:18.0];
+        titleView.textAlignment = NSTextAlignmentCenter;
+        titleView.tag = 31;
+        [activityBGView addSubview:titleView];
+    }
+    
+#define TITILE_LABEL_HEIGHT 44.0
+    CGRect rect = CGRectMake(0.0, CGRectGetHeight(activityBGView.frame), CGRectGetWidth(activityBGView.frame), TITILE_LABEL_HEIGHT);
+    UILabel *titleView = (UILabel *)[activityBGView viewWithTag:31];
+    titleView.frame = rect;
+    titleView.text = title;
+
+    rect.origin.y = CGRectGetHeight(activityBGView.frame)-TITILE_LABEL_HEIGHT;
+    [UIView animateWithDuration:0.4 animations:^{
+        titleView.frame = rect;
+    }];
+    
+    [self.window addSubview:activityBGView];
+    [(MONActivityIndicatorView *)[activityBGView viewWithTag:13] startAnimating];
+}
+
+-(void)hideActivity
+{
+    UILabel *titleView = (UILabel *)[activityBGView viewWithTag:31];
+    CGRect rect = titleView.frame;
+    rect.origin.y = CGRectGetHeight(activityBGView.frame);
+    
+    [UIView animateWithDuration:0.4 animations:^{
+        titleView.frame = rect;
+    } completion:^(BOOL finished) {
+        
+        [(MONActivityIndicatorView *)[activityBGView viewWithTag:13] stopAnimating];
+        [activityBGView removeFromSuperview];
+
+    }];
+}
+
+#pragma mark - MONActivityIndicatorViewDelegate Methods
+- (UIColor *)activityIndicatorView:(MONActivityIndicatorView *)activityIndicatorView
+      circleBackgroundColorAtIndex:(NSUInteger)index {
+    
+    return [PDHelper sharedHelper].applicationThemeBlueColor;
+    
+}
+
+
+#pragma mark - Push & Pop
+-(void)pushViewController:(UIViewController *)toController fromController:(UIViewController *)fromController
+{
+    CATransition *transition = [CATransition animation];
+    transition.duration = 0.3;
+    transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+    transition.type = kCATransitionPush;
+    transition.subtype = kCATransitionFromRight;
+    [fromController.view.window.layer addAnimation:transition forKey:nil];
+    [fromController presentViewController:toController animated:NO completion:nil];
+}
+
+
+-(void)popViewController:(UIViewController *)controller
+{
+    CATransition *transition = [CATransition animation];
+    transition.duration = 0.3;
+    transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+    transition.type = kCATransitionPush;
+    transition.subtype = kCATransitionFromLeft;
+    [controller.view.window.layer addAnimation:transition forKey:nil];
+    [controller dismissViewControllerAnimated:NO completion:nil];
+}
+
+
+#pragma mark RemoteNotification
+- (void)application:(UIApplication*)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken
+{
+	NSLog(@"My token is: %@", deviceToken);
+    
+    
+    NSString *newToken = [deviceToken description];
+	newToken = [newToken stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"<>"]];
+	newToken = [newToken stringByReplacingOccurrencesOfString:@" " withString:@""];
+    [[PDHelper sharedHelper] setStrUd_Id:newToken];
+	NSLog(@"My token is: %@", newToken);
+}
+
+- (void)application:(UIApplication*)application didFailToRegisterForRemoteNotificationsWithError:(NSError*)error
+{
+	NSLog(@"Failed to get token, error: %@", error);
+}
+
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+    
+    // [UIApplication sharedApplication].applicationIconBadgeNumber = [UIApplication sharedApplication].applicationIconBadgeNumber +[[[userInfo valueForKey:@"aps"]valueForKey:@"badge"] intValue];
+    
+}
+@end

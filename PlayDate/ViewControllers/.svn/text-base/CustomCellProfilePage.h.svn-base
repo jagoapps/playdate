@@ -1,0 +1,28 @@
+//
+//  CustomCellProfilePage.h
+//  PlayDate
+//
+//  Created by iApp on 13/06/14.
+//  Copyright (c) 2014 iAppTechnologies. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface CustomCellProfilePage : UITableViewCell
+{
+  
+    
+    
+}
+@property(nonatomic,retain)IBOutlet UIImageView *imgVwChild;
+@property(nonatomic,retain) IBOutlet UIImageView *imgVwFriend;
+@property(nonatomic,retain)IBOutlet UIImageView *imgVwParent;
+
+@property(nonatomic,retain)IBOutlet UILabel *lblNameChild;
+@property(nonatomic,retain)IBOutlet UILabel *lblNameFriend;
+@property(nonatomic,retain)IBOutlet UILabel *lblNameParent;
+@property(nonatomic,retain)IBOutlet UILabel *lblTime;
+@property(nonatomic,retain)IBOutlet UILabel *lblDate;
+@property(nonatomic,retain)IBOutlet UILabel *lblStatus;
+
+@end
