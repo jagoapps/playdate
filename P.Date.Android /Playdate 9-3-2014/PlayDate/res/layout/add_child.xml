@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/child_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#e3e3e3"
+    android:orientation="vertical" >
+
+    <ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:id="@+id/imageView1_child"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:src="@drawable/placeholder_large" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@drawable/register_text_field_bg"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:orientation="horizontal" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:text="*" />
+
+                    <EditText
+                        android:id="@+id/edit_childname"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="15dp"
+                        android:background="@drawable/txt_field"
+                        android:ems="10"
+                        android:hint="Child name"
+                        android:inputType="textCapCharacters"
+                        android:lines="1"
+                        android:padding="15dp"
+                        android:paddingLeft="15dp"
+                        android:singleLine="true"
+                        android:textColor="#0097dc"
+                        android:textSize="13dp"
+                        android:textStyle="bold"
+                        android:typeface="sans" >
+
+                        <requestFocus />
+                    </EditText>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:text="*" />
+
+                    <EditText
+                        android:id="@+id/edit_Dob"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginTop="15dp"
+                        android:background="@drawable/txt_field"
+                        android:ems="10"
+                        android:hint="Date of Birth"
+                        android:inputType="textCapCharacters"
+                        android:lines="1"
+                        android:padding="15dp"
+                        android:paddingLeft="15dp"
+                        android:singleLine="true"
+                        android:textColor="#0097dc"
+                        android:textSize="13dp"
+                        android:textStyle="bold"
+                        android:typeface="sans" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:orientation="horizontal"
+                    android:weightSum="10" >
+
+                    <EditText
+                        android:id="@+id/edit_childfreetime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:layout_weight="9.5"
+                        android:background="@drawable/txt_field"
+                        android:ems="10"
+                        android:hint="Free Time"
+                        android:singleLine="false"
+                        android:padding="15dp"
+                        android:paddingLeft="15dp"
+                        android:textColor="#0097dc"
+                          android:inputType="textMultiLine"
+                        android:textSize="13dp"
+                        android:textStyle="bold"
+                        android:typeface="sans" />
+
+                    <Button
+                        android:id="@+id/button1_add_moredays"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical|center_horizontal|right"
+                        android:layout_marginRight="10dp"
+                        android:layout_weight=".5"
+                        android:background="@drawable/add_button"
+                        android:gravity="center" />
+                </LinearLayout>
+
+               <!--  <EditText
+                    android:id="@+id/edit_childconditions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:background="@drawable/txt_field"
+                    android:ems="10"
+                    android:hint="Conditions"
+                    android:inputType="textCapCharacters"
+                    android:lines="1"
+                    android:padding="15dp"
+                    android:paddingLeft="15dp"
+                    android:singleLine="true"
+                    android:textColor="#0097dc"
+                    android:textSize="13dp"
+                    android:textStyle="bold"
+                    android:typeface="sans" /> -->
+
+               
+
+               
+
+                <EditText
+                    android:id="@+id/edit_childallergies"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/txt_field"
+                    android:scrollbars="vertical"
+                    android:hint="Allergies"
+                    android:inputType="textMultiLine"
+                    android:padding="15dp"
+                    android:singleLine="false"
+                    android:textColor="#0097dc"
+                    android:textSize="13dp"
+                    android:textStyle="bold"
+                    android:typeface="sans" />
+
+                <EditText
+                    android:id="@+id/edit_childhobbies"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:layout_marginTop="15dp"
+                    android:background="@drawable/txt_field"
+                      android:inputType="textMultiLine"
+                    android:hint="Hobbies"
+                    android:padding="15dp"
+                    android:singleLine="false"
+                    android:textColor="#0097dc"
+                    android:textSize="13dp"
+                    android:textStyle="bold"
+                    android:typeface="sans" />
+                <!--
+         <EditText
+        android:id="@+id/edit_siblings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="25dp"
+        android:background="@drawable/txt_field"
+         android:padding="15dp"
+         android:hint="Siblings"
+        android:ems="10" 
+          android:lines="1"
+            android:paddingLeft="15dp"
+            android:singleLine="true"
+              android:textColor="#0097dc"
+               
+             android:typeface="sans"
+             android:textStyle="bold"
+               />
+
+                -->
+
+                <EditText
+                    android:id="@+id/edit_childschool"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:layout_marginTop="15dp"
+                    android:background="@drawable/txt_field"
+                    android:ems="10"
+                    android:hint="School"
+                    android:inputType="textCapCharacters"
+                    android:lines="1"
+                    android:padding="15dp"
+                    android:paddingLeft="15dp"
+                    android:singleLine="true"
+                    android:textColor="#0097dc"
+                    android:textSize="13dp"
+                    android:textStyle="bold"
+                    android:typeface="sans" />
+
+                <EditText
+                    android:id="@+id/edit_childyouthclub"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:layout_marginTop="15dp"
+                    android:background="@drawable/txt_field"
+                    android:ems="10"
+                    android:hint="Youth club"
+                    android:inputType="textCapCharacters"
+                    android:lines="1"
+                    android:padding="15dp"
+                    android:paddingLeft="15dp"
+                    android:singleLine="true"
+                    android:textColor="#0097dc"
+                    android:textSize="13dp"
+                    android:textStyle="bold"
+                    android:typeface="sans" />
+
+                <Button
+                    android:id="@+id/button1_childsubmit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="50dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:layout_marginTop="15dp"
+                    android:background="@drawable/header"
+                    android:gravity="center"
+                    android:text="SUBMIT"
+                    android:textColor="@android:color/white" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

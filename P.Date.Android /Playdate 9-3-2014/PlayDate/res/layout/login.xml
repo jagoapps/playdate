@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#e3e3e3"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/header"
+       android:text="LOGIN"
+       android:textColor="@android:color/white"
+       android:typeface="sans"
+       android:textSize="20dp"
+       
+       android:gravity="center_vertical|center_horizontal" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" 
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="15dp"
+        android:background="@drawable/login_text_field_bg"
+        android:layout_marginRight="15dp">
+    
+     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" 
+        android:layout_marginTop="15dp"
+        >
+   
+
+   <!--  <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+       android:layout_margin="5dp"
+       android:textColor="#0097dc"
+        android:text="Username" /> -->
+
+         <EditText
+             android:id="@+id/username_login"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+             android:background="@drawable/txt_field"
+             android:ems="10"
+             android:paddingLeft="15dp"
+             android:layout_marginTop="15dp"
+             android:singleLine="true"
+             android:lines="1"
+             android:hint="Username"
+             android:textColor="#0097dc" >
+
+           
+         </EditText>
+
+           </LinearLayout>
+           <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" 
+      android:layout_marginTop="15dp"
+        >
+   
+    <!-- <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:textColor="#0097dc"
+        android:text="Password" /> -->
+
+    <EditText
+        android:id="@+id/password_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+         android:textColor="#0097dc"
+          android:paddingLeft="15dp"
+           android:singleLine="true"
+             android:lines="1"
+           android:background="@drawable/txt_field"
+        android:inputType="textPassword" 
+        android:hint="Password"/>
+       </LinearLayout>
+       
+ </LinearLayout>
+ 
+    <TextView
+        android:id="@+id/forget_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="17dp"
+        android:textColor="#646464"
+        android:textStyle="italic"/>
+    
+    
+    
+    <Button
+        android:id="@+id/button_login"
+       
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:clickable="true"
+        android:background="@drawable/login_btn"
+        />
+
+    <Button
+        android:id="@+id/button_register"
+        android:layout_width="match_parent"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/register_btn"
+         />
+
+                                 
+
+</LinearLayout>
