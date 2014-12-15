@@ -72,7 +72,7 @@ static BOOL cellIsDragging;
         
         self.panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
         self.panGesture.delegate = self;
-        [self addGestureRecognizer:self.panGesture];
+       // [self addGestureRecognizer:self.panGesture];
         
         [self setInitialSizes];
         
@@ -344,10 +344,15 @@ static BOOL cellIsDragging;
 
     [self.timeLabel sizeToFit];
     CGRect timeLabel = self.timeLabel.frame;
-    timeLabel.origin.x = self.contentView.frame.size.width + 5;
-    self.timeLabel.frame = timeLabel;
-    self.timeLabel.center = CGPointMake(self.timeLabel.center.x, self.containerView.center.y);
+//   timeLabel.origin.x = self.contentView.frame.size.width + 5;
     
+    timeLabel.origin.x=self.message.fromMe?self.contentView.frame.size.width -30:self.contentView.frame.origin.x+5 ;
+    
+   //  timeLabel.origin.x = self.contentView.frame.size.width -30;
+    self.timeLabel.frame = timeLabel;
+    self.timeLabel.center = CGPointMake(self.timeLabel.center.x,CGRectGetMaxY( self.containerView.frame)+20);
+   // self.timeLabel.center = CGPointMake(self.timeLabel.center.x,self.containerView.center.y);
+
 }
 
 - (CGRect)usedRectForWidth:(CGFloat)width
@@ -445,9 +450,11 @@ static BOOL cellIsDragging;
     
     [self.timeLabel sizeToFit];
     CGRect timeLabel = self.timeLabel.frame;
-    timeLabel.origin.x = self.contentView.frame.size.width + 5;
+   // timeLabel.origin.x = self.contentView.frame.size.width -5;
+     timeLabel.origin.x = self.contentView.frame.size.width -30;
     self.timeLabel.frame = timeLabel;
-    self.timeLabel.center = CGPointMake(self.timeLabel.center.x, self.containerView.center.y);
+  //  self.timeLabel.center = CGPointMake(self.timeLabel.center.x, self.containerView.center.y);
+        self.timeLabel.center = CGPointMake(self.timeLabel.center.x,CGRectGetMaxY( self.containerView.frame)+20);
 }
 
 - (void)adjustForVideoOnly

@@ -59,7 +59,7 @@
 {
     
     CGRect rect=self.view.bounds;
-    rect.origin.y=44+20;
+    rect.origin.y=74;
     rect.size.height-=64;
     
     self.tableView = [[UITableView alloc] initWithFrame:rect style:UITableViewStyleGrouped];
@@ -150,7 +150,7 @@
     
     id<SOMessage> message = self.conversation[indexPath.section][indexPath.row];
     int index = (int)[[self messages] indexOfObject:message];
-    height = [self heightForMessageForIndex:index];
+    height = [self heightForMessageForIndex:index]+24;
 
     return height;
 }
@@ -296,7 +296,7 @@
 
 - (UIImage *)balloonImageForReceiving
 {
-    UIImage *bubble = [UIImage imageNamed:@"bubbleReceive.png"];
+    UIImage *bubble =[UIImage imageNamed:@"bubbleReceive.png"];
     UIColor *color = [UIColor colorWithRed:210.0/255.0 green:210.0/255.0 blue:215.0/255.0 alpha:1.0];
     bubble = [self tintImage:bubble withColor:color];
     return [bubble resizableImageWithCapInsets:UIEdgeInsetsMake(17, 27, 21, 17)];
@@ -304,7 +304,7 @@
 
 - (UIImage *)balloonImageForSending
 {
-    UIImage *bubble = [UIImage imageNamed:@"bubble.png"];
+    UIImage *bubble =[UIImage imageNamed:@"bubble.png"];
     UIColor *color = [UIColor colorWithRed:74.0/255.0 green:186.0/255.0 blue:251.0/255.0 alpha:1.0];
     bubble = [self tintImage:bubble withColor:color];
     return [bubble resizableImageWithCapInsets:UIEdgeInsetsMake(17, 21, 16, 27)];

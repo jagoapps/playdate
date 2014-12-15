@@ -7,8 +7,17 @@
 //
 
 #import "SOMessagingViewController.h"
+#import "PDMessage.h"
+#import <CoreData/CoreData.h>
 
-@interface PDChatData : SOMessagingViewController
+@interface PDChatData : SOMessagingViewController<NSFetchedResultsControllerDelegate>
+{
+     NSFetchedResultsController *fetchedResultsController;
+}
 
-@property(nonatomic) id guardian_id;
+@property(nonatomic,strong) id jabber_id;
+@property(nonatomic,strong) NSString* receiverName;
+-(void)message_receiveToMe_Message:(NSString *)mesg type:(NSString *)type;
 @end
+
+

@@ -11,9 +11,9 @@
 #import "UIImageView+WebCache.h"
 #import "PDCalenderViewController.h"
 #import "PDMainViewController.h"
-
-
-@interface PDRequestArrangeViewController ()<UITextFieldDelegate, UITextViewDelegate,UIAlertViewDelegate>
+#import "vwAdditionalChild.h"
+#define CancelImage [UIImage imageNamed:@"Cancel_button"]
+@interface PDRequestArrangeViewController ()<UITextFieldDelegate,UITextViewDelegate,UIAlertViewDelegate>
 {
     IBOutlet UIScrollView *scrollView;
     IBOutlet UIView *dropDownView;
@@ -44,13 +44,9 @@
     IBOutlet UIView *containerView;
     IBOutlet UILabel *lblChild;
     IBOutlet UIView *vwBackView;
-    IBOutlet UIScrollView *scrollvw;
+
     IBOutlet UIView *vwChildDetail;
     ///
-    
-    
-    
-    
     IBOutlet UILabel  *lblName;
     IBOutlet UILabel  *lblDob;
     
@@ -65,7 +61,7 @@
     IBOutlet UIView *vwYouthClub;
     IBOutlet UILabel  *lblSchool;
     IBOutlet UILabel *lblYouthclub;
-
+    IBOutlet UIScrollView  *scollvw;
     
     PDDateTimePicker *datePicker;
     PDDateTimePicker *freeTimePicker;
@@ -86,7 +82,7 @@
     NSArray *arrTableData;
     
     NSString *str_Me_slected_Childname;
-  NSString *str_Friend_slected_Childname;
+    NSString *str_Friend_slected_Childname;
     
     NSString *str_Me_slected_Child_Id;
     NSString *str_Friend_slected_Child_Id;
@@ -95,12 +91,14 @@
     
     NSString *str_Whilch_childtable_open;
     
+    int  str_Whilch_FriendchildtagNo;
     
+
     
     IBOutlet UIView *childScrollViewContainer;
     IBOutlet UIScrollView *childScrollView;
     
-    BOOL val_Save_Send;
+  
     BOOL edit_info;
     
     NSString *strEventId;
@@ -117,9 +115,16 @@
      IBOutlet UIButton *btnMenu;
      IBOutlet UIButton *btnHome;
      IBOutlet UIView *topMenuView;
+    IBOutlet UIView *vwFriendChild;
+  
+    NSMutableArray *arrVwFriendChild_Add;
+    NSMutableArray *arrVwFriendChild_Add_ID;
+     NSMutableArray *arrVwFriendChild_Add_Name;
+      NSMutableArray *arrVwFriendChild_Add_G_ID;
     
+    IBOutlet UIButton *btnAddMoreChild;
 }
-
+-(IBAction)btnAddmoreChild:(id)sender;
 @end
 
 @implementation PDRequestArrangeViewController
@@ -134,13 +139,24 @@
 }
 -(void)viewDidAppear:(BOOL)animated
 {
+    if (![self.dictEventInfo_edit count] )
+    {
+    
     [[PDAppDelegate sharedDelegate] showActivityWithTitle:@"Loading..."];
     [self performSelector:@selector(callFacebookFriend) withObject:nil afterDelay:0.1];
+    }
 
    }
 - (void)viewDidLoad
 {
+
+    
     [super viewDidLoad];
+    arrVwFriendChild_Add=[[NSMutableArray alloc]init];
+    arrVwFriendChild_Add_ID=[[NSMutableArray alloc]init];
+    arrVwFriendChild_Add_Name=[[NSMutableArray alloc]init];
+    arrVwFriendChild_Add_G_ID=[[NSMutableArray alloc]init];
+
     arrFriendChild=[[NSArray alloc]init];
     arrTableData=[[NSArray alloc]init];
     arrChild=[[NSArray alloc]init];
@@ -149,16 +165,20 @@
     // Do any additional setup after loading the view from its nib.
     [self setContentInsectOfEachTextField];
     [self.view addSubview:dropDownView];
+    
+ 
+    
+    
     [alternateButton setUserInteractionEnabled:YES];
     firstClicked = NO;
     secondClicked = NO;
     thirdClicked = NO;
-     anyOneClick = NO;
+    anyOneClick = NO;
     dropDownView.hidden = YES;
     anyOneClickTime = NO;
 
     
-   childScrollViewContainer.layer.borderWidth = 5.0;
+    childScrollViewContainer.layer.borderWidth = 5.0;
     childScrollViewContainer.layer.borderColor = [UIColor whiteColor].CGColor;
     childScrollViewContainer.layer.shadowOffset = CGSizeMake(1.0, 1.0);
     childScrollViewContainer.layer.shadowRadius = 2.0;
@@ -223,25 +243,109 @@
        NSLog(@"%@",strSetDate);
         
         edit_info=1;
-     //   sendBtn.hidden=YES;
-        NSLog(@"%@",self.dictEventInfo_edit);
+        
+            NSLog(@"%@",self.dictEventInfo_edit);
         
               //// check who is sender
         NSString *str_id=[self.dictEventInfo_edit valueForKey:@"senderid"];
 
         NSString *strGid = [[[[PDUser currentUser] detail] objectForKey:PDUserInfo]objectForKey:PDWebGID];
         
-        if ([str_id isEqualToString:strGid])
+        if ([str_id isEqualToString:strGid])// if event onwer is same
         {
-            str_id=[self.dictEventInfo_edit valueForKey:@"receiver_id"];
-        }
-  
-        str_Friend_slected_Child_g_id=str_id;
+            
+           tfChildName.text=[self.dictEventInfo_edit valueForKey:@"child_name"];
+          [imgVwChildName setImageWithURL:[self.dictEventInfo_edit valueForKey:@"profile_image"] placeholderImage:[UIImage imageNamed:@"user_img"]];
+            str_Me_slected_Child_Id=[self.dictEventInfo_edit valueForKey:@"Child_id"];
 
-        str_Friend_slected_Child_Id=[self.dictEventInfo_edit valueForKey:@"friend_childid"];
-        str_Me_slected_Child_Id=[self.dictEventInfo_edit valueForKey:@"Child_id"];
-        tfGuardianFrndChildName.text=[self.dictEventInfo_edit valueForKey:@"friendname"];
-        tfChildName.text=[self.dictEventInfo_edit valueForKey:@"child_name"];
+           NSArray *arrTemp=[self.dictEventInfo_edit valueForKey:@"finfo"];
+            
+            for (int i=0; i<[arrTemp count]; i++)
+            {
+                if (i==0)
+                {
+               
+                    tfGuardianFrndChildName.text=[[arrTemp objectAtIndex:i]valueForKey:@"friendname"];
+                    
+                    str_Friend_slected_Childname= [[arrTemp objectAtIndex:i]valueForKey:@"friendname"];
+
+                    str_Friend_slected_Child_Id= [[arrTemp objectAtIndex:i]valueForKey:@"friend_child_id"];
+
+                    str_Friend_slected_Child_g_id=[[arrTemp objectAtIndex:i]valueForKey:@"friend_g_id"];
+                    
+
+                }
+                
+              else
+              {
+
+                  
+                  [arrVwFriendChild_Add_ID addObject:[[arrTemp objectAtIndex:i]valueForKey:@"friend_child_id"]];
+                  [arrVwFriendChild_Add_G_ID addObject:[[arrTemp objectAtIndex:i]valueForKey:@"friend_g_id"]];
+                  [arrVwFriendChild_Add_Name addObject: [[arrTemp objectAtIndex:i]valueForKey:@"friendname"]];
+                  
+                  
+              }
+                
+            }
+        }
+       else
+       {
+           tfGuardianFrndChildName.text=[self.dictEventInfo_edit valueForKey:@"child_name"];
+           
+           str_Friend_slected_Childname=[self.dictEventInfo_edit valueForKey:@"child_name"];
+           str_Friend_slected_Child_Id= [self.dictEventInfo_edit valueForKey:@"Child_id"];
+           
+           str_Friend_slected_Child_g_id=[self.dictEventInfo_edit valueForKey:@"senderid"];
+           
+           [imgVwGuardianFrndChildName setImageWithURL:[self.dictEventInfo_edit valueForKey:@"profile_image"] placeholderImage:[UIImage imageNamed:@"user_img"]];
+           
+           NSArray *arrTemp=[self.dictEventInfo_edit valueForKey:@"finfo"];
+           
+           for (int i=0; i<[arrTemp count]; i++)
+           {
+               
+               
+               if ([strGid isEqualToString:[[arrTemp objectAtIndex:i]valueForKey:@"friend_g_id"]])
+               {
+                   tfChildName.text=[[arrTemp objectAtIndex:i]valueForKey:@"friendname"];
+                   [imgVwChildName setImageWithURL:[[arrTemp objectAtIndex:i]valueForKey:@"friend_profile_image"] placeholderImage:[UIImage imageNamed:@"user_img"]];
+                   str_Me_slected_Child_Id=[[arrTemp objectAtIndex:i]valueForKey:@"friend_child_id"];
+                   
+               }
+               else
+               {
+                   [arrVwFriendChild_Add_ID addObject:[[arrTemp objectAtIndex:i]valueForKey:@"friend_child_id"]];
+                   [arrVwFriendChild_Add_G_ID addObject:[[arrTemp objectAtIndex:i]valueForKey:@"friend_g_id"]];
+                   [arrVwFriendChild_Add_Name addObject: [[arrTemp objectAtIndex:i]valueForKey:@"friendname"]];
+               }
+               
+               
+           }
+           
+
+       }
+        
+   
+      
+//        str_Friend_slected_Child_g_id=str_id;
+        
+        
+//        
+//        str_Friend_slected_Child_Id=[self.dictEventInfo_edit valueForKey:@"friend_childid"];
+//        str_Me_slected_Child_Id=[self.dictEventInfo_edit valueForKey:@"Child_id"];
+//        tfGuardianFrndChildName.text=[self.dictEventInfo_edit valueForKey:@"friendname"];
+//        tfChildName.text=[self.dictEventInfo_edit valueForKey:@"child_name"];
+//        
+//        
+//        
+//        
+//        
+//        [imgVwChildName setImageWithURL:[self.dictEventInfo_edit valueForKey:@"profile_image"] placeholderImage:[UIImage imageNamed:@"user_img"]];
+//         [imgVwGuardianFrndChildName setImageWithURL:[self.dictEventInfo_edit valueForKey:@"friend_profile_image"] placeholderImage:[UIImage imageNamed:@"user_img"]];
+        
+  
+       
         tfLocation.text=[self.dictEventInfo_edit valueForKey:@"location"];
         tVNotes.text=[self.dictEventInfo_edit valueForKey:@"notes"];
         tfStartTime1.text=[self.dictEventInfo_edit valueForKey:@"Starttime"];
@@ -327,15 +431,18 @@
         }
   
      //   [self alternateBtn:nil];
+
         [self Adjust_Size_height_EditInfo];
-           [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
+        
+       [self AdjustFriend_child_framesEdit];
+  
+[scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
     }
     
     else
       [self setUpView];
       [self setUpViewContents];
-    
-    // Getrure
+        // Getrure
     
     UITapGestureRecognizer *gestureImgVwGuardianFrndChildInfo=[[UITapGestureRecognizer alloc]init];
     [gestureImgVwGuardianFrndChildInfo addTarget:self action:@selector(gestureActionFrndChildInfo:)];
@@ -361,11 +468,44 @@
     if (!firstClicked)
     {
         [self setUpView];
+        
+        
+        // chage for showing save button in  edit
+        CGRect rect;
+        rect=tfLocation.frame;
+        rect.origin.y =CGRectGetMaxY(alternateButton.frame)+10.0;
+        tfLocation.frame=rect;
+        
+        CGFloat fixedWidth = tfLocation.frame.size.width;
+        CGSize newSize = [tfLocation sizeThatFits:CGSizeMake(fixedWidth, MAXFLOAT)];
+        CGRect newFrame = tfLocation.frame;
+        newFrame.size = CGSizeMake(fmaxf(newSize.width, fixedWidth), newSize.height);
+        tfLocation.frame = newFrame;
+       
+        
+        rect=tVNotes.frame;
+        rect.origin.y =CGRectGetMaxY(tfLocation.frame)+10.0;
+        tVNotes.frame=rect;
+        
+        
+        CGFloat fixedWidthtVNotes = tVNotes.frame.size.width;
+        CGSize newSizetVNotes = [tVNotes sizeThatFits:CGSizeMake(fixedWidthtVNotes, MAXFLOAT)];
+        CGRect newFrametVNotes= tVNotes.frame;
+        newFrametVNotes.size = CGSizeMake(fmaxf(newSizetVNotes.width, fixedWidthtVNotes), newSizetVNotes.height);
+        tVNotes.frame = newFrametVNotes;
+        
+        rect=containerView.frame;
+        rect.size.height =CGRectGetMaxY(tVNotes.frame)+15.0;
+        containerView.frame=rect;
+        
+        rect=   sendBtn.frame;
+        rect.origin.y =  CGRectGetMaxY(containerView.frame)+20;
+        sendBtn.frame =rect;
+       [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
 //        [self setUpViewContents];
+        ///////////
     }
-    
-    NSLog(@"%@",NSStringFromCGRect(containerView.frame));
-    NSLog(@"%@",NSStringFromCGRect(alternateButton.frame));
+
 }
 
 
@@ -529,24 +669,42 @@
 
 -(void)setUpView
 {
-    CGRect rect = alternateButton.frame;
-    rect.origin.y = 235.0;
-    alternateButton.frame = rect;
+    
+    CGRect rect=alternateButton.frame;
+    
+    
+    rect.origin.y= CGRectGetMaxY(tfEndTime1.frame)+10;
+    alternateButton.frame=rect;
+    
+  
+
     rect = tfLocation.frame;
-    rect.origin.y = 270.0;
+    rect.origin.y =CGRectGetMaxY(alternateButton.frame)+10;
     tfLocation.frame = rect;
     rect = tVNotes.frame;
-    rect.origin.y = 310.0;
+    rect.origin.y = CGRectGetMaxY(tfLocation.frame)+10;
     tVNotes.frame = rect;
     rect = containerView.frame;
-    rect.size.height = 375.0;
-    containerView.frame = rect;
-//    rect = saveBtn.frame;
-//    rect.origin.y = 415.0;
-//    saveBtn.frame = rect;
+    rect.size.height = CGRectGetMaxY(tVNotes.frame)+10;
+    containerView.frame=rect;
+
     rect = sendBtn.frame;
-    rect.origin.y = 425.0;
+    rect.origin.y =CGRectGetMaxY(containerView.frame)+10;
     sendBtn.frame = rect;
+    
+    
+//    /// change code  Remember if any change
+//    rect = containerView.frame;
+//    rect.size.height = CGRectGetMaxY(tVNotes.frame) +30.0;
+//    containerView.frame = rect;
+//    
+//    rect=   sendBtn.frame;
+//    
+//    rect.origin.y =  CGRectGetMaxY(containerView.frame)+20;
+//    
+//    sendBtn.frame =rect;
+    
+    
 }
 
 
@@ -602,155 +760,169 @@
 
 -(void)firstAlternateClick
 {
+    
+    CGRect rect;
+    
+    rect=tfDate2.frame;
+    rect.origin.y= CGRectGetMaxY(tfEndTime1.frame)+10;
+    tfDate2.frame=rect;
+    
+    
+    rect=tfStartTime2.frame;
+    rect.origin.y= CGRectGetMaxY(tfDate2.frame)+10;
+    tfStartTime2.frame=rect;
+    
+    rect=tfEndTime2.frame;
+    rect.origin.y= CGRectGetMaxY(tfStartTime2.frame)+10;
+    tfEndTime2.frame=rect;
+    
     tfDate2.hidden = NO;
     tfStartTime2.hidden = NO;
     tfEndTime2.hidden = NO;
    
-    CGRect rect = alternateButton.frame;
-    rect.origin.y = 340.0;
-    alternateButton.frame = rect;
-    
-    
+    rect=alternateButton.frame;
+    rect.origin.y= CGRectGetMaxY(tfEndTime2.frame)+10;
+    alternateButton.frame=rect;
+
+
     rect = tfLocation.frame;
-    rect.origin.y = 375.0;
+      rect.origin.y = CGRectGetMaxY(alternateButton.frame)+10;
     tfLocation.frame = rect;
   
     rect = tVNotes.frame;
-    rect.origin.y =  CGRectGetMaxY( tfLocation.frame)+5.0;
-   tVNotes.frame = rect;
+    rect.origin.y =  CGRectGetMaxY( tfLocation.frame)+10;
+    tVNotes.frame = rect;
     
     
     rect = containerView.frame;
-    rect.size.height = 485.0;
-    containerView.frame = rect;
+    rect.size.height = CGRectGetMaxY(tVNotes.frame)+10;
+    containerView.frame=rect;
     
-    
-  
-    CGRect rectbtn;
-//    =   saveBtn.frame;
-//    
-//    rectbtn.origin.y =   CGRectGetMaxY(tVNotes.frame)+80;
-//    saveBtn.frame =rectbtn;
-    
-    rectbtn=   sendBtn.frame;
-    
-    rectbtn.origin.y =  CGRectGetMaxY(tVNotes.frame)+10;
-    
-    sendBtn.frame =rectbtn;
-
+    rect = sendBtn.frame;
+    rect.origin.y =CGRectGetMaxY(containerView.frame)+10;
+    sendBtn.frame = rect;
     
     
     [self viewWillAppear:YES];
     
     NSLog(@"%@",NSStringFromCGRect(sendBtn.frame));
     
-   // [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
+ 
 
  
 }
 
 -(void)secondAlternateClick
 {
+    
+    CGRect rect;
+    
+    rect=tfDate3.frame;
+    rect.origin.y= CGRectGetMaxY(tfEndTime2.frame)+10;
+    tfDate3.frame=rect;
+    
+    
+    rect=tfStartTime3.frame;
+    rect.origin.y= CGRectGetMaxY(tfDate3.frame)+10;
+    tfStartTime3.frame=rect;
+    
+    rect=tfEndTime3.frame;
+    rect.origin.y= CGRectGetMaxY(tfStartTime3.frame)+10;
+    tfEndTime3.frame=rect;
+
+    
+    
+    
+    
+    
     tfDate3.hidden = NO;
     tfStartTime3.hidden = NO;
     tfEndTime3.hidden = NO;
-    CGRect rect = alternateButton.frame;
-    rect.origin.y = 445.0;
-    alternateButton.frame = rect;
+    
+    
+
+    
+      rect=alternateButton.frame;
+    rect.origin.y= CGRectGetMaxY(tfEndTime3.frame)+10;
+    alternateButton.frame=rect;
+
     rect = tfLocation.frame;
-    rect.origin.y = 484.0;
+    rect.origin.y = CGRectGetMaxY(alternateButton.frame)+10;
     tfLocation.frame = rect;
     
-    
     rect = tVNotes.frame;
-    rect.origin.y =  CGRectGetMaxY( tfLocation.frame)+5.0;
+    rect.origin.y =  CGRectGetMaxY( tfLocation.frame)+10;
     tVNotes.frame = rect;
 
     
     
     
-//    rect = tVNotes.frame;
-//    rect.origin.y = 522.0;
-//    tVNotes.frame = rect;
     rect = containerView.frame;
-    rect.size.height = 594.0;
-    containerView.frame = rect;
+    rect.size.height = CGRectGetMaxY(tVNotes.frame)+10;
+    containerView.frame=rect;
     
-    
-//    rect = saveBtn.frame;
-//    rect.origin.y = 616.0;
-//    saveBtn.frame = rect;
-//   
-//    
-//    rect = sendBtn.frame;
-//    rect.origin.y = 653.0;
-//    sendBtn.frame = rect;
-    
-    CGRect rectbtn;
-    //=   saveBtn.frame;
-    
-//    rectbtn.origin.y =   CGRectGetMaxY(tVNotes.frame)+80;
-//    saveBtn.frame =rectbtn;
-//    
-    rectbtn=   sendBtn.frame;
-    
-    rectbtn.origin.y =  CGRectGetMaxY(tVNotes.frame)+10;
-    
-    sendBtn.frame =rectbtn;
+    rect = sendBtn.frame;
+    rect.origin.y =CGRectGetMaxY(containerView.frame)+10;
+    sendBtn.frame = rect;
+
 
     
     
     
     [self viewWillAppear:YES];
-       // [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width,  CGRectGetMaxY(sendBtn.frame) + 40.0)];
+
 }
 
 -(void)thirdAlternateClick
 {
+    
+    CGRect rect;
+    
+    rect=tfDate4.frame;
+    rect.origin.y= CGRectGetMaxY(tfEndTime3.frame)+10;
+    tfDate4.frame=rect;
+    
+    
+    rect=tfStartTime4.frame;
+    rect.origin.y= CGRectGetMaxY(tfDate4.frame)+10;
+    tfStartTime4.frame=rect;
+    
+    rect=tfEndTime4.frame;
+    rect.origin.y= CGRectGetMaxY(tfStartTime4.frame)+10;
+    tfEndTime4.frame=rect;
+    
+    
+    
+    
     tfDate4.hidden = NO;
     tfStartTime4.hidden = NO;
     tfEndTime4.hidden = NO;
-    CGRect rect = alternateButton.frame;
-    rect.origin.y = 550.0;
-    alternateButton.frame = rect;
+    
+    
+  rect=alternateButton.frame;
+    rect.origin.y= CGRectGetMaxY(tfEndTime4.frame)+10;
+    alternateButton.frame=rect;
+
+    
+    
+    
     rect = tfLocation.frame;
-    rect.origin.y = 575.0;
+    rect.origin.y = CGRectGetMaxY(alternateButton.frame)+10;
     tfLocation.frame = rect;
     
     
     rect = tVNotes.frame;
-    rect.origin.y =  CGRectGetMaxY( tfLocation.frame)+5.0;
+    rect.origin.y =  CGRectGetMaxY( tfLocation.frame)+10;
     tVNotes.frame = rect;
 
-    
-//    rect = tVNotes.frame;
-//    rect.origin.y = 600.0;
-//    tVNotes.frame = rect;
     rect = containerView.frame;
-    rect.size.height = 680.0;
-    containerView.frame = rect;
-   
+    rect.size.height = CGRectGetMaxY(tVNotes.frame)+10;
+    containerView.frame=rect;
     
-//    rect = saveBtn.frame;
-//    rect.origin.y = 740.0;
-//    saveBtn.frame = rect;
-//    
-//    
-//    rect = sendBtn.frame;
-//    rect.origin.y = 777.0;
-//    sendBtn.frame = rect;
+    rect = sendBtn.frame;
+    rect.origin.y =CGRectGetMaxY(containerView.frame)+10;
+    sendBtn.frame = rect;
 
-    CGRect rectbtn;
-//    =   saveBtn.frame;
-//    
-//    rectbtn.origin.y =   CGRectGetMaxY(tVNotes.frame)+80;
-//    saveBtn.frame =rectbtn;
-//    
-    rectbtn=   sendBtn.frame;
-    
-    rectbtn.origin.y =  CGRectGetMaxY(tVNotes.frame)+10;
-    
-    sendBtn.frame =rectbtn;
 
     
     [self viewWillAppear:YES];
@@ -1703,7 +1875,7 @@
     [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
     
     
-    val_Save_Send=1;
+  
     
     if ([self validateFields])
     {
@@ -1716,21 +1888,7 @@
     }
 
 }
-//-(IBAction)saveAction:(id)sender
-//{
-//    [self resignKeyBoard];
-//    [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
-//    
-//    
-//    val_Save_Send=0;
-//    
-//    if ([self validateFields])
-//    {
-//        [[PDAppDelegate sharedDelegate] showActivityWithTitle:@"Saving..."];
-//        [self performSelector:@selector(activityDidAppear) withObject:nil afterDelay:0.1];
-//    }
-//
-//}
+
 
 #pragma mark - Activity Appear
 -(void)activityDidAppear
@@ -1846,20 +2004,41 @@
     }
     
         [params setObject:str_Me_slected_Child_Id forKey:@"child_id"];
+    if ([arrVwFriendChild_Add_ID count]>0)
+    {
+        
+         NSString *strChild_Id=[arrVwFriendChild_Add_ID componentsJoinedByString:@","];
+        [params setObject:[NSString stringWithFormat:@"%@,%@",str_Friend_slected_Child_Id,strChild_Id] forKey:@"friend_childid"];
+        
+        NSString *strChild_G_Id=[arrVwFriendChild_Add_G_ID componentsJoinedByString:@","];
+        [params setObject:[NSString stringWithFormat:@"%@,%@",str_Friend_slected_Child_g_id,strChild_G_Id] forKey:@"receiver_id"];
+
+    }
+    else
+    {
         [params setObject:str_Friend_slected_Child_Id forKey:@"friend_childid"];
         [params setObject:str_Friend_slected_Child_g_id forKey:@"receiver_id"];
-        [params setObject:[NSString stringWithFormat:@"%d", val_Save_Send] forKey:@"publish"];
+    }
+//        [params setObject:str_Friend_slected_Child_Id forKey:@"friend_childid"];//old
+//        [params setObject:str_Friend_slected_Child_g_id forKey:@"receiver_id"];//old
+    
+ 
+    
+   
+    
+       [params setObject:[NSString stringWithFormat:@"%d",1] forKey:@"publish"];
        [params setObject:@"requested" forKey:@"receiver_status"];
     
 
     if (edit_info)
     {
+        
           [params setObject:strEventId forKey:@"event_id"];
           [[PDWebHandler sharedWebHandler]editEventWithParams:params forGuardian:guardianID];
     }
     else
-        [[PDWebHandler sharedWebHandler]createEventWithParams:params forGuardian:guardianID];
-
+       // [[PDWebHandler sharedWebHandler]createEventWithParams:params forGuardian:guardianID];// old webservice
+        [[PDWebHandler sharedWebHandler]createEventMultiPersonWithParams:params forGuardian:guardianID];
  
     [[PDWebHandler sharedWebHandler] startRequestWithCompletionBlock:^(id response, NSError *error) {
     [[PDAppDelegate sharedDelegate] hideActivity];
@@ -1910,6 +2089,49 @@
 }
 -(IBAction)guardianFriendDropDown:(id)sender
 {
+    UIButton *btn=(UIButton *)sender;
+    if (btn.currentImage==CancelImage)
+    { // delete Child
+        vwAdditionalChild *vwAdditional=(vwAdditionalChild *)[arrVwFriendChild_Add objectAtIndex:btn.tag];
+
+        
+       [arrVwFriendChild_Add removeObjectAtIndex:btn.tag];
+
+        [arrVwFriendChild_Add_ID removeObjectAtIndex:btn.tag];
+        [arrVwFriendChild_Add_G_ID removeObjectAtIndex:btn.tag];
+        [arrVwFriendChild_Add_Name removeObjectAtIndex:btn.tag];
+        
+
+        
+        [vwAdditional removeFromSuperview];
+        for (int i=0; i<[arrVwFriendChild_Add count]; i++)
+        {
+            
+             vwAdditional=(vwAdditionalChild *)[arrVwFriendChild_Add objectAtIndex:i];
+            for (UIView *vw in [vwAdditional subviews])
+            {
+                if ([vw isKindOfClass:[UILabel class]])
+                {
+                    UILabel *lbl=(UILabel *)vw;
+                    
+                    lbl.tag=i;
+                }
+                if ([vw isKindOfClass:[UIButton class]])
+                {
+                    
+                    UIButton *btnVw=(UIButton *)vw;
+//                    [btnVw setImage:CancelImage forState:UIControlStateNormal];
+                    btnVw.tag=i;
+
+                }
+            }
+
+        }
+        [self AdjustDeleteRowframes];
+        return;
+    }
+    
+    
     if ([[self.view subviews] containsObject:freeTimePicker])
     {
         [freeTimePicker hide];
@@ -1926,6 +2148,7 @@
     [self resignKeyBoard];
     lblChild.text=@"Select friend's child:";
     str_Whilch_childtable_open=@"FriendChild";
+    str_Whilch_FriendchildtagNo=(int)((UIButton *)sender).tag;
     arrTableData=arrFriendChild;
     [self   reloadChild];
     dropDownView.hidden=NO;
@@ -1996,7 +2219,7 @@
     
     
     /////
-    
+
     
     rect=tVNotes.frame;
     rect.origin.y =CGRectGetMaxY(tfLocation.frame)+10.0;
@@ -2048,7 +2271,7 @@
     rect.size.height=CGRectGetMaxY(vwYouthClub.frame)+25.0;
     vwBackView.frame=rect;
     
-   [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(vwBackView.frame) + 37.0)];
+   [scollvw setContentSize:CGSizeMake(scollvw.frame.size.width, CGRectGetMaxY(vwBackView.frame) + 37.0)];
 }
 
 -(void)resignPhonePad
@@ -2117,7 +2340,7 @@
     NSArray *arrAllergies=[[dictSlectd_ChildInfo valueForKey:@"allergies"] componentsSeparatedByString:@","];
     NSMutableString *strAllergies=[[NSMutableString alloc]init];
     
-    if ([arrHobbies count]>1)
+    if ([arrAllergies count]>1)
     {
     for ( int i=0;i<[arrAllergies count]; i++)
     {
@@ -2281,7 +2504,7 @@
     lblAllergies.text=strAllergies;
     lblHobbies.text=strHobbies;
     lblYouthclub.text=[dictSlectdFriend_ChildInfo valueForKey:@"youth_club"];
-       lblSchool.text=[dictSlectd_ChildInfo valueForKey:@"school"];
+    lblSchool.text=[dictSlectd_ChildInfo valueForKey:@"school"];
     
         rect  = lblAllergies.frame;
     if (rect.size.height < 30.0) {
@@ -2304,13 +2527,13 @@
 }
 -(void)facebookFriends
 {
-    NSString *strurl= [NSString stringWithFormat:@"https://graph.facebook.com/v2.0/me/friends?fields=id,name,picture.type(large)&access_token=%@" ,[FBSession activeSession].accessTokenData.accessToken];
+    NSString *strurl= [NSString stringWithFormat:@"https://graph.facebook.com/v2.0/me/friends?fields=id,name,picture.type(large)&access_token=%@",[FBSession activeSession].accessTokenData.accessToken];
 
     
     NSURL *url = [NSURL URLWithString:strurl];
     NSData *data = [NSData dataWithContentsOfURL:url];
     
-    id friends_result = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:nil];
+    id friends_result=[NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:nil];
     
     NSArray  *friends_fb_ids = [[friends_result objectForKey:FBData] valueForKey:FBId];
    
@@ -2322,7 +2545,7 @@
         
     }];
     
-    NSLog(@"friends_fb_ids String: \n%@", str);
+
     if (str.length > 0){
         [str deleteCharactersInRange:NSMakeRange(str.length-1, 1)];
     }
@@ -2401,7 +2624,7 @@
         [imageView setImageWithURL:[NSURL URLWithString:[detail objectForKey:@"c_profile_image"]] placeholderImage:[UIImage imageNamed:@"user_img"]];
 
         NSString *childName = nil;
-        if (  [str_Whilch_childtable_open isEqualToString:@"FriendChild"] )
+        if ([str_Whilch_childtable_open isEqualToString:@"FriendChild"])
         {
               childName = [detail valueForKey:@"name"];
           
@@ -2409,7 +2632,7 @@
         else
         {
                childName = [detail valueForKey:@"Childname"];
-                  }
+        }
 
 
         titleView = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 0.0, childScrollView.frame.size.width-55.0, 50.0)];
@@ -2434,17 +2657,81 @@
 -(void)getChildInfo:(UIGestureRecognizer *)gesture
 {
     
-       if ([str_Whilch_childtable_open isEqualToString:@"FriendChild"])
+    
+    
+    if ([str_Whilch_childtable_open isEqualToString:@"FriendChild"])
     {
           tfGuardianFrndChildName.textColor=  [[PDHelper sharedHelper] applicationThemeBlueColor];
-        dictSlectdFriend_ChildInfo=[arrTableData objectAtIndex:gesture.view.tag];
-        str_Friend_slected_Childname=   [[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"name"];
-        tfGuardianFrndChildName.text=[str_Friend_slected_Childname uppercaseString];
-  
-        str_Friend_slected_Child_Id=  [[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"child_id"];
-        str_Friend_slected_Child_g_id= [[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"g_id"];
-        [imgVwGuardianFrndChildName setImageWithURL:[NSURL URLWithString: [[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"c_profile_image"]]];
+          dictSlectdFriend_ChildInfo=[arrTableData objectAtIndex:gesture.view.tag];
+        
+        if (str_Whilch_FriendchildtagNo==1000)
+        {
+            
+            NSString *tempId=[[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"child_id"];
+            
+            if (([arrVwFriendChild_Add_ID count]!=0)&& [arrVwFriendChild_Add_ID containsObject:tempId])
+            {
+                [[[UIAlertView alloc] initWithTitle:nil message:@"Please Select different child." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+                return;
+            }
 
+            
+        
+            [imgVwGuardianFrndChildName setImageWithURL:[NSURL URLWithString: [[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"c_profile_image"]]placeholderImage:[UIImage imageNamed:@"user_img"]];
+            
+            str_Friend_slected_Childname=   [[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"name"];
+            str_Friend_slected_Child_Id=  [[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"child_id"];
+            str_Friend_slected_Child_g_id= [[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"g_id"];
+            tfGuardianFrndChildName.text=[str_Friend_slected_Childname uppercaseString];
+        }
+       else
+       {
+           
+           
+           NSString *tempId=[[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"child_id"];
+           
+           if ([tempId isEqualToString:str_Friend_slected_Child_Id]||(([arrVwFriendChild_Add_ID count]!=0)&& [arrVwFriendChild_Add_ID containsObject:tempId]))
+           {
+               [[[UIAlertView alloc] initWithTitle:nil message:@"Please Select different child." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+               return;
+           }
+  
+           
+           
+       vwAdditionalChild *vwAdditional=[arrVwFriendChild_Add objectAtIndex:str_Whilch_FriendchildtagNo];
+           
+           for (UIView *vw in [vwAdditional subviews])
+           {
+               if ([vw isKindOfClass:[UILabel class]])
+               {
+                   UILabel *lbl=(UILabel *)vw;
+                   lbl.text=[[[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"name"] uppercaseString];
+                   lbl.textColor=  [[PDHelper sharedHelper] applicationThemeBlueColor];
+               }
+               if ([vw isKindOfClass:[UIImageView class]])
+               {
+                   UIImageView *imgVw=(UIImageView *)vw;
+                   
+                   
+                   [imgVw setImageWithURL:[NSURL URLWithString: [[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"c_profile_image"]] placeholderImage:[UIImage imageNamed:@"user_img"]];
+
+               }
+               if ([vw isKindOfClass:[UIButton class]])
+               {
+                   UIButton *btnVw=(UIButton *)vw;
+                   [btnVw setImage:CancelImage forState:UIControlStateNormal];
+                }
+           }
+       [arrVwFriendChild_Add_ID addObject:[[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"child_id"]];
+       [arrVwFriendChild_Add_G_ID addObject: [[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"g_id"]];
+       [arrVwFriendChild_Add_Name addObject:[[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"name"]];
+       
+       }
+        
+        
+ 
+      
+       
     }
     else if ([str_Whilch_childtable_open isEqualToString:@"MeChild"])
     {
@@ -2453,11 +2740,12 @@
         str_Me_slected_Childname= [[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"Childname"];
         tfChildName.text=[str_Me_slected_Childname uppercaseString];
           str_Me_slected_Child_Id=[[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"child_id"];
-        [imgVwChildName setImageWithURL:[NSURL URLWithString: [[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"c_profile_image"]]];
+        [imgVwChildName setImageWithURL:[NSURL URLWithString: [[arrTableData objectAtIndex:gesture.view.tag]valueForKey:@"c_profile_image"]] placeholderImage:[UIImage imageNamed:@"user_img"]];
+
     }
     
     dropDownView.hidden=YES;
-            [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
+    [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
 }
 #pragma mark alertView delegate
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
@@ -2495,6 +2783,223 @@
     NSArray *controllers = [NSArray arrayWithObject:mainViewController];
     navigationController.viewControllers = controllers;
     [self.menuContainerViewController setMenuState:MFSideMenuStateClosed];
+}
+-(IBAction)btnAddmoreChild:(id)sender
+{
+    
+    vwAdditionalChild *vwAdditional=[[vwAdditionalChild alloc]initWithFrame:CGRectMake(0, 0, 280, 51)];
+
+    NSArray *outlets = [[NSBundle mainBundle] loadNibNamed:@"vwAdditionalChild" owner:self options:nil];
+    for (id outlet in outlets) {
+        if ([outlet isKindOfClass:[vwAdditionalChild class]]) {
+            vwAdditional= (vwAdditionalChild *)outlet;
+        }
+    }
+   
+    
+    float yCordinate;
+    
+    if ([arrVwFriendChild_Add count]!=0)
+    {
+        UIView *vw=(UIView *)([arrVwFriendChild_Add lastObject]);
+        yCordinate=CGRectGetMaxY(vw.frame)+5;
+        vwAdditional.tag=[arrVwFriendChild_Add count]-1;
+        vwAdditional.btnPlus.tag=[arrVwFriendChild_Add count];
+    }
+    
+   else
+   {
+       yCordinate=CGRectGetMaxY(vwFriendChild.frame)+5;
+       vwAdditional.tag=0;
+       vwAdditional.btnPlus.tag=0;
+   }
+    
+   [containerView addSubview:vwAdditional];
+   [vwAdditional.btnPlus addTarget:self action:@selector(guardianFriendDropDown:) forControlEvents:UIControlEventTouchUpInside];
+    CGRect rect=vwAdditional.frame;
+    rect.origin.y=yCordinate;
+    rect.origin.x=12;
+    vwAdditional.frame=rect;
+    
+    
+    [arrVwFriendChild_Add addObject:vwAdditional];
+    
+    rect=btnAddMoreChild.frame;
+    rect.origin.y=CGRectGetMaxY(vwAdditional.frame)+5;
+    btnAddMoreChild.frame=rect;
+
+    
+    rect=tfDate1.frame;
+    rect.origin.y=CGRectGetMaxY(btnAddMoreChild.frame)+5;
+    tfDate1.frame=rect;
+    
+    
+    rect=tfStartTime1.frame;
+    rect.origin.y=CGRectGetMaxY(tfDate1.frame)+5;
+    tfStartTime1.frame=rect;
+
+    rect=tfEndTime1.frame;
+    rect.origin.y=CGRectGetMaxY(tfStartTime1.frame)+5;
+    tfEndTime1.frame=rect;
+
+    
+    
+    if (tfEndTime1.hidden==NO)
+           [self setUpView];
+        
+    if (tfEndTime2.hidden==NO)
+        [self firstAlternateClick];
+    
+    if (tfEndTime3.hidden==NO)
+        [self secondAlternateClick];
+    
+    if (tfEndTime4.hidden==NO)
+        [self thirdAlternateClick];
+    
+       [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
+}
+-(void)AdjustDeleteRowframes
+{
+    CGRect rect;
+    float yCordinate;
+    vwAdditionalChild *vwAdditional;
+    yCordinate=CGRectGetMaxY(vwFriendChild.frame)+5;
+    if ([arrVwFriendChild_Add count]==0)
+    {
+        rect=btnAddMoreChild.frame;
+        rect.origin.y=yCordinate;
+        btnAddMoreChild.frame=rect;
+    }
+    else
+    {
+      for(int i=0;i<[arrVwFriendChild_Add count]; i++)
+       {
+           
+         vwAdditional=(vwAdditionalChild *)[arrVwFriendChild_Add objectAtIndex:i];
+         rect=vwAdditional.frame;
+           rect.origin.y=yCordinate;
+         vwAdditional.frame=rect;
+           yCordinate=CGRectGetMaxY(vwAdditional.frame)+5;
+       }
+        rect=btnAddMoreChild.frame;
+        rect.origin.y=CGRectGetMaxY(vwAdditional.frame)+5;
+        btnAddMoreChild.frame=rect;
+    }
+    
+    
+    
+    
+    
+    rect=tfDate1.frame;
+    rect.origin.y=CGRectGetMaxY(btnAddMoreChild.frame)+5;
+    tfDate1.frame=rect;
+    
+    
+    rect=tfStartTime1.frame;
+    rect.origin.y=CGRectGetMaxY(tfDate1.frame)+5;
+    tfStartTime1.frame=rect;
+    
+    rect=tfEndTime1.frame;
+    rect.origin.y=CGRectGetMaxY(tfStartTime1.frame)+5;
+    tfEndTime1.frame=rect;
+    
+    
+    
+    if (tfEndTime1.hidden==NO)
+        [self setUpView];
+    
+    if (tfEndTime2.hidden==NO)
+        [self firstAlternateClick];
+    
+    if (tfEndTime3.hidden==NO)
+        [self secondAlternateClick];
+    
+    if (tfEndTime4.hidden==NO)
+        [self thirdAlternateClick];
+    
+    [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
+
+}
+-(void)AdjustFriend_child_framesEdit
+{
+    btnAddMoreChild.enabled=NO;
+    for (int j=0; j<[arrVwFriendChild_Add_Name count]; j++)
+    {
+        //arrVwFriendChild_Add_Name
+        vwAdditionalChild *vwAdditional=[[vwAdditionalChild alloc]initWithFrame:CGRectMake(0, 0, 280, 51)];
+        vwAdditional.btnPlus.enabled=NO;
+
+//        vwAdditional.lblFriendChild.text=[arrVwFriendChild_Add_Name objectAtIndex:j];
+        NSArray *outlets = [[NSBundle mainBundle] loadNibNamed:@"vwAdditionalChild" owner:self options:nil];
+        for (id outlet in outlets) {
+            if ([outlet isKindOfClass:[vwAdditionalChild class]]) {
+                vwAdditional= (vwAdditionalChild *)outlet;
+            }
+        }
+        
+        
+        float yCordinate;
+             vwAdditional.lblFriendChild.text=[arrVwFriendChild_Add_Name objectAtIndex:j];
+        if ([arrVwFriendChild_Add count]!=0)
+        {
+            UIView *vw=(UIView *)([arrVwFriendChild_Add lastObject]);
+            yCordinate=CGRectGetMaxY(vw.frame)+5;
+            vwAdditional.tag=[arrVwFriendChild_Add count]-1;
+            vwAdditional.btnPlus.tag=[arrVwFriendChild_Add count];
+        }
+        
+        else
+        {
+            yCordinate=CGRectGetMaxY(vwFriendChild.frame)+5;
+            vwAdditional.tag=0;
+            vwAdditional.btnPlus.tag=0;
+        }
+        
+        [containerView addSubview:vwAdditional];
+      
+        CGRect rect=vwAdditional.frame;
+        rect.origin.y=yCordinate;
+        rect.origin.x=12;
+        vwAdditional.frame=rect;
+        
+        
+        [arrVwFriendChild_Add addObject:vwAdditional];
+        
+        rect=btnAddMoreChild.frame;
+        rect.origin.y=CGRectGetMaxY(vwAdditional.frame)+5;
+        btnAddMoreChild.frame=rect;
+    
+    
+    
+    rect=tfDate1.frame;
+    rect.origin.y=CGRectGetMaxY(btnAddMoreChild.frame)+5;
+    tfDate1.frame=rect;
+    
+    
+    rect=tfStartTime1.frame;
+    rect.origin.y=CGRectGetMaxY(tfDate1.frame)+5;
+    tfStartTime1.frame=rect;
+    
+    rect=tfEndTime1.frame;
+    rect.origin.y=CGRectGetMaxY(tfStartTime1.frame)+5;
+    tfEndTime1.frame=rect;
+    
+    
+    
+    if (tfEndTime1.hidden==NO)
+        [self setUpView];
+    
+    if (tfEndTime2.hidden==NO)
+        [self firstAlternateClick];
+    
+    if (tfEndTime3.hidden==NO)
+        [self secondAlternateClick];
+    
+    if (tfEndTime4.hidden==NO)
+        [self thirdAlternateClick];
+    
+    [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(sendBtn.frame) + 40.0)];
+    }
 }
 
 @end

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="5053" systemVersion="13D65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="5053" systemVersion="13F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none">
     <dependencies>
         <deployment defaultVersion="1536" identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3733"/>
@@ -29,8 +29,8 @@
                 <outlet property="lblName" destination="dl8-tr-QI9" id="xxL-wH-leQ"/>
                 <outlet property="lblSchool" destination="LEz-M0-yQI" id="UQl-5r-RpF"/>
                 <outlet property="lblYouthclub" destination="rxr-Ed-LgS" id="tqv-Yp-ogz"/>
+                <outlet property="scollvw" destination="WnU-M1-VwL" id="KuR-Gw-HYH"/>
                 <outlet property="scrollView" destination="fTF-Su-95B" id="Mlo-Z8-F4R"/>
-                <outlet property="scrollvw" destination="WnU-M1-VwL" id="0Al-Nw-8Pn"/>
                 <outlet property="sendBtn" destination="Mkm-Hl-aYE" id="BFd-4G-pNC"/>
                 <outlet property="tVNotes" destination="diu-y4-TSM" id="RZ2-U9-tp6"/>
                 <outlet property="tfChildName" destination="1Xr-nm-wMK" id="KPO-ya-5qJ"/>
@@ -54,6 +54,7 @@
                 <outlet property="vwBackView" destination="mDP-M9-oAR" id="yMg-EQ-qNX"/>
                 <outlet property="vwChildDetail" destination="mUW-4z-Hag" id="7bb-XL-gVe"/>
                 <outlet property="vwFreetime" destination="if9-9T-lAM" id="tOm-kv-5j8"/>
+                <outlet property="vwFriendChild" destination="rb5-iu-nl6" id="lOb-LO-e4E"/>
                 <outlet property="vwHobbies" destination="uCi-rI-oag" id="8Q7-ec-sAU"/>
                 <outlet property="vwSchool" destination="bxm-Kf-jzk" id="Dc1-kY-AaC"/>
                 <outlet property="vwYouthClub" destination="fTT-Ry-lH2" id="O7a-NZ-SHm"/>
@@ -151,8 +152,37 @@
                             <rect key="frame" x="8" y="22" width="304" height="697"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <subviews>
-                                <view contentMode="scaleToFill" id="rb5-iu-nl6">
+                                <view contentMode="scaleToFill" id="8yR-ul-Rto">
                                     <rect key="frame" x="12" y="15" width="280" height="51"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <subviews>
+                                        <imageView contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="user_img" id="XQh-Cd-Jl9">
+                                            <rect key="frame" x="7" y="7" width="36" height="36"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        </imageView>
+                                        <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="YOUR CHILD NAME" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="1Xr-nm-wMK">
+                                            <rect key="frame" x="83" y="4" width="156" height="44"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                            <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
+                                            <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="kph-QN-9QY">
+                                            <rect key="frame" x="238" y="5" width="42" height="40"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <state key="normal" image="add_button">
+                                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                            </state>
+                                            <connections>
+                                                <action selector="childDropDownBtn:" destination="-1" eventType="touchUpInside" id="xjq-FI-Skz"/>
+                                            </connections>
+                                        </button>
+                                    </subviews>
+                                    <color key="backgroundColor" red="0.95294117649999999" green="0.95294117649999999" blue="0.95294117649999999" alpha="1" colorSpace="calibratedRGB"/>
+                                </view>
+                                <view contentMode="scaleToFill" id="rb5-iu-nl6">
+                                    <rect key="frame" x="12" y="71" width="280" height="51"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <subviews>
                                         <imageView contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="user_img" id="qtW-A9-C46">
@@ -168,30 +198,81 @@
                                             <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
                                             <color key="highlightedColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </label>
+                                        <button opaque="NO" tag="1000" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="kon-es-kqL">
+                                            <rect key="frame" x="238" y="5" width="42" height="40"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <state key="normal" image="add_button">
+                                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                            </state>
+                                            <connections>
+                                                <action selector="guardianFriendDropDown:" destination="-1" eventType="touchUpInside" id="8Vr-vO-a01"/>
+                                            </connections>
+                                        </button>
                                     </subviews>
                                     <color key="backgroundColor" red="0.95294117647058818" green="0.95294117647058818" blue="0.95294117647058818" alpha="1" colorSpace="calibratedRGB"/>
                                 </view>
-                                <view contentMode="scaleToFill" id="8yR-ul-Rto">
-                                    <rect key="frame" x="12" y="71" width="280" height="51"/>
+                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="   DATE" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="Ml0-mL-O3m">
+                                    <rect key="frame" x="12" y="133" width="280" height="30"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    <subviews>
-                                        <imageView contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="user_img" id="XQh-Cd-Jl9">
-                                            <rect key="frame" x="7" y="7" width="36" height="36"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        </imageView>
-                                        <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="YOUR CHILD NAME" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="1Xr-nm-wMK">
-                                            <rect key="frame" x="83" y="4" width="156" height="44"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                                            <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
-                                            <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                    </subviews>
-                                    <color key="backgroundColor" red="0.95294117649999999" green="0.95294117649999999" blue="0.95294117649999999" alpha="1" colorSpace="calibratedRGB"/>
-                                </view>
+                                    <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
+                                    <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
+                                    <textInputTraits key="textInputTraits" keyboardType="emailAddress"/>
+                                    <connections>
+                                        <outlet property="delegate" destination="-1" id="OE5-tn-tu4"/>
+                                    </connections>
+                                </textField>
+                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="  START TIME" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="fDp-S0-4Up">
+                                    <rect key="frame" x="12" y="168" width="280" height="30"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
+                                    <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
+                                    <textInputTraits key="textInputTraits" keyboardType="emailAddress"/>
+                                    <connections>
+                                        <outlet property="delegate" destination="-1" id="9UN-3K-hSZ"/>
+                                    </connections>
+                                </textField>
+                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="  END TIME" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="78e-MR-o53">
+                                    <rect key="frame" x="12" y="203" width="280" height="30"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
+                                    <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
+                                    <textInputTraits key="textInputTraits" keyboardType="emailAddress"/>
+                                    <connections>
+                                        <outlet property="delegate" destination="-1" id="3Bt-gc-fls"/>
+                                    </connections>
+                                </textField>
+                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="   DATE" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="Voe-bH-Bte">
+                                    <rect key="frame" x="12" y="238" width="280" height="30"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
+                                    <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
+                                    <textInputTraits key="textInputTraits" keyboardType="emailAddress"/>
+                                    <connections>
+                                        <outlet property="delegate" destination="-1" id="8QI-W8-GUQ"/>
+                                    </connections>
+                                </textField>
+                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="  START TIME" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="9Iz-J0-ZWM">
+                                    <rect key="frame" x="12" y="273" width="280" height="30"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
+                                    <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
+                                    <textInputTraits key="textInputTraits" keyboardType="emailAddress"/>
+                                    <connections>
+                                        <outlet property="delegate" destination="-1" id="rn2-OM-FJo"/>
+                                    </connections>
+                                </textField>
+                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="  END TIME" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="U5d-dh-isE">
+                                    <rect key="frame" x="12" y="308" width="280" height="30"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
+                                    <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
+                                    <textInputTraits key="textInputTraits" keyboardType="emailAddress"/>
+                                    <connections>
+                                        <outlet property="delegate" destination="-1" id="Xbu-0y-IC6"/>
+                                    </connections>
+                                </textField>
                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="   DATE" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="Dnt-7s-uLy">
-                                    <rect key="frame" x="12" y="337" width="280" height="30"/>
+                                    <rect key="frame" x="12" y="343" width="280" height="30"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
                                     <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
@@ -201,7 +282,7 @@
                                     </connections>
                                 </textField>
                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="  START TIME" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="pxq-Ll-fvD">
-                                    <rect key="frame" x="12" y="372" width="280" height="30"/>
+                                    <rect key="frame" x="12" y="378" width="280" height="30"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
                                     <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
@@ -211,7 +292,7 @@
                                     </connections>
                                 </textField>
                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="  END TIME" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="SaF-HJ-Tf3">
-                                    <rect key="frame" x="12" y="407" width="280" height="30"/>
+                                    <rect key="frame" x="12" y="413" width="280" height="30"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
                                     <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
@@ -221,7 +302,7 @@
                                     </connections>
                                 </textField>
                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="   DATE" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="2HM-Cs-MC7">
-                                    <rect key="frame" x="12" y="442" width="280" height="30"/>
+                                    <rect key="frame" x="12" y="448" width="280" height="30"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
                                     <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
@@ -231,7 +312,7 @@
                                     </connections>
                                 </textField>
                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="  START TIME" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="cCB-yh-0wl">
-                                    <rect key="frame" x="12" y="477" width="280" height="30"/>
+                                    <rect key="frame" x="12" y="483" width="280" height="30"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
                                     <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
@@ -241,7 +322,7 @@
                                     </connections>
                                 </textField>
                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="  END TIME" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="4mu-D3-wGd">
-                                    <rect key="frame" x="12" y="512" width="280" height="30"/>
+                                    <rect key="frame" x="12" y="518" width="280" height="30"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
                                     <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
@@ -251,7 +332,7 @@
                                     </connections>
                                 </textField>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="BO4-OE-xj9">
-                                    <rect key="frame" x="12" y="552" width="227" height="20"/>
+                                    <rect key="frame" x="12" y="558" width="227" height="20"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <fontDescription key="fontDescription" name="Helvetica" family="Helvetica" pointSize="13"/>
                                     <state key="normal" title="  Alternative Date/Time">
@@ -263,7 +344,7 @@
                                     </connections>
                                 </button>
                                 <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" text="LOCATION" id="XhO-mv-4Cv">
-                                    <rect key="frame" x="12" y="582" width="280" height="35"/>
+                                    <rect key="frame" x="12" y="588" width="280" height="35"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <color key="backgroundColor" red="0.95294117647058818" green="0.95294117647058818" blue="0.95294117647058818" alpha="1" colorSpace="calibratedRGB"/>
                                     <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
@@ -274,7 +355,7 @@
                                     </connections>
                                 </textView>
                                 <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" keyboardDismissMode="onDrag" text="NOTES" id="diu-y4-TSM">
-                                    <rect key="frame" x="12" y="627" width="280" height="35"/>
+                                    <rect key="frame" x="12" y="633" width="280" height="35"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <color key="backgroundColor" red="0.95294117647058818" green="0.95294117647058818" blue="0.95294117647058818" alpha="1" colorSpace="calibratedRGB"/>
                                     <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
@@ -284,86 +365,6 @@
                                         <outlet property="delegate" destination="-1" id="Rg9-hW-7Db"/>
                                     </connections>
                                 </textView>
-                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="kon-es-kqL">
-                                    <rect key="frame" x="246" y="21" width="42" height="40"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    <state key="normal" image="add_button">
-                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                    </state>
-                                    <connections>
-                                        <action selector="guardianFriendDropDown:" destination="-1" eventType="touchUpInside" id="8Vr-vO-a01"/>
-                                    </connections>
-                                </button>
-                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="kph-QN-9QY">
-                                    <rect key="frame" x="246" y="77" width="42" height="40"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    <state key="normal" image="add_button">
-                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                    </state>
-                                    <connections>
-                                        <action selector="childDropDownBtn:" destination="-1" eventType="touchUpInside" id="xjq-FI-Skz"/>
-                                    </connections>
-                                </button>
-                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="   DATE" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="Voe-bH-Bte">
-                                    <rect key="frame" x="12" y="232" width="280" height="30"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
-                                    <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
-                                    <textInputTraits key="textInputTraits" keyboardType="emailAddress"/>
-                                    <connections>
-                                        <outlet property="delegate" destination="-1" id="8QI-W8-GUQ"/>
-                                    </connections>
-                                </textField>
-                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="  START TIME" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="9Iz-J0-ZWM">
-                                    <rect key="frame" x="12" y="267" width="280" height="30"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
-                                    <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
-                                    <textInputTraits key="textInputTraits" keyboardType="emailAddress"/>
-                                    <connections>
-                                        <outlet property="delegate" destination="-1" id="rn2-OM-FJo"/>
-                                    </connections>
-                                </textField>
-                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="  END TIME" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="U5d-dh-isE">
-                                    <rect key="frame" x="12" y="302" width="280" height="30"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
-                                    <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
-                                    <textInputTraits key="textInputTraits" keyboardType="emailAddress"/>
-                                    <connections>
-                                        <outlet property="delegate" destination="-1" id="Xbu-0y-IC6"/>
-                                    </connections>
-                                </textField>
-                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="   DATE" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="Ml0-mL-O3m">
-                                    <rect key="frame" x="12" y="127" width="280" height="30"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
-                                    <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
-                                    <textInputTraits key="textInputTraits" keyboardType="emailAddress"/>
-                                    <connections>
-                                        <outlet property="delegate" destination="-1" id="OE5-tn-tu4"/>
-                                    </connections>
-                                </textField>
-                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="  START TIME" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="fDp-S0-4Up">
-                                    <rect key="frame" x="12" y="162" width="280" height="30"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
-                                    <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
-                                    <textInputTraits key="textInputTraits" keyboardType="emailAddress"/>
-                                    <connections>
-                                        <outlet property="delegate" destination="-1" id="9UN-3K-hSZ"/>
-                                    </connections>
-                                </textField>
-                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="  END TIME" minimumFontSize="17" background="txt_field_big" clearButtonMode="always" id="78e-MR-o53">
-                                    <rect key="frame" x="12" y="197" width="280" height="30"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    <color key="textColor" red="0.0" green="0.59215686270000001" blue="0.86274509799999999" alpha="1" colorSpace="calibratedRGB"/>
-                                    <fontDescription key="fontDescription" name="GillSans" family="Gill Sans" pointSize="12"/>
-                                    <textInputTraits key="textInputTraits" keyboardType="emailAddress"/>
-                                    <connections>
-                                        <outlet property="delegate" destination="-1" id="3Bt-gc-fls"/>
-                                    </connections>
-                                </textField>
                             </subviews>
                             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         </view>
@@ -568,7 +569,7 @@
     <resources>
         <image name="add_button" width="25" height="26"/>
         <image name="navigation" width="320" height="44"/>
-        <image name="txt_field_big" width="264" height="25"/>
+        <image name="txt_field_big" width="264" height="27"/>
         <image name="user_img" width="60" height="60"/>
     </resources>
 </document>

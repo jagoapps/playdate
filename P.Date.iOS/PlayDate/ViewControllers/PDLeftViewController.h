@@ -12,6 +12,7 @@
     
 }
 @property (strong, nonatomic) IBOutlet UIImageView *iVProfile;
+@property (strong, nonatomic) IBOutlet UILabel *lblName;
 -(void)setUpUserProfile;
 
 @end

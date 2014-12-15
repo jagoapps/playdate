@@ -36,6 +36,11 @@ typedef enum {
     G_FATHER,
     G_GRAND_MOTHER,
     G_GRAND_FATHER,
+    G_NANY,
+    G_BROTHER,
+    G_SISTER,
+    G_TEACHER,
+    G_OTHER,
     NON
     
 }GUARDIAN_TYPE;

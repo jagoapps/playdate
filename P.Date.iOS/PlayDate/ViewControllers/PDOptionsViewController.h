@@ -18,10 +18,8 @@ typedef enum
 typedef void (^PDOptionsDidFinishBlock) (NSArray *options, NSArray *indexes);
 
 @interface PDOptionsViewController : UIViewController
-
 @property (nonatomic) ListType listType;
 @property (strong, nonatomic) NSMutableArray *selectedTexts;
-
 -(void)openFromController:(UIViewController *)controller withCompletionBlock:(PDOptionsDidFinishBlock)block;
 
 @end

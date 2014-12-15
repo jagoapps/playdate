@@ -13,45 +13,45 @@
 NSString *const PDWebSuccess            = @"success";
 NSString *const PDWebData                  = @"data";
 NSString *const PDWebGID                   = @"g_id";
-NSString *const PDWebFirstName         = @"firstname";
-NSString *const PDWebLastName         = @"lastname";
-NSString *const PDWebEmail                 = @"email";
-NSString *const PDWebFacebookId       = @"facebook_id";
-NSString *const PDWebGuardianType   = @"guardian_type";
-NSString *const PDWebDOB                  = @"dob";
-NSString *const PDWebLocation            = @"location";
-NSString *const PDWebFreeTime          = @"set_fixed_freetime";
-NSString *const PDWebProfileImage     = @"profile_image";
-NSString *const PDWebFriendFBId       = @"friend_fbid";
-NSString *const PDWebPhone               = @"phone";
+NSString *const PDWebFirstName        = @"firstname";
+NSString *const PDWebLastName          = @"lastname";
+NSString *const PDWebEmail                = @"email";
+NSString *const PDWebFacebookId     = @"facebook_id";
+NSString *const PDWebGuardianType = @"guardian_type";
+NSString *const PDWebDOB                    = @"dob";
+NSString *const PDWebLocation          = @"location";
+NSString *const PDWebFreeTime= @"set_fixed_freetime";
+NSString *const PDWebProfileImage = @"profile_image";
+NSString *const PDWebFriendFBId     = @"friend_fbid";
+NSString *const PDWebPhone                = @"phone";
 
 
 NSString *const PDWebSchool              = @"school";
-NSString *const PDWebYouthClub         = @"youth_club";
-NSString *const PDWebConditions        = @"conditions";
-NSString *const PDWebAllergies           = @"allergies";
+NSString *const PDWebYouthClub       = @"youth_club";
+NSString *const PDWebConditions      = @"conditions";
+NSString *const PDWebAllergies        = @"allergies";
 NSString *const PDWebHobbies            = @"hobbies";
-NSString *const PDWebChildName       = @"Childname";
+NSString *const PDWebChildName        = @"Childname";
 
- NSString *const PDWebStartTime        = @"starttime";
- NSString *const PDWebEndTime         = @"endtime";
- NSString *const PDWebDate                = @"date";
- NSString *const PDWebStartTime1      = @"starttime1";
- NSString *const PDWebEndTime1       = @"endtime1";
- NSString *const PDWebDate1              = @"date1";
- NSString *const PDWebStartTime2      = @"starttime2";
- NSString *const PDWebEndTime2       = @"endtime2";
- NSString *const PDWebDate2              = @"date2";
- NSString *const PDWebStartTime3      = @"starttime3";
- NSString *const PDWebEndTime3       = @"endtime3";
- NSString *const PDWebDate3              = @"date3";
- NSString *const PDWebEventLocation = @"location";
- NSString *const PDWebNotes              = @"notes";
- NSString *const PDWebFriendName    =@"friendname";
- NSString *const PDWebChildId             = @"child_id";
- NSString *const PDWebMessage          =@"msg";
+ NSString *const PDWebStartTime       = @"starttime";
+ NSString *const PDWebEndTime           = @"endtime";
+ NSString *const PDWebDate                 = @"date";
+ NSString *const PDWebStartTime1     = @"starttime1";
+ NSString *const PDWebEndTime1         = @"endtime1";
+ NSString *const PDWebDate1               = @"date1";
+ NSString *const PDWebStartTime2     = @"starttime2";
+ NSString *const PDWebEndTime2         = @"endtime2";
+ NSString *const PDWebDate2               = @"date2";
+ NSString *const PDWebStartTime3     = @"starttime3";
+ NSString *const PDWebEndTime3         = @"endtime3";
+ NSString *const PDWebDate3               = @"date3";
+ NSString *const PDWebEventLocation    = @"location";
+ NSString *const PDWebNotes               = @"notes";
+ NSString *const PDWebFriendName      =@"friendname";
+ NSString *const PDWebChildId          = @"child_id";
+ NSString *const PDWebMessage                =@"msg";
  NSString *const PDWebStatus              =@"status";
- NSString *const PDWebAccepted         =@"accepted";
+ NSString *const PDWebAccepted          =@"accepted";
  NSString *const PDWebFriendProfileImage=@"friend_profile_image";
 
  NSString *const PDWebSetID               =@"set_id";
@@ -75,8 +75,7 @@ static PDWebHandler *handler = nil;
     dispatch_once(&onceToken, ^{
         handler = [[PDWebHandler alloc] init];
     });
-    
-    return handler;
+  return handler;
 }
 
 #pragma mark - ASIRequest Methods
@@ -92,7 +91,6 @@ static PDWebHandler *handler = nil;
     {
         self.request = nil;
         self.requestFinishBlock = nil;
-        
         SHOW_NO_INTERNET_ALERT();
     }
 }
@@ -152,7 +150,7 @@ static PDWebHandler *handler = nil;
 {
     NSString *response = [request responseString];
     NSData *data = [response dataUsingEncoding:NSUTF8StringEncoding];
-    id result = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:nil];
+    id result =[NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:nil];
     
     NSLog(@"URL: %@\nResponse: %@", request.url, result);
     
@@ -179,14 +177,14 @@ static PDWebHandler *handler = nil;
 #pragma mark - WebServices
 -(void)registerUserWithParams:(NSDictionary *)params
 {
-    //  http://112.196.34.179/playdate/guardian.php?firstname=aa&lastname=bb&email=cc@gmail.com&facebook_id=295&guardian_type=m&dob=1989-12-11&location=123&set_fixed_freetime=123&profile_image=&friend_fbid=%272%27
+    //guardian.php?firstname=aa&lastname=bb&email=cc@gmail.com&facebook_id=295&guardian_type=m&dob=1989-12-11&location=123&set_fixed_freetime=123&profile_image=&friend_fbid=%272%27
     
     [self configureASIRequestWithParameters:params andURL:@"guardian.php?"];
 }
 
 -(void)addChildWithParams:(NSDictionary *)params forGuardian:(NSString *)guardianID
 {
-    // http://112.196.34.179/playdate/child.php?profile_image=pic&name=deepak&dob=1989/1/12&set_fixed_freetime=1989/2/4&school=DPS&conditions=TRUE&allergies=test&hobbies=demo&siblings=mother&youth_club=abc&g_id=10
+
     
     NSMutableDictionary *d = [[NSMutableDictionary alloc] initWithDictionary:params];
     [d setObject:guardianID forKey:PDWebGID];
@@ -236,6 +234,7 @@ static PDWebHandler *handler = nil;
 -(void)getEventRequestListParams:(NSDictionary *)params
 {
    [self configureASIRequestWithParameters:params andURL:@"event_with.php?"];
+
 }
 -(void)editChildPicListParams:(NSDictionary *)params
 {
@@ -248,6 +247,7 @@ static PDWebHandler *handler = nil;
 -(void)event_Accepted_RejectedEvent:(NSDictionary *)params
 {
       [self configureASIRequestWithParameters:params andURL:@"event_accept_or_reject.php?"];
+
 }
 -(void)event_Accepted_ForCalander:(NSDictionary *)params
 {
@@ -304,5 +304,28 @@ static PDWebHandler *handler = nil;
 -(void)Notificationlist_ListParams:(NSDictionary *)params
 {
    [self configureASIRequestWithParameters:params andURL:@"admin_push_msg.php?"];
+}
+-(void)deleteAuthChild_ListParams:(NSDictionary *)params
+{
+    //http://54.191.67.152/playdate/all_assign_child_remove.php?assign_gid=&child_id=
+    [self configureASIRequestWithParameters:params andURL:@"all_assign_child_remove.php?"];
+
+}
+-(void)allreadyFriendFromContactlist_ListParams:(NSDictionary *)params
+{
+    
+    http://54.191.67.152/playdate/guardian_fb_friends_details.php?friend_fbids=%27100004938971287%27,%27100001678200547%27
+    //http://54.191.67.152/playdate/guardian_fb_friends_details.php?friend_fbids=%27100004938971287%27,%27100001678200547%27
+    [self configureASIRequestWithParameters:params andURL:@"guardian_fb_friends_details.php?"];
+    
+}
+-(void)createEventMultiPersonWithParams:(NSDictionary *)params forGuardian:(NSString *)guardianID
+{
+    //http://112.196.34.179/playdate/event.php?child_id=68&friend_childid=69&date=31-5-2014&starttime=11:04&endtime=3:00&date1=31-1-2014&starttime1=12:34&endtime1=4:00&date2=28-3-2014&g_id=46&starttime2=1:34&endtime2=7:00&date3=3-4-2014&starttime3=2:34&endtime3=6:00&location=delhi&notes=abc&publish=1&receiver_id=1&receiver_status=requested
+    
+    
+    NSMutableDictionary *dic = [[NSMutableDictionary alloc]initWithDictionary:params];
+    [dic setObject:guardianID forKey:PDWebGID];
+    [self configureASIRequestWithParameters:dic andURL:@"event.php?"];
 }
 @end

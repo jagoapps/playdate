@@ -14,6 +14,7 @@
 #define COLOR_FROM_RGB(RED, GREEN, BLUE, ALPHA)  [UIColor colorWithRed:RED/255.0 green:GREEN/255.0 blue:BLUE/255.0 alpha:ALPHA]
 
 typedef void (^PDImagePickerBlock) (UIImage *image);
+typedef void (^PDContactBlock) (NSArray *arrContact);
 
 @interface PDHelper : NSObject
 
@@ -47,4 +48,5 @@ typedef void (^PDImagePickerBlock) (UIImage *image);
 -(void)openCameraFromController:(UIViewController *)controller withCompletionBlock:(PDImagePickerBlock)block;
 -(void)addRecent:(NSMutableArray *)array;
 
+-(void)getAllContacts:(PDContactBlock)arrContact;
 @end

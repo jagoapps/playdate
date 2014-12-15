@@ -197,7 +197,7 @@
         [self saveWebservice];
     }
   }
-      [self allSetsWebServices];
+     [self allSetsWebServices];
      txtSetName.hidden=NO;
      txtSetName.text=@"";
      dropDownView.hidden = YES;
@@ -230,7 +230,7 @@
 
         UIView *vwBg = [[UIView alloc]initWithFrame:CGRectMake(0, 0, 307, 57)];
         vwBg.backgroundColor=[UIColor whiteColor];
-        UILabel *lblName = [[UILabel alloc]initWithFrame:CGRectMake(10, 15, 68, 29)];
+        UILabel *lblName = [[UILabel alloc]initWithFrame:CGRectMake(10, 15, 62, 29)];
         lblName.text =[[NSString stringWithFormat:@"%@",[[arrAllSets objectAtIndex:indexPath.row] valueForKey:PDWebSetName]]uppercaseString];
         lblName.textColor =[UIColor blackColor];
         lblName.font =[[PDHelper sharedHelper] applicationFontWithSize:13.0];
@@ -458,7 +458,6 @@
         
         btnCheckmark=[UIButton buttonWithType:UIButtonTypeCustom];
         btnCheckmark.tag=i;
-        
         CGRect r = CGRectMake(0.0, 0.0, 17.0, 13.0);
         r.origin.x = CGRectGetMaxX(titleView.frame);
         r.origin.y = (CGRectGetHeight(row.frame) - CGRectGetHeight(r))/2.0;
@@ -637,7 +636,7 @@
      {
          id result = response;
          
-         if ([result valueForKey:PDWebSuccess]  )
+         if ([result valueForKey:PDWebSuccess] )
          {
              NSArray *arrTemp = [response valueForKey:PDWebData];
              
@@ -681,7 +680,7 @@
          dropDownView.hidden = NO;
          txtSetName.text=@"";
          [self   reloadChild];
-         
+         editingEnable=NO;
          [[PDAppDelegate sharedDelegate]hideActivity];
      }];
     

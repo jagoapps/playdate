@@ -67,7 +67,8 @@
         
         if ([outlet isKindOfClass:[PDDateTimePicker class]])
         {
-            if ([outlet tag] == type) {
+            UIView *tempVw=(UIView *)outlet;
+            if ([tempVw tag] == type) {
                 picker = (PDDateTimePicker *)outlet;
                 break;
             }
@@ -210,7 +211,7 @@
     
     // HOURS
     self.arrayForSecondPicker = [[NSMutableArray alloc] init];
-    for (int i=1; i<25; i++) {
+    for (int i=0; i<24; i++) {
         if (i < 10)
             [self.arrayForSecondPicker addObject:[NSString stringWithFormat:@"0%d", i]];
         else
@@ -220,7 +221,7 @@
     
     // MINUTES
     self.arrayForThirdPicker = [[NSMutableArray alloc] init];
-    for (int i=0; i<60; i++) {
+    for (int i=0; i<60; i+=15) {
         if (i < 10)
             [self.arrayForThirdPicker addObject:[NSString stringWithFormat:@"0%d", i]];
         else
@@ -377,7 +378,8 @@
         month == 5 ||
         month == 7 ||
         month == 8 ||
-        month == 9 ||
+        
+        month==10||
         month == 12) {
         
         maxDays = 31;

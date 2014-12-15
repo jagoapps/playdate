@@ -12,6 +12,7 @@
 #import "PDMainViewController.h"
 #import "UIImageView+WebCache.h"
 #import "PDChatData.h"
+
 @interface PDChatListVC ()<UITableViewDataSource,UITableViewDelegate>
 {
     IBOutlet UISegmentedControl *segmentControl;
@@ -19,6 +20,7 @@
     NSArray *arrTableData;
     NSArray *allFriendDetailArray;
     NSMutableArray *recentFriendDetailArray;
+    NSMutableArray *arrJabberId;
 }
 -(IBAction)menuArrange:(id)sender;
 -(IBAction)menuCalender:(id)sender;
@@ -117,7 +119,6 @@
     
     
     [[PDWebHandler sharedWebHandler]getFriend_Detail:params];
-    
     [[PDWebHandler sharedWebHandler] startRequestWithCompletionBlock:^(id response, NSError *error)
      {
          id result = response;
@@ -191,7 +192,12 @@
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     PDChatData *objPDChatData=[[PDChatData alloc]initWithNibName:@"PDChatData" bundle:nil];
-    objPDChatData.guardian_id = [[[recentFriendDetailArray objectAtIndex:indexPath.row] valueForKey:@"friendinfo"]valueForKey:@"g_id"];
+    objPDChatData.jabber_id = [[[recentFriendDetailArray objectAtIndex:indexPath.row] valueForKey:@"friendinfo"]valueForKey:@"ejabber_user"];
+    objPDChatData.receiverName=[[[recentFriendDetailArray objectAtIndex:indexPath.row] valueForKey:@"friendinfo"]valueForKey:@"name"];
+    // jabber id send
+    
+    
+
     [self.navigationController pushViewController:objPDChatData animated:YES];
 }
 

@@ -12,7 +12,7 @@
 #import "PDCalenderViewController.h"
 #import "PDMainViewController.h"
 #import "PDRequestArrangeViewController.h"
-
+#import "UIImageView+WebCache.h"
 @interface PDFriendListViewController ()
 {
     IBOutlet UITableView *tblView;
@@ -89,6 +89,8 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     return [ friendDetailArray count];
+    
+    
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -223,6 +225,13 @@
     [[PDWebHandler sharedWebHandler] startRequestWithCompletionBlock:^(id response, NSError *error)
       {
           id result = response;
+          
+          if (result==nil) {
+              
+              [[PDAppDelegate sharedDelegate]hideActivity];
+ 
+              return;
+          }
           NSString *strval = [NSString stringWithString: [result valueForKey:@"msg"]];
           NSLog(@"%@",strval);
           if ([[response valueForKey:PDWebData] isKindOfClass:[NSNull class]])

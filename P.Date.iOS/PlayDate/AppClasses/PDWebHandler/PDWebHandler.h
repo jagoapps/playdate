@@ -9,8 +9,10 @@
 #import <Foundation/Foundation.h>
 #import "Base64Transcoder.h"
 
-//#define SERVER_URL @"http://112.196.34.179/playdate/"
-#define SERVER_URL @"http://54.191.67.152/playdate/"
+//#define SERVER_URL @"http://112.196.34.179/playdate/" // office testing server
+#define SERVER_URL @"http://54.191.67.152/playdate/" // Client Server
+//#define SERVER_URL @"http://192.168.1.193/playdate/"  // Jabber server
+
 #define SHOW_NO_INTERNET_ALERT() [[[UIAlertView alloc] initWithTitle:@"" message:@"Please check your internet connection. It might be slow or disconnected." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show]
 
 extern NSString *const PDWebData;
@@ -96,5 +98,7 @@ typedef void (^PDWebRequestFinishBlock) (id response, NSError *error);
 -(void)deviceToken_ListParams:(NSDictionary *)params;
 -(void)authFaciltygetParentList_ListParams:(NSDictionary *)params;
 -(void)Notificationlist_ListParams:(NSDictionary *)params;
-
+-(void)deleteAuthChild_ListParams:(NSDictionary *)params;
+-(void)allreadyFriendFromContactlist_ListParams:(NSDictionary *)params;
+-(void)createEventMultiPersonWithParams:(NSDictionary *)params forGuardian:(NSString *)guardianID;
 @end

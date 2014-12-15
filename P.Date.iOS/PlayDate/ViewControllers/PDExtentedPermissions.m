@@ -12,6 +12,8 @@
 #import "PDMainViewController.h"
 #import "UIImageView+WebCache.h"
 
+
+
 #define TICK_IMAGE [UIImage imageNamed:@"blueTick"]
 @interface PDExtentedPermissions ()<UIAlertViewDelegate>
 {
@@ -77,9 +79,9 @@
     friendScrollViewContainer.layer.shadowRadius = 2.0;
     friendScrollViewContainer.layer.shadowOpacity = 0.5;
 
-    if (![[NSUserDefaults standardUserDefaults]valueForKey:@"com.jagoapps.playdate.exchangechilds"])
+    if (![[NSUserDefaults standardUserDefaults]valueForKey:@"com.jagoapps.playdate.exchangechilds"]) //un comment the code
     {
-        
+    
         imgVwTop.image=[UIImage imageNamed:@"navigation_blank"];
         btnArrange.hidden=YES;
         btnCalender.hidden=YES;
@@ -106,8 +108,8 @@
 #pragma mark iboutlets
 -(IBAction)btnActionSave:(id)sender
 {
-    NSArray *arrChildIndexes=[self checkedIndex:childScrollView];
-    NSArray *arrFriendIndexes=[self checkedIndex:friendScrollView];
+//    NSArray *arrChildIndexes=[self checkedIndex:childScrollView];
+//    NSArray *arrFriendIndexes=[self checkedIndex:friendScrollView];
 //    if ([arrChildIndexes count]==0||[arrFriendIndexes count]==0)
 //            [[[UIAlertView alloc]initWithTitle:@"" message:@"Please select from friend list " delegate:nil cancelButtonTitle:@"ok" otherButtonTitles: nil]show];
 //    else
@@ -427,7 +429,7 @@
             [str deleteCharactersInRange:NSMakeRange(str.length-1, 1)];
 
      //   strFacebookFiriend_Id=str;
-    //http://54.191.67.152/playdate/guardian_assigned_unsigned_friends.php?g_id=100001122280003&child_id=//325&friend_fbids=%27100001402194206%27,%27100001496842161%27,%27100008236784143%27
+
     
     NSString *strGid = [[[[PDUser currentUser] detail] objectForKey:PDUserInfo]objectForKey:PDWebGID];
 
@@ -507,7 +509,7 @@
          else
          {
             if ([[result valueForKey:PDWebSuccess]integerValue])
-                [[[UIAlertView alloc]initWithTitle:@"" message:@"Saved Sucessfully" delegate:self cancelButtonTitle:@"ok" otherButtonTitles:nil]show];
+                [[[UIAlertView alloc]initWithTitle:@"Alert" message:@"Saved Sucessfully" delegate:self cancelButtonTitle:@"ok" otherButtonTitles:nil]show];
           }
          [[PDAppDelegate sharedDelegate]hideActivity];
      }];

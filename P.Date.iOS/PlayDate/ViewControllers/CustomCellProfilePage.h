@@ -14,6 +14,7 @@
     
     
 }
+@property(nonatomic,retain)IBOutlet UIView *vwGrayBg;
 @property(nonatomic,retain)IBOutlet UIImageView *imgVwChild;
 @property(nonatomic,retain)IBOutlet UIImageView *imgVwFriend;
 @property(nonatomic,retain)IBOutlet UIImageView *imgVwParent;
@@ -24,5 +25,6 @@
 @property(nonatomic,retain)IBOutlet UILabel *lblTime;
 @property(nonatomic,retain)IBOutlet UILabel *lblDate;
 @property(nonatomic,retain)IBOutlet UILabel *lblStatus;
+@property(nonatomic,retain)IBOutlet UIView  *vwStaus;
 
 @end

@@ -22,6 +22,7 @@
 #import "PDNotificationListVC.h"
 #import "RecipeProducts.h"
 #import "PDChatListVC.h"
+#import "PDContactlistVC.h"
 #define TITLE @"title"
 #define IMAGE @"image"
 
@@ -32,7 +33,7 @@
 #define CALENDAR    @"Calendar"
 #define INVITE      @"Invite"
 #define ADD_CHILD   @"Add Child"
-#define NOTIFICATION   @"Notification"
+#define NOTIFICATION   @"Notifications"
 #define UPGRADE     @"Upgrade"
 #define SETTING     @"Setting"
 #define FEEDBACK    @"Feedback"
@@ -45,7 +46,7 @@
 @property (strong, nonatomic) IBOutlet UIView *profileBGView;
 @property (strong, nonatomic) IBOutlet UIImageView *iVBackground;
 
-@property (strong, nonatomic) IBOutlet UILabel *lblName;
+
 @property (strong, nonatomic) IBOutlet UITableView *tblView;
 
 @property (strong, nonatomic) NSArray *tblItems;
@@ -99,17 +100,17 @@
     self.tblItems = @[@{TITLE: HOME,     IMAGE: [UIImage imageNamed:@"home_icon"]},
                       
                       @{TITLE: PROFILE,  IMAGE: [UIImage imageNamed:@"profile_icon"]},
-                      @{TITLE: CALENDAR, IMAGE: [UIImage imageNamed:@"calender_icon"]},
+                      @{TITLE: NOTIFICATION,IMAGE: [UIImage imageNamed:@"notification_icon"]},
                       @{TITLE: ARRANGE,  IMAGE: [UIImage imageNamed:@"add_icon"]},
                       @{TITLE: FRIENDS,  IMAGE: [UIImage imageNamed:@"friend"]},
                       @{TITLE: SETS,     IMAGE: [UIImage imageNamed:@"sets_icon"]},
                       @{TITLE: ADD_CHILD,IMAGE: [UIImage imageNamed:@"child_icon"]},
-                      @{TITLE: NOTIFICATION,IMAGE: [UIImage imageNamed:@"notification_icon"]},
+                      @{TITLE: CALENDAR, IMAGE: [UIImage imageNamed:@"calender_icon"]},
+                      
                       @{TITLE: INVITE,   IMAGE: [UIImage imageNamed:@"invite_icon"]},
                       @{TITLE: UPGRADE,  IMAGE: [UIImage imageNamed:@"upgrade_icon"]},
-                      
                       @{TITLE: FEEDBACK, IMAGE: [UIImage imageNamed:@"feedback_icon"]},
-                      @{TITLE: CHAT, IMAGE: [UIImage imageNamed:@"feedback_icon"]},
+                    /*  @{TITLE: CHAT, IMAGE: [UIImage imageNamed:@"feedback_icon"]},*/
 
                        @{TITLE: RESTORE, IMAGE: [UIImage imageNamed:@"restore_icon"]}];
   //  @{TITLE: SETTING,  IMAGE: [UIImage imageNamed:@"settings_icon"]},
@@ -178,9 +179,12 @@
 
 -(void)setUpUserProfile
 {
+
     NSURL *imageURL = [NSURL URLWithString:[[[[PDUser currentUser] detail] objectForKey:PDUserInfo] objectForKey:PDWebProfileImage]];
-    self.lblName.text = [[[PDUser currentUser] compositeName]uppercaseString];
-    [self.iVProfile setImageWithURL:imageURL placeholderImage:nil];
+ //   self.lblName.text = [[[PDUser currentUser] compositeName]uppercaseString];
+     self.lblName.text = [[[[[PDUser currentUser] detail] valueForKey:@"userinfo"]valueForKey:PDWebFirstName] uppercaseString];
+    
+    [self.iVProfile setImageWithURL:imageURL placeholderImage:[UIImage imageNamed:@"user_img"]];
 }
 
 
@@ -300,13 +304,11 @@
     else if ([[[self.tblItems objectAtIndex:indexPath.row]objectForKey:TITLE]isEqualToString:UPGRADE])
     {
         
-        
-//        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"com.jagoapps.playdate.exchangechilds"];
-//        [[NSUserDefaults standardUserDefaults] synchronize];
+
         if ([[NSUserDefaults standardUserDefaults]valueForKey:@"com.jagoapps.playdate.exchangechilds"])
         {
       
-            
+        
           PDExtentedPermissions *objPDExtentedPermissions=[[PDExtentedPermissions alloc]initWithNibName:@"PDExtentedPermissions" bundle:nil];
             
             
@@ -361,35 +363,49 @@
     }
     else if ([[[self.tblItems objectAtIndex:indexPath.row] objectForKey:TITLE]isEqualToString:FRIENDS])
     {
-        PDFriendListViewController *pdFriendListViewController = [[PDFriendListViewController alloc]initWithNibName:@"PDFriendListViewController" bundle:nil];
+        
+        PDContactlistVC *objPDContactlistVC=[[PDContactlistVC alloc]initWithNibName:@"PDContactlistVC" bundle:nil];
         UINavigationController *navigationController = self.menuContainerViewController.centerViewController;
-        NSArray *controllers = [NSArray arrayWithObject:pdFriendListViewController];
+        NSArray *controllers = [NSArray arrayWithObject:objPDContactlistVC];
         navigationController.viewControllers = controllers;
         [self.menuContainerViewController setMenuState:MFSideMenuStateClosed];
+
+        
+        
+        
+//        PDFriendListViewController *pdFriendListViewController = [[PDFriendListViewController alloc]initWithNibName:@"PDFriendListViewController" bundle:nil];
+//        UINavigationController *navigationController = self.menuContainerViewController.centerViewController;
+//        NSArray *controllers = [NSArray arrayWithObject:pdFriendListViewController];
+//        navigationController.viewControllers = controllers;
+//        [self.menuContainerViewController setMenuState:MFSideMenuStateClosed];
         
     }
     else if ([[[self.tblItems objectAtIndex:indexPath.row] objectForKey:TITLE]isEqualToString:CHAT])
     {
-//        PDChatListVC *pdPDChatListVC = [[PDChatListVC alloc]initWithNibName:@"PDChatListVC" bundle:nil];
-//        UINavigationController *navigationController = self.menuContainerViewController.centerViewController;
-//        NSArray *controllers = [NSArray arrayWithObject:pdPDChatListVC];
-//        navigationController.viewControllers = controllers;
-//        [self.menuContainerViewController setMenuState:MFSideMenuStateClosed];
+        PDChatListVC *pdPDChatListVC = [[PDChatListVC alloc]initWithNibName:@"PDChatListVC" bundle:nil];
+        UINavigationController *navigationController = self.menuContainerViewController.centerViewController;
+        NSArray *controllers = [NSArray arrayWithObject:pdPDChatListVC];
+        navigationController.viewControllers = controllers;
+        [self.menuContainerViewController setMenuState:MFSideMenuStateClosed];
         
     }
 
     else if ([[[self.tblItems objectAtIndex:indexPath.row] objectForKey:TITLE]isEqualToString:RESTORE])
     {
         
-        //        if ([[PDAppDelegate sharedDelegate].recipeProducts  productIsAlreadyPurchased:@"com.jagoapps.playdate.exchangechilds"])// Change product here
-        //        {
+
         
         [[PDAppDelegate sharedDelegate] showActivityWithTitle:@"Loading..."];
         [self performSelector:@selector(btnActivity_Purchase) withObject:self afterDelay:0.1];
-        
-        //        }
-        //     else
-        //             [[[UIAlertView alloc]initWithTitle:@"" message:@"we cann't restore now Please firstly Puchase" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil]show];
+
+//        PDExtentedPermissions *objPDExtentedPermissions=[[PDExtentedPermissions alloc]initWithNibName:@"PDExtentedPermissions" bundle:nil];
+//        
+//        
+//        UINavigationController *navigationController = self.menuContainerViewController.centerViewController;
+//        NSArray *controllers = [NSArray arrayWithObject:objPDExtentedPermissions];
+//        navigationController.viewControllers = controllers;
+//        [self.menuContainerViewController setMenuState:MFSideMenuStateClosed];
+
         
     }
     
@@ -425,11 +441,12 @@
                      [PDAppDelegate sharedDelegate].allProducts = products;
                   
                      [[PDAppDelegate sharedDelegate].recipeProducts restoreLastTrasanction];
+                    
                      
                  }
                  else
                  {
-                     UIAlertView *alert =[[UIAlertView alloc] initWithTitle:@"Alert!!" message:@"Please wait While Product is loaded" delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+                     UIAlertView *alert =[[UIAlertView alloc] initWithTitle:@"Alert!!" message:@"Please wait While Product is loaded" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
                      [alert show];
                      [[PDAppDelegate sharedDelegate]hideActivity];
                  }
@@ -463,12 +480,6 @@
     }
 }
 
-
-
-
-
-
-
 -(void)didFinishWithTransaction:(SKPaymentTransaction *)transaction
 {
     
@@ -489,7 +500,7 @@
 }
 -(void)didFailWithError:(NSError *)error transaction:(SKPaymentTransaction *)transaction
 {
-    [[[UIAlertView alloc]initWithTitle:@"" message:@"error while purchasing please try again" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil]show];
+    [[[UIAlertView alloc]initWithTitle:@"Alert" message:@"error while purchasing please try again" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil]show];
     [[PDAppDelegate sharedDelegate] hideActivity];
 }
 @end

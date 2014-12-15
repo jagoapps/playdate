@@ -1967,7 +1967,7 @@ static NSOperationQueue *sharedQueue = nil;
 /* ALWAYS CALLED ON MAIN THREAD! */
 - (void)reportFailure
 {
-    [[[UIAlertView alloc]initWithTitle:@"hii" message:@"unableto upload" delegate:nil cancelButtonTitle:@"cancel" otherButtonTitles: nil]show];
+    [[[UIAlertView alloc]initWithTitle:@"Alert" message:@"Unable to upload" delegate:nil cancelButtonTitle:@"cancel" otherButtonTitles: nil]show];
 	
     if (delegate && [delegate respondsToSelector:didFailSelector])
     {

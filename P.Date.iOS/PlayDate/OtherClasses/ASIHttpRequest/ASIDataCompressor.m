@@ -183,8 +183,10 @@
 		
 		// Attempt to deflate the chunk of data
 		outputData = [compressor compressBytes:inputData length:readLength error:&theError shouldFinish:readLength < DATA_CHUNK_SIZE ];
-		if (theError) {
-			if (err) {
+		if (theError)
+        {
+			if (err)
+            {
 				*err = theError;
 			}
 			[compressor closeStream];

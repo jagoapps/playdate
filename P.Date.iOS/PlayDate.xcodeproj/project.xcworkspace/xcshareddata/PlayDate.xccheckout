@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>5905E672-48E7-47FA-A23F-88C23B8E9D5E</string>
+	<key>IDESourceControlProjectName</key>
+	<string>PlayDate</string>
+	<key>IDESourceControlProjectPath</key>
+	<string>PlayDate.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>8A2AC317-D038-44DA-9F0D-FA594DD00F15</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>http://192.168.1.250/svn/iPhone/Mohit/Mohit/PlayDate/PlayDate.xcodeproj</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>8A2AC317-D038-44DA-9F0D-FA594DD00F15</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>8A2AC317-D038-44DA-9F0D-FA594DD00F15</string>
+			<key>IDESourceControlWCCName</key>
+			<string>PlayDate</string>
+		</dict>
+	</array>
+</dict>
+</plist>

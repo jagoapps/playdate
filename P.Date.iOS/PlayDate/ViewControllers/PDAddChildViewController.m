@@ -28,7 +28,7 @@
 //    IBOutlet UITextField *tFFreeTime;
     //IBOutlet UITextField *tFConditions;
     IBOutlet UITextField *tFSchool;
-    IBOutlet UITextField *tFYouthClub;
+//    IBOutlet UITextField *tFYouthClub;
     
 
     IBOutlet UIScrollView *svFreeTime;
@@ -37,6 +37,8 @@
     IBOutlet UILabel *lblAllergies;
     IBOutlet UILabel *lblHobbies;
     IBOutlet UILabel *lblStar_Hobbies;
+    
+    IBOutlet UIView *vwFreetime;
     
     
     BOOL isEditMode;
@@ -239,7 +241,7 @@
 //        [[[UIAlertView alloc] initWithTitle:nil message:@"Please enter date of birth." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
 //        return NO;
 //    }
-//
+//AZZA
 //    
 //    // VALIDATE FREE TIME
 //    str = tFFreeTime.text;
@@ -369,7 +371,7 @@
     [params setObject:dateToSend forKey:PDWebDOB];
     [params setObject:lblFreeTime.text forKey:PDWebFreeTime];
     [params setObject:tFSchool.text forKey:PDWebSchool];
-    [params setObject:tFYouthClub.text forKey:PDWebYouthClub];
+//    [params setObject:tFYouthClub.text forKey:PDWebYouthClub];
    // [params setObject:tFConditions.text forKey:PDWebConditions];
     [params setObject:strAllergies forKey:PDWebAllergies];
     [params setObject:strHobbies forKey:PDWebHobbies];
@@ -463,7 +465,7 @@
 //        [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(btnSave.frame) + 37.0)];
 //    }
   //  [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(btnSave.frame))];
-
+//  [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(btnSave.frame)+180.0)];
  
     [textField resignFirstResponder];
     
@@ -487,7 +489,41 @@
 //            [datePicker showInView:self.view withType:PDPickerTypeDate withPickingBlock:^(NSString *pickedResult) {
                 
             } andPickerDoneBlock:^(NSString *currentResult) {
-                tFDOB.text = [currentResult uppercaseString] ;
+                
+                
+                NSDateFormatter *df = [[NSDateFormatter alloc] init];
+
+                      [df setDateFormat:@"dd-MMMM-yyyy"];
+                NSString  *strDate = [df stringFromDate:[NSDate date]];
+                NSDate *date=[df dateFromString:strDate];
+                
+                 [df setDateFormat:@"dd-MMMM-yyyy"];
+                NSString *strTemp=[df stringFromDate:date];
+                NSDate *CurrentDate=[df dateFromString:strTemp];
+                [df setDateFormat:@"dd-MMMM-yyyy"];
+                NSDate *pickerDate=[df dateFromString:currentResult];
+                
+                if ([CurrentDate compare:pickerDate]==NSOrderedSame||[CurrentDate compare:pickerDate]==NSOrderedDescending)
+                {
+                    tFDOB.text = [currentResult uppercaseString] ;
+                    
+                }
+                else
+                {
+                    [[[UIAlertView alloc]initWithTitle:@"Alert" message:@"Birth Date must be less than current date" delegate:nil cancelButtonTitle:@"ok" otherButtonTitles:nil]show];
+                    
+                }
+                //   datePicker.startDate=date;
+                
+                
+                //textField.text = [currentResult uppercaseString];
+                [scrollView setContentOffset:CGPointZero animated:YES];
+                
+                
+                
+                
+                
+           
                 
                 
             } cancelBlock:^{
@@ -560,12 +596,12 @@
     rect.origin.y=CGRectGetMaxY(vwHobbies.frame)+7.0;
     tFSchool.frame=rect;
     
-    rect =tFYouthClub.frame;
-    rect.origin.y=CGRectGetMaxY(tFSchool.frame)+7.0;
-    tFYouthClub.frame=rect;
+//    rect =tFYouthClub.frame;
+//    rect.origin.y=CGRectGetMaxY(tFSchool.frame)+7.0;
+//    tFYouthClub.frame=rect;
     
     rect =infoBackgroundView.frame;
-    rect.size.height=CGRectGetMaxY(tFYouthClub.frame)+25.0;
+    rect.size.height=CGRectGetMaxY(tFSchool.frame)+25.0;
     infoBackgroundView.frame=rect;
     
     rect =btnSave.frame;
@@ -628,15 +664,26 @@
             if ([[self.view subviews] containsObject:datePicker]) {
                 [datePicker hide];
             }
+ 
+            
+            CGPoint scrollPoint = CGPointMake(0.0, vwFreetime.frame.origin.y-10.0);
+            [scrollView setContentOffset:scrollPoint animated:YES];
+            
+            [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(btnSave.frame)+180.0)];
+            
             
     [freeTimePicker showInView:self.view hideday:-1 withType:PDPickerTypeFreeTime withPickingBlock:^(NSString *pickedResult) {
 //     [freeTimePicker showInView:self.view withType:PDPickerTypeFreeTime withPickingBlock:^(NSString *pickedResult) {
-                
+        
+  
+        
+        
             } andPickerDoneBlock:^(NSString *currentResult) {
                 
+                  [scrollView setContentOffset:CGPointZero animated:YES]; 
                 if (currentResult.length==0)
                 {
-                    [[[UIAlertView alloc]initWithTitle:@"Alert" message:@"Start time can't be same or greater than end time" delegate:nil cancelButtonTitle:@"ok'" otherButtonTitles:nil]show];
+                    [[[UIAlertView alloc]initWithTitle:@"Alert" message:@"Start time can't be same or greater than end time" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil]show];
                 }
 
                 else
@@ -719,8 +766,17 @@
             [datePicker hide];
         }
         
+        CGPoint scrollPoint = CGPointMake(0.0, vwFreetime.frame.origin.y-10.0);
+        [scrollView setContentOffset:scrollPoint animated:YES];
+        
+        [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(btnSave.frame)+180.0)];
          [freeTimePicker showInView:self.view hideday:-1 withType:PDPickerTypeFreeTime withPickingBlock:^(NSString *pickedResult) {
 //        [freeTimePicker showInView:self.view withType:PDPickerTypeFreeTime withPickingBlock:^(NSString *pickedResult) {
+             
+             
+           
+             
+             
         
         } andPickerDoneBlock:^(NSString *currentResult) {
             
@@ -733,6 +789,7 @@
 
             else if ([lblFreeTime.text isEqualToString:@"FREE TIME"])
             {
+                lblFreeTime.textColor = [[PDHelper sharedHelper] applicationThemeBlueColor];
                 strTemp = [currentResult uppercaseString];
                 lblFreeTime.text = strTemp;
             }

@@ -108,8 +108,6 @@
     }
 
 }
-
-
 -(void)fetchUserDetail
 {
     if ([[PDHelper sharedHelper] isInternetAvailable])
@@ -174,7 +172,7 @@
             }
             
             NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
-            [params setObject:firstname    forKey:PDWebFirstName];
+            [params setObject:[NSString stringWithFormat:@"%@ %@",firstname,lastname]    forKey:PDWebFirstName];
             [params setObject:lastname     forKey:PDWebLastName];
             [params setObject:email                                 forKey:PDWebEmail];
             [params setObject:[result objectForKey:FBId]            forKey:PDWebFacebookId];
@@ -189,8 +187,7 @@
             [[PDWebHandler sharedWebHandler] registerUserWithParams:params];
             [[PDWebHandler sharedWebHandler] startRequestWithCompletionBlock:^(id response, NSError *error)
              {
-                [indicator stopAnimating];
-                [viewActivity setHidden:YES];
+                
                 
                 if (!error)
                 {
@@ -199,12 +196,32 @@
                     [dict setObject:[response objectForKey:PDWebData] forKey:PDFriends];
                     [dict setObject:[response objectForKey:PDUserInfo] forKey:PDUserInfo];
                     
+                     NSArray *arrChatId=[response objectForKey:@"ejabber_data"];
+                      if (arrChatId.count!=0)
+                      {
+                         [[NSUserDefaults standardUserDefaults]setObject:[arrChatId objectAtIndex:0] forKey:@"Chat_Id"];
+                         [[NSUserDefaults standardUserDefaults]setObject:[arrChatId objectAtIndex:1] forKey:@"Chat_Password"];
+                         [[NSUserDefaults standardUserDefaults]synchronize];
+                          [[PDAppDelegate  sharedDelegate] connect];
+                
+                      }
+                    
+                    NSArray *arrtempMessage=[response objectForKey:@"custom_message"];
+                   if (arrtempMessage.count!=0)
+                       arr_Custom_messageFirstLogin=[arrtempMessage mutableCopy];
+                    //  [[[UIAlertView alloc]initWithTitle:@"Welcome" message:strtempMessage delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil]show];
+                    
                     [[PDUser currentUser] setDetail:dict];
                     [[PDUser currentUser] save];
                     
+                    NSLog(@"%@",[[[PDUser currentUser] detail] objectForKey:PDUserInfo]);
+                    NSString *guardianID = [[[[PDUser currentUser] detail] objectForKey:PDUserInfo] objectForKey:PDWebGID];
+                    NSString *strUd_Id;
+                    if ([[PDHelper sharedHelper] strUd_Id].length==0)
+                        strUd_Id=@"";
                     
-                     NSString *guardianID = [[[[PDUser currentUser] detail] objectForKey:PDUserInfo] objectForKey:PDWebGID];
-                    NSString *strUd_Id=  [[PDHelper sharedHelper] strUd_Id];
+                    else
+                        strUd_Id=  [[PDHelper sharedHelper] strUd_Id];
                     NSMutableDictionary *paramsTokenService = [[NSMutableDictionary alloc] init];
                     [paramsTokenService setObject:guardianID    forKey:PDWebGID];
                     [paramsTokenService setObject:strUd_Id     forKey:PDDeviceToken];
@@ -214,22 +231,28 @@
                     [[PDWebHandler sharedWebHandler] startRequestWithCompletionBlock:^(id response, NSError *error)
                      {
                          
-                         [indicator stopAnimating];
-                         [viewActivity setHidden:YES];
+                         
                          //  http://112.196.34.179/playdate/devicetoken.php?g_id=100001122279977&device_token=43654fghfg262456yuigiuhgihghkjhgjhgjhg12345&type=1
-                         if (!error) {
+                         if (!error)
+                         {
                              [(PDLeftViewController *)[PDAppDelegate sharedDelegate].menuController.leftMenuViewController setUpUserProfile];
-                             [self dismissViewControllerAnimated:NO completion:NULL];}
+                             
+                             [self dismissViewControllerAnimated:NO completion:NULL];
+                         }
                          else
                          {
                          }
-                         
+                         [indicator stopAnimating];
+                         [viewActivity setHidden:YES];
+             
                      }];
 
                 }
                 else
                 {
                     [[[UIAlertView alloc] initWithTitle:@"" message:error.description delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+                    [indicator stopAnimating];
+                    [viewActivity setHidden:YES];
                 }
                 
             }];

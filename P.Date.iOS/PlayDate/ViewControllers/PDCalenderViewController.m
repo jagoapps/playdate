@@ -17,12 +17,11 @@
 
 @interface PDCalenderViewController ()<UITableViewDataSource, UITableViewDelegate,CKCalendarDelegate>
 {
- 
     NSDictionary *dictAllData;
     NSArray *arrAllData;
     NSMutableArray    *arrTbleData;
     IBOutlet UITableView *tblView;
-    NSArray              *markDateArray;
+    NSArray   *markDateArray;
    
     IBOutlet UIView *eventContainer;
     UIActivityIndicatorView *activityIndicator;
@@ -39,9 +38,6 @@
 @property(nonatomic, strong) NSMutableArray *iosCalenderEventDates;
 @property(nonatomic, strong) NSMutableArray *arrAllEventDates;
 
-
-
-
 -(IBAction)menuArrange:(id)sender;
 -(IBAction)menuCalender:(id)sender;
 -(IBAction)menuHome:(id)sender;
@@ -56,7 +52,8 @@
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
+    if (self)
+    {
         // Custom initialization
     }
     return self;
@@ -86,7 +83,7 @@
    if ([[PDUser currentUser] hasDetail])
     {
          varhideActivity=0;
-        [[PDAppDelegate sharedDelegate] showActivityWithTitle:@"Loading  Calender..."];
+        [[PDAppDelegate sharedDelegate] showActivityWithTitle:@"Loading  Calendar..."];
         [self performSelector:@selector(callWebServices) withObject:nil afterDelay:0.1];
     }
 
@@ -255,7 +252,9 @@
                           [self.dateFormatter setDateFormat:@"yyyy"];
                          [dictTemp setObject:[self.dateFormatter stringFromDate:Sdate] forKey:@"year"];
                           // [dictTemp setValue:@" " forKey:@"friendname"];
-                         if ([event.title  localizedCaseInsensitiveCompare:@"Playdate"] == NSOrderedSame)
+                         
+                         NSString *strTemp=[event.title substringToIndex:8];
+                         if ([strTemp localizedCaseInsensitiveCompare:@"Playdate"] == NSOrderedSame)
                         // if ([event.title isEqualToString:@"Playdate"])
                          {
                              NSLog(@"play date events\n");
@@ -273,7 +272,7 @@
            }
              else // if he does not allow
              {
-                self.arrAllEventDates = [[NSMutableArray alloc] initWithArray:self.serverEventDates];
+                self.arrAllEventDates=[[NSMutableArray alloc] initWithArray:self.serverEventDates];
             }
              
     
@@ -290,7 +289,6 @@
 -(void)setUpViewContents
 {
         CGRect rect;
-        
         CGFloat totalHeight = [UIScreen mainScreen].bounds.size.height;
         if (![[PDHelper sharedHelper] isIOS7])
         {
@@ -308,7 +306,6 @@
                 }
             }
         }
-
 }
 -(void)eventShown_Table:(NSDate *)date
 {
@@ -365,7 +362,7 @@
     lblName.text = [[[arrTbleData objectAtIndex:indexPath.row] valueForKey:@"friendname"] uppercaseString];
     lblName.font = [UIFont systemFontOfSize:14.0];
     UILabel *lblTime = [[UILabel alloc]initWithFrame:CGRectMake(100, 30, 100, 20)];
-    lblTime.text = [[NSString stringWithFormat:@"%@-%@", [[arrTbleData objectAtIndex:indexPath.row]valueForKey:@"starttime"],[[arrTbleData objectAtIndex:indexPath.row]valueForKey:@"endtime"] ]uppercaseString];
+    lblTime.text = [[NSString stringWithFormat:@"%@-%@", [[arrTbleData objectAtIndex:indexPath.row]valueForKey:@"starttime"],[[arrTbleData objectAtIndex:indexPath.row]valueForKey:@"endtime"]]uppercaseString];
     lblTime.font = [UIFont systemFontOfSize:12.0];
     
     NSDateFormatter *df = [[NSDateFormatter alloc] init];
@@ -383,7 +380,7 @@
     
     if (url == nil)
     {
-        [imgView setImage:[UIImage imageNamed:@""]];
+        [imgView setImage:[UIImage imageNamed:@"user_img"]];
     }
     else
     {
@@ -462,26 +459,26 @@
 
     if (![strDateTemp isEqualToString:strMothshowImageonCalender])
     {
-           [dateButton setBackgroundImage:[UIImage imageNamed:@"" ] forState:UIControlStateNormal];
+           [dateButton setBackgroundImage:[UIImage imageNamed:@""] forState:UIControlStateNormal];
         return ;
     }
     
     if ([self dateIsDisabled:date])
     {
       
-         [dateButton setBackgroundImage:[UIImage imageNamed:@"gift_icon_new" ] forState:UIControlStateNormal];
+         [dateButton setBackgroundImage:[UIImage imageNamed:@"gift_icon_new"] forState:UIControlStateNormal];
          dateItem.textColor = [PDHelper sharedHelper].applicationThemeBlueColor;
         
     }
     else
     {
-          [dateButton setBackgroundImage:[UIImage imageNamed:@"" ] forState:UIControlStateNormal];
+          [dateButton setBackgroundImage:[UIImage imageNamed:@""] forState:UIControlStateNormal];
     }
 }
  -(void)calendar:(CKCalendarView *)calendar didChangeToMonth:(NSDate *)date
 {
     [self.dateFormatter setDateFormat:@"MM"];
-strMothshowImageonCalender=[NSString stringWithFormat:@"%ld", (long)[[self.dateFormatter stringFromDate:date]integerValue]];
+    strMothshowImageonCalender=[NSString stringWithFormat:@"%ld", (long)[[self.dateFormatter stringFromDate:date]integerValue]];
     [self eventShown_Table:date];
     
    // [self performSelector:@selector(eventShown_Table:) withObject:date afterDelay:0.5];
@@ -493,7 +490,7 @@ strMothshowImageonCalender=[NSString stringWithFormat:@"%ld", (long)[[self.dateF
     self.calendar.userInteractionEnabled=NO;
     NSDate *dat=date;
 
-    [[PDAppDelegate sharedDelegate] showActivityWithTitle:@"Loading  Calender..."];
+    [[PDAppDelegate sharedDelegate] showActivityWithTitle:@"Loading  Calendar..."];
     
     [self performSelectorOnMainThread:@selector(SelectCalenderDate:) withObject:dat waitUntilDone:YES];
     
@@ -660,10 +657,10 @@ strMothshowImageonCalender=[NSString stringWithFormat:@"%ld", (long)[[self.dateF
                  for (id obj in self.serverEventDates) // get same record of data base
                  {
                      
-               NSPredicate *predicate = [NSPredicate predicateWithFormat:@"event_id == %@" , [obj objectForKey:@"event_id"]];
+               NSPredicate *predicate = [NSPredicate predicateWithFormat:@"event_id == %@",[obj objectForKey:@"event_id"]];
   
                      
-                 [arrTempSaveServerEvent  addObject:[[self.serverEventDates filteredArrayUsingPredicate:predicate]objectAtIndex:0]];
+              [arrTempSaveServerEvent  addObject:[[self.serverEventDates filteredArrayUsingPredicate:predicate]objectAtIndex:0]];
             }
                  
                  [arrCopyserverEventDates removeObjectsInArray:[arrTempSaveServerEvent copy]]; // contain unique object;
@@ -677,9 +674,9 @@ strMothshowImageonCalender=[NSString stringWithFormat:@"%ld", (long)[[self.dateF
                  
                  
                  EKEvent *event = [EKEvent eventWithEventStore:eventStore];
-                 event.title  = @"PlayDate";
-                 event.allDay = YES;
-                     event.notes=[[arrCopyserverEventDates objectAtIndex:i]valueForKey:@"friendname"];
+                 event.title  = [NSString stringWithFormat:@"PlayDate-%@",[[arrCopyserverEventDates objectAtIndex:i]valueForKey:@"child_name"]];
+                     event.allDay = YES;
+                     event.notes=[NSString stringWithFormat:@"%@  Play with  %@",[[arrCopyserverEventDates objectAtIndex:i]valueForKey:@"child_name"],[[arrCopyserverEventDates objectAtIndex:i]valueForKey:@"friendname"]];
                  //    event.description=@"asd";
                      [event setLocation:[[arrCopyserverEventDates objectAtIndex:i]valueForKey:@"location"]];
                      
@@ -713,7 +710,7 @@ strMothshowImageonCalender=[NSString stringWithFormat:@"%ld", (long)[[self.dateF
                      
                      NSDate *DateStart=[self.dateFormatter dateFromString:strTempStart];
 
-                        NSDate *DateEnd=[self.dateFormatter dateFromString:strTempEnd];
+                     NSDate *DateEnd=[self.dateFormatter dateFromString:strTempEnd];
                      
                      
                      
@@ -740,7 +737,7 @@ strMothshowImageonCalender=[NSString stringWithFormat:@"%ld", (long)[[self.dateF
              }
              else // if he does not allow
              {
-                 [[[UIAlertView alloc]initWithTitle:nil message:@"Alert" delegate:nil cancelButtonTitle:NSLocalizedString(@"Please on the calender option from setting", nil)  otherButtonTitles: nil] show];
+                 [[[UIAlertView alloc]initWithTitle:@"Alert" message:@"Please on the Calendar option from setting" delegate:nil cancelButtonTitle:@"OK"  otherButtonTitles: nil] show];
                  return;
              }
          }];
@@ -786,7 +783,7 @@ strMothshowImageonCalender=[NSString stringWithFormat:@"%ld", (long)[[self.dateF
             
             
             EKEvent *event = [EKEvent eventWithEventStore:eventStore];
-            event.title  = @"PlayDate";
+            event.title  =[NSString stringWithFormat:@"PlayDate (%@)",[[arrCopyserverEventDates objectAtIndex:i]valueForKey:@"friendname"]];
             event.allDay = YES;
             event.notes=[[arrCopyserverEventDates objectAtIndex:i]valueForKey:@"friendname"];
             //    event.description=@"asd";

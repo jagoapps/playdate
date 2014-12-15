@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 #import "SaveEntity.h"
+#import "NotificationMessage.h"
 @interface Database : NSObject
 
 @property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
@@ -22,6 +23,8 @@
 //-(void)deleteFavroiteForTeam:(NSString *)teamID Category:(NSString *)category;
 
 -(void)saveFavroiteForTeam:(NSString *)eventID;
+-(NSArray *)readAllRecords_Notification;
+-(void)saveFavroite_NotificationMessage:(NSString *)message;
 //-(void)saveUserId:(NSString *)Userid name:(NSString *)name phoneno:(NSString *)phonenosave ImageUrl:(NSString *)imgUrl startdateTime:(NSString *)Startime  endTime:(NSString *)EndTime;
 ////-(void)DeleteUserId:(NSString *)Userid;
 //

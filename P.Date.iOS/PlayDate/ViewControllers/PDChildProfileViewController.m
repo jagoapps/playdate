@@ -29,7 +29,7 @@
     IBOutlet UIView *allergiesBackgroundView;
     IBOutlet UIView *hobbiesBackgroundView;
     IBOutlet UIView *schoolBackgroundView;
-    IBOutlet UIView *youthClubBackgroundView;
+//    IBOutlet UIView *youthClubBackgroundView;
     IBOutlet UIView *freeTimeBackgroundView;
    
     
@@ -42,7 +42,7 @@
     IBOutlet UILabel *lblAllergies;
     IBOutlet UILabel *lblHobbies;
     IBOutlet UITextField *tFSchool;
-    IBOutlet UITextField *tFYouthClub;
+//    IBOutlet UITextField *tFYouthClub;
     IBOutlet UILabel     *lblFreeTime;
     IBOutlet UIButton *addfreeTimeBtn;
     
@@ -66,6 +66,8 @@
     IBOutlet UIButton   *btnMenu;
     IBOutlet UIButton  *btnHome;
     NSMutableArray *arrSetFixedTime;
+    
+    IBOutlet UIButton *btnDeleteAuth_child;
 
 }
 @property (strong, nonatomic) IBOutlet UIView *topMenuView;
@@ -85,11 +87,7 @@
     }
     return self;
 }
--(void)viewDidAppear:(BOOL)animated
-{
-   
 
-}
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -103,7 +101,7 @@
     
     
     
-    imagePickerOptionsView = [[VSOptionsView alloc] initWithDelegate:self andTitles:@"Photo Gallery",@"Camera", nil];
+    imagePickerOptionsView = [[VSOptionsView alloc]initWithDelegate:self andTitles:@"Photo Gallery",@"Camera",nil];
     imagePickerOptionsView.dismissAfterAction = YES;
     // imagePickerOptionsView.mainTitle = @"  Choose Photo From:";
     imagePickerOptionsView.lineColor = [[PDHelper sharedHelper] applicationThemeBlueColor];
@@ -141,9 +139,54 @@
         guardianType = @"GRAND FATHER";
         self.guardianType = G_GRAND_FATHER;
     }
-    
-   
+    else if ([[detail objectForKey:PDWebGuardianType] isEqualToString:@"b"])
+    {
+        guardianType = @"BROTHER";
+        self.guardianType = G_BROTHER;
+    }
+    else if ([[detail objectForKey:PDWebGuardianType] isEqualToString:@"s"])
+    {
+        guardianType = @"SISTER";
+        self.guardianType = G_SISTER;
+    }
+    else if ([[detail objectForKey:PDWebGuardianType] isEqualToString:@"n"])
+    {
+        guardianType = @"NANNY";
+        self.guardianType = G_NANY;
+    }
+    else if ([[detail objectForKey:PDWebGuardianType] isEqualToString:@"t"])
+    {
+        guardianType = @"TEACHER";
+        self.guardianType = G_TEACHER;
+    }
 
+    else if ([[detail objectForKey:PDWebGuardianType] isEqualToString:@"o"])
+    {
+        guardianType = @"OTHER";
+        self.guardianType = G_OTHER;
+    }
+  
+   /// show  delete button
+    
+  
+    
+  //  NSString *strOrignalLoginParent=[[[[PDUser currentUser] detail]objectForKey:PDUserInfo] objectForKey:PDWebGID];
+
+    NSString *strOrignalParent=[[self.childProfileArray objectAtIndex:self.index] valueForKey:PDWebGID];
+    
+    
+    if(strOrignalParent==nil)
+        btnDeleteAuth_child.hidden=YES;
+    else
+        btnDeleteAuth_child.hidden=NO;
+        
+    
+//    if ([strOrignalLoginParent isEqualToString:strOrignalParent])
+//        btnDeleteAuth_child.hidden=YES;
+//    else
+//        btnDeleteAuth_child.hidden=NO;
+        
+    
     
 }
 
@@ -188,7 +231,7 @@
     [tFChildName resignFirstResponder];
  //   [tFConditions resignFirstResponder];
     [tFSchool resignFirstResponder];
-    [tFYouthClub resignFirstResponder];
+//    [tFYouthClub resignFirstResponder];
 }
 
 -(void)resignPhonePad
@@ -225,6 +268,8 @@
                 lblFreeTime.text = [currentResult uppercaseString];
                 [arrSetFixedTime removeAllObjects];
                 [arrSetFixedTime addObject:currentResult];
+                lblFreeTime.textColor = [[PDHelper sharedHelper] applicationThemeBlueColor];
+
             }
             else {
                 
@@ -305,9 +350,9 @@
             if (currentResult.length==0)
             {
                 [[[UIAlertView alloc]initWithTitle:@"Alert" message:@"Start time is less than end time" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil]show];
-                            }
+           }
             
-         else   if ([lblFreeTime.text isEqualToString:@"FREE TIME"]) {
+         else  if ([lblFreeTime.text isEqualToString:@"FREE TIME"]) {
                 lblFreeTime.text = [currentResult uppercaseString];
              [arrSetFixedTime removeAllObjects];
              [arrSetFixedTime addObject:currentResult];
@@ -411,15 +456,15 @@
     schoolBackgroundView.frame = rect;
     
     
-    rect = youthClubBackgroundView.frame;
-    rect.origin.y = CGRectGetMaxY(schoolBackgroundView.frame) + 5.0;
-    youthClubBackgroundView.frame = rect;
+//    rect = youthClubBackgroundView.frame;
+//    rect.origin.y = CGRectGetMaxY(schoolBackgroundView.frame) + 5.0;
+//    youthClubBackgroundView.frame = rect;
 
     
     
     
     rect = btnSave.frame;
-    rect.origin.y = CGRectGetMaxY(youthClubBackgroundView.frame) + 25.0;
+    rect.origin.y = CGRectGetMaxY(schoolBackgroundView.frame) + 25.0;
     btnSave.frame = rect;
 }
 
@@ -450,13 +495,14 @@
         
         if (![[self.view subviews] containsObject:datePicker])
         {
-            if ([[self.view subviews] containsObject:freeTimePicker]) {
+            if ([[self.view subviews] containsObject:freeTimePicker])
+            {
                 [freeTimePicker hide];
             }
             
             NSDateFormatter *df = [[NSDateFormatter alloc] init];
             [df setDateFormat:@"dd-MMMM-yyyy"];
-            NSString  *strDate = [df stringFromDate:[NSDate date]];
+       //     NSString  *strDate = [df stringFromDate:[NSDate date]];
        //     NSDate *date=[df dateFromString:strDate];
 //            datePicker.endDate=date;
 //             datePicker.startDate=nil;
@@ -515,11 +561,18 @@
 -(void)textFieldDidBeginEditing:(UITextField *)textField
 {
     UIView *vw;
+    if (textField==tFChildName)
+    {
+        CGPoint scrollPoint = CGPointMake(0.0, 0.0);
+        [scrollView setContentOffset:scrollPoint animated:YES];
+        [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, scrollView.frame.size.height + 300.0)];
+        return;
+    }
     if (textField==tFSchool)
         vw=schoolBackgroundView;
     
-    else if (textField==tFYouthClub)
-        vw=youthClubBackgroundView;
+//    else if (textField==tFYouthClub)
+//        vw=youthClubBackgroundView;
 //    else if (textField==tFConditions)
 //        vw=conditionsBackgroundView;
 
@@ -716,6 +769,42 @@
 {
     [self.navigationController popViewControllerAnimated:YES];
 }
+-(IBAction)btnDeleteAuth_child:(id)sender
+{
+    [[PDAppDelegate sharedDelegate] showActivityWithTitle:@"Loading..."];
+    [self performSelector:@selector(callwebService_deleteAuthChild) withObject:nil afterDelay:0.1];
+
+}
+
+-(void)callwebService_deleteAuthChild
+{
+    
+      NSString *strOrignalLoginParent=[[[[PDUser currentUser] detail]objectForKey:PDUserInfo] objectForKey:PDWebGID];
+    NSDictionary *params = @{PDWebChildId:[[self.childProfileArray objectAtIndex:self.index] valueForKey:PDWebChildId],@"assign_gid":strOrignalLoginParent};
+    
+    [self deleteAuthChild_ListParams:params];
+    
+}
+-(void)deleteAuthChild_ListParams:(NSDictionary *)params
+{
+   
+    [[PDWebHandler sharedWebHandler] deleteAuthChild_ListParams:params];
+    [[PDWebHandler sharedWebHandler] startRequestWithCompletionBlock:^(id response, NSError *error)
+    {
+//
+//http://54.191.67.152/playdate/all_assign_child_remove.php?assign_gid=&child_id=
+    
+     
+        if (!error)
+        {
+            
+            
+            [[PDAppDelegate sharedDelegate] hideActivity];
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+    }];
+    
+}
 -(void)activityDidAppear
 {
     
@@ -740,6 +829,14 @@
         gType = @"gm";
     else if (self.guardianType == G_GRAND_FATHER)
         gType = @"gf";
+    else if (self.guardianType == G_BROTHER)
+        gType = @"b";
+    else if (self.guardianType == G_SISTER)
+        gType = @"s";
+    else if (self.guardianType == G_NANY)
+        gType = @"n";
+    else if (self.guardianType == G_OTHER)
+        gType = @"o";
     
     NSString *strAllergies=lblAllergies.text;
  strAllergies=   [strAllergies stringByReplacingOccurrencesOfString:@"\n" withString:@","];
@@ -753,7 +850,7 @@
                              PDWebAllergies:strAllergies,
                              PDWebHobbies:strHobbies,
                              PDWebSchool:tFSchool.text,
-                             PDWebYouthClub:tFYouthClub.text,
+                           /*  PDWebYouthClub:tFYouthClub.text,*/
                              PDWebFreeTime: [lblFreeTime.text stringByReplacingOccurrencesOfString:@"\n" withString:@","],
                              @"childid": strChild_id};
     
@@ -891,7 +988,7 @@
         tFChildDOB.userInteractionEnabled = NO;
         // tFConditions.userInteractionEnabled = NO;
         tFSchool.userInteractionEnabled = NO;
-        tFYouthClub.userInteractionEnabled = NO;
+//        tFYouthClub.userInteractionEnabled = NO;
     }
     else
     {
@@ -1007,6 +1104,12 @@
             [self dismissViewControllerAnimated:YES completion:NULL];
             if (image)
             {
+                __block UIImageView *iV = iVChildProfile;
+                __block UIView *iVC = childProfileImageViewContainer;
+                CGSize perfectSize = [[PDHelper sharedHelper] perfectSizeOfImage:image withMaximumHeight:iV.frame.size.height andMaximumWidth:iV.frame.size.width];
+                CGRect r = CGRectMake((iVC.frame.size.width - perfectSize.width)/2.0, (iVC.frame.size.height - perfectSize.height)/2.0, perfectSize.width, perfectSize.height);
+                iV.frame = r;
+
                 [iVChildProfile setImage:image ];
                 [[PDAppDelegate sharedDelegate] showActivityWithTitle:@"Saving..."];
                 [self performSelector:@selector(callWebService_SendImage:) withObject:image afterDelay:0.1];
@@ -1022,13 +1125,21 @@
             if (image)
             {
                 [iVChildProfile setImage:image ];
-            
+                
+                __block UIImageView *iV = iVChildProfile;
+                __block UIView *iVC = childProfileImageViewContainer;
+                CGSize perfectSize = [[PDHelper sharedHelper] perfectSizeOfImage:image withMaximumHeight:iV.frame.size.height andMaximumWidth:iV.frame.size.width];
+                CGRect r = CGRectMake((iVC.frame.size.width - perfectSize.width)/2.0, (iVC.frame.size.height - perfectSize.height)/2.0, perfectSize.width, perfectSize.height);
+                iV.frame = r;
+
             [[PDAppDelegate sharedDelegate] showActivityWithTitle:@"Saving..."];
             [self performSelector:@selector(callWebService_SendImage:) withObject:image afterDelay:0.1];
             }
             
 
         }];
+     
+        
         
     }
  
@@ -1058,12 +1169,12 @@
     rect.origin.y=CGRectGetMaxY(hobbiesBackgroundView.frame)+5.0;
     schoolBackgroundView.frame=rect;
     
-    rect=youthClubBackgroundView.frame;
-    rect.origin.y=CGRectGetMaxY(schoolBackgroundView.frame)+5.0;
-    youthClubBackgroundView.frame=rect;
+//    rect=youthClubBackgroundView.frame;
+//    rect.origin.y=CGRectGetMaxY(schoolBackgroundView.frame)+5.0;
+//    youthClubBackgroundView.frame=rect;
 
     rect=btnSave.frame;
-    rect.origin.y=CGRectGetMaxY(youthClubBackgroundView.frame)+15.0;
+    rect.origin.y=CGRectGetMaxY(schoolBackgroundView.frame)+15.0;
     btnSave.frame=rect;
     
     [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, CGRectGetMaxY(btnSave.frame) + 19.0)];
@@ -1084,11 +1195,11 @@
             if ([[response objectForKey:PDWebSuccess] boolValue]) {
                 
                 [btnSave setHidden:NO];
-                tFChildName.userInteractionEnabled = NO;
+                tFChildName.userInteractionEnabled = YES;
                 tFChildDOB.userInteractionEnabled = YES;
 
                 tFSchool.userInteractionEnabled = YES;
-                tFYouthClub.userInteractionEnabled = YES;
+//                tFYouthClub.userInteractionEnabled = YES;
                 
                 detail = [response valueForKey:@"childinfo"];
                 tFChildName.text = [[detail objectForKey:PDWebChildName] uppercaseString];
@@ -1108,7 +1219,7 @@
                 lblAllergies.text = strAllergiesTemp;
                 lblHobbies.text = strHobbiesTemp;
                 tFSchool.text = [[detail objectForKey:PDWebSchool] uppercaseString];
-                tFYouthClub.text = [[detail objectForKey:PDWebYouthClub]uppercaseString];
+//                tFYouthClub.text = [[detail objectForKey:PDWebYouthClub]uppercaseString];
                 lblFreeTime.text =[[[detail objectForKey:PDWebFreeTime]uppercaseString]stringByReplacingOccurrencesOfString:@"," withString:@"\n"];
                 arrSetFixedTime=[[[detail objectForKey:PDWebFreeTime] componentsSeparatedByString:@","]mutableCopy];
           

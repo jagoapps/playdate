@@ -51,10 +51,7 @@
 -(IBAction)menuAction:(id)sender
 {
     [self.menuContainerViewController toggleLeftSideMenuCompletion:^{
-        
-        
-        
-    }];
+        }];
 }
 
 #pragma mark - Social Button Actions
@@ -82,7 +79,7 @@
     NSMutableString *htmlString = [[NSMutableString alloc] init];
     [htmlString appendString:@"<html>"];
     [htmlString appendString:@"<body>"];
-    [htmlString appendString:@"I’ve started using Playdate by JAGO, an awesome app to arrange & manage my kids social lives.  Check it out and get your download here <a href='http://www.jago.nu'>www.jago.nu</a>"];
+    [htmlString appendString:@"Sent"];
     [htmlString appendString:@"</body>"];
     [htmlString appendString:@"</html>"];
 
@@ -93,16 +90,10 @@
         
         mailer.mailComposeDelegate = self;
         
-        [mailer setSubject:@"Playdate Feedback"];
+        [mailer setSubject:@"I’ve started using Playdate by JAGO, an awesome app to arrange & manage my kids social lives.  Check it out and get your download here <a href='http://www.jago.nu'>www.jago.nu</a>"];
         [mailer setToRecipients:@[@"abc@gmail.com"]];
         
-        
-//        NSArray *toRecipients = [NSArray arrayWithObjects:@"fisrtMail@example.com", @"secondMail@example.com", nil];
-//        [mailer setToRecipients:toRecipients];
-        
-      // UIImage *myImage = [UIImage imageNamed:@"mobiletuts-logo.png"];
-      //  NSData *imageData = UIImagePNGRepresentation(myImage);
-     //   [mailer addAttachmentData:imageData mimeType:@"image/png" fileName:@"mobiletutsImage"];
+
         
         [mailer setMessageBody:htmlString isHTML:YES];
         [self presentViewController:mailer animated:YES completion:nil];
@@ -123,7 +114,8 @@
 //    PDSMSViewController *pdSMSViewController = [[PDSMSViewController alloc]initWithNibName:@"PDSMSViewController" bundle:nil];
 //    [self.navigationController pushViewController:pdSMSViewController animated:YES];
     
-    if ([MFMessageComposeViewController canSendText]) {
+    if ([MFMessageComposeViewController canSendText])
+    {
         MFMessageComposeViewController *messageComposer =
         [[MFMessageComposeViewController alloc] init];
         NSString *message = @"I’ve started using Playdate by JAGO, an awesome app to arrange & manage my kids lives.  Check it out here www.jago.nu";
@@ -191,7 +183,7 @@
         default:
             break;
     }
-   // [self dismissModalViewControllerAnimated:YES];
+
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -245,4 +237,10 @@
     navigationController.viewControllers = controllers;
     [self.menuContainerViewController setMenuState:MFSideMenuStateClosed];
 }
+
+
+
+
+
+
 @end

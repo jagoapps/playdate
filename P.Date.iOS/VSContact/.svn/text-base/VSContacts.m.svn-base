@@ -1,0 +1,84 @@
+//
+//  VSContacts.m
+//  ContactsRead
+//
+//  Created by ml2-1 on 11/9/13.
+//  Copyright (c) 2013 ml2-1. All rights reserved.
+//
+
+#import "VSContacts.h"
+
+@interface VSContacts ()
+{
+    ABAddressBookRef localAddressBook;
+}
+@end
+
+@implementation VSContacts
+
+@synthesize delegate = _delegate;
+
+-(id)initWithDelegate:(id<VSContactsDelegate>)delegate
+{
+    self = [super init];
+    if (self)
+    {
+        self.delegate = delegate;
+    }
+    
+    return self;
+}
+
+#pragma mark - Get AddressBook
+-(void)intializeAddressBook
+{
+    ABAddressBookRef aBook = NULL;
+    if(ABAddressBookCreateWithOptions)
+    {
+        CFErrorRef error;
+        aBook = ABAddressBookCreateWithOptions(NULL, &error);
+        
+        __block BOOL accessGranted = NO;
+        if (ABAddressBookRequestAccessWithCompletion != NULL) {
+            // we're on iOS 6
+            dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+            ABAddressBookRequestAccessWithCompletion(aBook, ^(bool granted, CFErrorRef error) {
+                accessGranted = granted;
+                dispatch_semaphore_signal(sema);
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if(granted && !error)
+                    {
+                        ABAddressBookRevert(aBook);
+                        localAddressBook = aBook;
+                        [self.delegate addressBookCreateSuccessfully:aBook];
+                    }
+                    else
+                    {
+                        [self.delegate addressBookCreationFailedWithError:(__bridge NSError *)(error)];
+                    }
+                });
+            });
+            
+            dispatch_semaphore_wait(sema, DISPATCH_TIME_NOW);
+           // dispatch_release(sema);
+        }
+    }
+}
+
+-(NSArray *)getContacts
+{
+    __block NSArray *contacts = nil;
+    
+    ABAddressBookRef addressBook = localAddressBook;
+    
+    if(addressBook != NULL || addressBook != nil)
+    {
+        CFArrayRef people = ABAddressBookCopyArrayOfAllPeople(addressBook);
+        contacts = (__bridge NSArray *)people;
+    }
+    
+    return contacts;
+}
+
+@end

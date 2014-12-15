@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="5053" systemVersion="13D65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="5053" systemVersion="13F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none">
     <dependencies>
         <deployment defaultVersion="1536" identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3733"/>
@@ -245,6 +245,6 @@
         <image name="navigation_blank" width="320" height="44"/>
         <image name="new_set_button" width="95" height="22"/>
         <image name="save_button" width="108" height="29"/>
-        <image name="txt_field_big" width="264" height="25"/>
+        <image name="txt_field_big" width="264" height="27"/>
     </resources>
 </document>

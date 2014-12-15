@@ -4,66 +4,65 @@
 <dict>
 	<key>ChildHobbies</key>
 	<array>
+		<string>NONE</string>
+		<string>AMERICAN FOOTBALL</string>
+		<string>BASKETBAL</string>
+		<string>BASEBAL</string>
+		<string>CRICKET</string>
+		<string>CYCLING</string>
+		<string>CLIMBING</string>
 		<string>COOKING</string>
 		<string>DANCE</string>
 		<string>DRAMA</string>
 		<string>DRAWING</string>
+		<string>FOOTBALL</string>
+		<string>JUDO</string>
 		<string>LEGO BUILDING</string>
 		<string>MAGIC</string>
 		<string>MODEL BUILDING</string>
 		<string>PAINTING</string>
-		<string>PUZZELS</string>
 		<string>READING</string>
+		<string>RUGBY</string>
+		<string>RUNNING</string>
 		<string>SCRAPBOOKING</string>
 		<string>SCULPTING</string>
 		<string>SEWING</string>
 		<string>SINGING</string>
-		<string>VIDEO GAMING</string>
-		<string>WOODWORKING</string>
-		<string>WRITING</string>
-		<string>RUGBY</string>
 		<string>SKITING</string>
 		<string>SKIING</string>
-		<string>SURFING</string>
 		<string>SNOWBOARING</string>
-		<string>SWIMMING</string>
-		<string>WATER SPOTS</string>
-		<string>AMERICAN FOOTBALL</string>
-		<string>BASEBAL</string>
-		<string>BASKETBAL</string>
-		<string>CLIMBING</string>
-		<string>CRICKET</string>
-		<string>CYCLING</string>
-		<string>FOOTBALL</string>
-		<string>JUDO</string>
-		<string>RUNNING</string>
+		<string>SURFING</string>
 		<string>SWIMMING</string>
 		<string>TABLE TENNIS</string>
 		<string>TENNIS</string>
+		<string>VIDEO GAMING</string>
+		<string>WOODWORKING</string>
+		<string>WRITING</string>
+		<string>WATER SPOTS</string>
 	</array>
 	<key>ChildAllergies</key>
 	<array>
-		<string>NUTS</string>
-		<string>MILK</string>
-		<string>EDD</string>
-		<string>WHEAT</string>
-		<string>SOY</string>
-		<string>FISH</string>
-		<string>CORN</string>
-		<string>GELATIN</string>
-		<string>MEAT</string>
-		<string>SEEDS</string>
-		<string>SPICES</string>
-		<string>GRASS</string>
-		<string>BANANA</string>
-		<string>DAIRY</string>
+		<string>NONE</string>
 		<string>ANAPHYLAXIS</string>
 		<string>ASTHMA</string>
+		<string>BANANA</string>
+		<string>CORN</string>
+		<string>DAIRY</string>
 		<string>ECZEMA</string>
+		<string>EDD</string>
+		<string>FISH</string>
+		<string>GELATIN</string>
+		<string>GRASS</string>
 		<string>HAYFEAVER</string>
 		<string>INSECT STINGS</string>
 		<string>LACTOSE CELIAC</string>
-		<string>GLUTEN</string>
+		<string>MEAT</string>
+		<string>MILK</string>
+		<string>NUTS</string>
+		<string>SEEDS</string>
+		<string>SOY</string>
+		<string>SPICES</string>
+		<string>WHEAT</string>
 	</array>
 </dict>
 </plist>

@@ -502,8 +502,10 @@
     [self touchEnded:sender];
     
     if ([self.delegate respondsToSelector:@selector(optionView:clickedAtIndex:)])
-        [self.delegate optionView:self clickedAtIndex:[sender tag]];
-    
+    {
+        UIButton *btn=(UIButton *)sender;
+        [self.delegate optionView:self clickedAtIndex:[btn tag]];
+    }
     if (self.dismissAfterAction) {
         [self dismiss];
     }

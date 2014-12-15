@@ -162,7 +162,7 @@
        {
         [btnSave setHidden:NO];
         [setfreeTimeBtn setHidden:NO];
-        tFName.userInteractionEnabled = NO;
+        tFName.userInteractionEnabled = YES;
         tFDOB.userInteractionEnabled = YES;
         tFPhone.userInteractionEnabled = YES;
         tFUsers.userInteractionEnabled = YES;
@@ -175,7 +175,7 @@
         {
             [btnSave setHidden:NO];
             [setfreeTimeBtn setHidden:NO];
-            tFName.userInteractionEnabled = NO;
+            tFName.userInteractionEnabled = YES;
             tFDOB.userInteractionEnabled = YES;
             tFPhone.userInteractionEnabled = YES;
             tFUsers.userInteractionEnabled = YES;
@@ -200,7 +200,7 @@
         
         
         // OPTIONS VIEW - GUARDIAN TYPE PICKER
-        optionsView = [[VSOptionsView alloc] initWithDelegate:self andTitles:@"MOTHER", @"FATHER", @"GRAND MOTHER", @"GRAND FATHER", nil];
+        optionsView = [[VSOptionsView alloc] initWithDelegate:self andTitles:@"MOTHER", @"FATHER", @"GRAND MOTHER", @"GRAND FATHER",@"NANNY",@"BROTHER",@"SISTER",@"TEACHER",@"OTHER", nil];
         optionsView.delegate = self;
         optionsView.selectedRowColor = [PDHelper sharedHelper].applicationThemeBlueColor;
         optionsView.selectedTitleColor = [UIColor whiteColor];
@@ -331,6 +331,35 @@
                  guardianType = @"GRAND FATHER";
                  self.guardianType = G_GRAND_FATHER;
              }
+             else if ([[dictParentInfo objectForKey:@"guardian_type"] isEqualToString:@"b"])
+             {
+                 guardianType = @"BROTHER";
+                 self.guardianType = G_BROTHER;
+             }
+
+             else if ([[dictParentInfo objectForKey:@"guardian_type"] isEqualToString:@"s"])
+             {
+                 guardianType = @"SISTER";
+                 self.guardianType = G_SISTER;
+             }
+
+             else if ([[dictParentInfo objectForKey:@"guardian_type"] isEqualToString:@"n"])
+             {
+                 guardianType = @"NANNY";
+                 self.guardianType = G_NANY;
+             }
+             else if  ([[dictParentInfo objectForKey:@"guardian_type"] isEqualToString:@"t"])
+             {
+                 guardianType = @"TEACHER";
+                 self.guardianType = G_TEACHER;
+             }
+
+             else if ([[dictParentInfo objectForKey:@"guardian_type"] isEqualToString:@"o"])
+             {
+                 guardianType = @"OTHER";
+                 self.guardianType = G_OTHER;
+             }
+
              tFUsers.text = guardianType;
              __block UIImageView *iV = iVProfile;
              __block UIView *iVC = profileImageViewContainer;
@@ -582,12 +611,25 @@
         gType = @"gm";
     else if (self.guardianType == G_GRAND_FATHER)
         gType = @"gf";
+    else if (self.guardianType == G_BROTHER)
+        gType = @"b";
+    else if (self.guardianType == G_SISTER)
+        gType = @"s";
+    else if (self.guardianType == G_NANY)
+        gType = @"n";
+    else if (self.guardianType == G_TEACHER)
+        gType = @"t";
+
+    else if (self.guardianType == G_OTHER)
+        gType = @"o";
     
     
     // g_id=1&name=abcde&dob=1989-07-08&location=aaabcde&phone=9872742345&set_fixed_freetime=12
     NSString *guardianID = [[[[PDUser currentUser] detail] objectForKey:PDUserInfo] objectForKey:PDWebGID];
 
-      NSString *strName=[[tFName.text componentsSeparatedByString:@" "]objectAtIndex:0];
+//      NSString *strName=[[tFName.text componentsSeparatedByString:@" "]objectAtIndex:0];
+    
+    NSString *strName=tFName.text;
     NSDictionary *params = @{FBName: strName,
                              PDWebDOB: dateToSend,
                              PDWebLocation: tVLocation.text,
@@ -615,6 +657,9 @@
                 
                 [[PDUser currentUser] setDetail:detail];
                 [[PDUser currentUser] save];
+                PDLeftViewController *controller = (PDLeftViewController *)[PDAppDelegate sharedDelegate].menuController.leftMenuViewController;
+                controller.lblName.text =tFName.text;
+               
             }
             else
             {
@@ -740,7 +785,7 @@
           
             NSDateFormatter *df = [[NSDateFormatter alloc] init];
             [df setDateFormat:@"dd-MMMM-yyyy"];
-            NSString  *strDate = [df stringFromDate:[NSDate date]];
+         //   NSString  *strDate = [df stringFromDate:[NSDate date]];
          //   NSDate *date=[df dateFromString:strDate];
        
 //            datePicker.endDate=date;
@@ -771,7 +816,7 @@
                 }
                 else
                 {
-                    [[[UIAlertView alloc]initWithTitle:@"Alert" message:@"Dateof Birth Date must be Less than current date" delegate:nil cancelButtonTitle:@"ok"otherButtonTitles:nil]show];
+                    [[[UIAlertView alloc]initWithTitle:@"Alert" message:@"Date of Birth Date must be Less than current date" delegate:nil cancelButtonTitle:@"ok"otherButtonTitles:nil]show];
                     
                 }
 
@@ -813,6 +858,10 @@
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
 {
+    if (tFName==textField)
+    {
+        return YES;
+    }
     textField.text = [textField.text stringByReplacingCharactersInRange:range withString:[string uppercaseStringWithLocale:[NSLocale currentLocale]]];
       return NO;
 }
@@ -1036,11 +1085,10 @@
                 iVProfile.frame = r;
                 [[PDAppDelegate sharedDelegate] showActivityWithTitle:@"Saving..."];
             [self performSelector:@selector(callWebService_SendImage:) withObject:image afterDelay:0.1];
+                
             }
          }];
-}
-    
-    
+     }
 }
 
 -(void)callWebService_SendImage:(UIImage *)img

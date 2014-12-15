@@ -8,7 +8,7 @@
 
 #import "PDOptionsViewController.h"
 
-@interface PDOptionsViewController () <UITableViewDelegate, UITableViewDataSource>
+@interface PDOptionsViewController () <UITableViewDelegate, UITableViewDataSource,UITextFieldDelegate>
 {
     IBOutlet UIView *navigationView;
     IBOutlet UIView *footerView;
@@ -75,6 +75,7 @@
                 isFoundInArray = YES;
                 break;
             }
+
         }
 
         if (isFoundInArray)
@@ -194,6 +195,58 @@
     {
         UITableViewCell *cell = [self.tblView cellForRowAtIndexPath:indexPath];
         
+     //   if ([lblTop.text isEqualToString:@"Allergies"])
+        {
+           NSIndexPath *indexTemp = [NSIndexPath indexPathForRow:0 inSection:0];
+            
+            if ([indexPath isEqual:indexTemp]) // if none field is selected
+            {
+                
+                
+                if ([self.selectedIndex containsObject:indexPath]) {
+                    
+                    // Deselect Row
+                    [self.selectedIndex removeObject:indexPath];
+                    cell.accessoryType = UITableViewCellAccessoryNone;
+                    return;
+
+                }
+                else
+                {
+                    // Select Row
+                    
+                    for (int i=0; i<[self.selectedIndex count]; i++)
+                    {
+                        UITableViewCell *cellTemp = [self.tblView cellForRowAtIndexPath:[self.selectedIndex  objectAtIndex:i]];
+                        cellTemp.accessoryType = UITableViewCellAccessoryNone;
+                    }
+                    
+                    [self.selectedIndex removeAllObjects];
+                    [self.selectedIndex addObject:indexPath];
+                    cell.accessoryType = UITableViewCellAccessoryCheckmark;
+                    return;
+                }
+
+                
+                
+              
+                
+            }
+            
+            else
+            {
+                NSIndexPath *indexTemp = [NSIndexPath indexPathForRow:0 inSection:0];
+                
+                   if ([self.selectedIndex containsObject:indexTemp])
+                   {
+                       return;
+                   }
+
+            }
+            
+            
+      }
+        
         if ([self.selectedIndex containsObject:indexPath]) {
             
             // Deselect Row
@@ -209,4 +262,9 @@
     }
 }
 
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    [textField resignFirstResponder];
+    return 1;
+}
 @end

@@ -19,7 +19,8 @@ static Database *db = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         db = [[Database alloc] init];
-    });
+    }
+                  );
     
     return db;
 }
@@ -69,7 +70,7 @@ static Database *db = nil;
     return _managedObjectModel;
 }
 
-#pragma mark - Queries
+#pragma mark - Queries for Enties
 -(NSArray *)readAllRecords
 {
     NSEntityDescription *entity = [NSEntityDescription entityForName:@"SaveEntity" inManagedObjectContext:[self managedObjectContext]];
@@ -107,7 +108,44 @@ static Database *db = nil;
         NSLog(@"Save successfully");
     }
 }
+#pragma mark - Queries for Notification Messages
+-(NSArray *)readAllRecords_Notification
+{
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"NotificationMessage" inManagedObjectContext:[self managedObjectContext]];
+    
+    NSFetchRequest *request = [[NSFetchRequest alloc] init];
+    [request setEntity:entity];
+    
+    NSError *error = nil;
+    NSArray *favs = [[self managedObjectContext] executeFetchRequest:request error:&error];
+    
+    if (error)
+    {
+        return nil;
+    }
+    else
+    {
+        return favs;
+    }
+}
 
+-(void)saveFavroite_NotificationMessage:(NSString *)message
+{
+    NotificationMessage *save =[NSEntityDescription insertNewObjectForEntityForName:@"NotificationMessage" inManagedObjectContext:[self managedObjectContext]];
+    [save setMessageName:message];
+    
+    NSError *error = nil;
+    [[self managedObjectContext] save:&error];
+    if (error)
+    {
+        
+        NSLog(@"Unable to save");
+    }
+    else
+    {
+        NSLog(@"Save successfully");
+    }
+}
 //-(void)saveUserId:(NSString *)Userid name:(NSString *)name phoneno:(NSString *)phonenosave ImageUrl:(NSString *)imgUrl startdateTime:(NSString *)Startime  endTime:(NSString *)EndTime
 //{
 //    SaveEntity *save =[NSEntityDescription insertNewObjectForEntityForName:@"SaveEntity" inManagedObjectContext:[self managedObjectContext]];

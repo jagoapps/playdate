@@ -1,0 +1,28 @@
+//
+//  VSContacts.h
+//  ContactsRead
+//
+//  Created by ml2-1 on 11/9/13.
+//  Copyright (c) 2013 ml2-1. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import <AddressBook/AddressBook.h>
+
+@protocol VSContactsDelegate <NSObject>
+-(void)addressBookCreateSuccessfully:(ABAddressBookRef)aBook;
+-(void)addressBookCreationFailedWithError:(NSError *)error;
+
+@end
+
+@interface VSContacts : NSObject
+
+@property (strong, nonatomic) id <VSContactsDelegate> delegate;
+
+-(id)initWithDelegate:(id<VSContactsDelegate>)delegate;
+-(NSArray *)getContacts;
+-(void)intializeAddressBook;
+
+
+
+@end

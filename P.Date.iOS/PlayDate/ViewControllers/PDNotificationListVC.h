@@ -13,4 +13,5 @@
 -(IBAction)menuCalender:(id)sender;
 -(IBAction)menuHome:(id)sender;
 -(IBAction)menuAction:(id)sender;
+-(IBAction)SegmentAction:(id)sender;
 @end

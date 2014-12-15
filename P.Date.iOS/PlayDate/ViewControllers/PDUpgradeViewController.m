@@ -119,14 +119,14 @@
 #pragma mark - Button Actions
 -(IBAction)btnRestore:(id)sender
 {
-    //    if ([[PDAppDelegate sharedDelegate].recipeProducts  productIsAlreadyPurchased:@"com.jagoapps.playdate.exchangechilds"])// Change product here
-    //    {
+        if ([[PDAppDelegate sharedDelegate].recipeProducts  productIsAlreadyPurchased:@"com.jagoapps.playdate.exchangechilds"])// Change product here
+        {
     [[PDAppDelegate sharedDelegate] showActivityWithTitle:@"Loading..."];
     [self performSelector:@selector(btnActivity_Purchase) withObject:self afterDelay:0.1];
     
-    //    }
-    //    else
-    //        [[[UIAlertView alloc]initWithTitle:@"" message:@"we cann't restore now Please firstly Puchase" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil]show];
+        }
+        else
+            [[[UIAlertView alloc]initWithTitle:@"Alert" message:@"we cann't restore now Please firstly Puchase" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil]show];
     
 }
 -(IBAction)menuAction:(id)sender
@@ -160,7 +160,7 @@
         [alert show];
         
     }
-    
+
     
 }
 -(IBAction)menuArrange:(id)sender
@@ -209,7 +209,7 @@
         {
         [[NSUserDefaults standardUserDefaults]setBool:YES forKey:@"com.jagoapps.playdate.exchangechilds"];
         [[PDAppDelegate sharedDelegate] hideActivity];
-       PDExtentedPermissions *objPDExtentedPermissions=[[PDExtentedPermissions alloc]initWithNibName:@"PDExtentedPermissions" bundle:nil];
+        PDExtentedPermissions *objPDExtentedPermissions=[[PDExtentedPermissions alloc]initWithNibName:@"PDExtentedPermissions" bundle:nil];
         [self.navigationController pushViewController:objPDExtentedPermissions animated:YES];
         }
     }

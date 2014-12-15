@@ -21,4 +21,5 @@
 
 -(IBAction)menuCalender:(id)sender;
 -(IBAction)menuHome:(id)sender;
+-(IBAction)btnDeleteAuth_child:(id)sender;
 @end
