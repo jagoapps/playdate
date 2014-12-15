@@ -25,6 +25,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -45,36 +46,45 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+
+
+
 import com.iapp.playdate.R;
+import com.iapptechnologies.time.Arrange_date_fragment.LazyAdapter.ViewHolder;
 
 
 public class Arrange_date_fragment extends android.support.v4.app.Fragment {
 Float x1,y1,x2,y2;
 EditText date,starttime,endtime,location,date1,starttime1,endtime1,date2,starttime2,endtime2,date3,starttime3,endtime3,notes_edittext;
-Button send_request,save_request;
+Button send_request,save_request,add_child,add_friend;
 int myYear,myMonth,myDay;
 int hours,minutes;
 String time="",time_to="",user_guardian_id,url,facebook_friends,friend_id="",child_id="",eventdate,eventdate1,eventdate2,eventdate3,image_url;
-Spinner child,friend;
+//Spinner child,friend;
 String publish;
-TextView alternatedatetime;
+TextView alternatedatetime,txt_child_friend_name,txt_child_name;
 ArrayList<childname> child_name_list = new ArrayList<childname>();
+ArrayList<childname> child_name_list_friend = new ArrayList<childname>();
 ArrayList<String> child_name_forspinner = new ArrayList<String>();
 ArrayList<String> child_id_forspinner = new ArrayList<String>();
 ArrayList<childfriendname> child_friend_name = new ArrayList<childfriendname>();
 ArrayList<String> friend_name_forspinner = new ArrayList<String>();
 ArrayList<String> friend_id_forspinner = new ArrayList<String>();
+ArrayList<String> friend_profilepic = new ArrayList<String>();
 ArrayList<String>friend_id_repeat_check=new ArrayList<String>();
 String receiver_id,notes="",date_selected,starttime_selected,endtime_selected,location_selected,success,date_selected1,starttime_selected1,endtime_selected1,date_selected2,starttime_selected2,endtime_selected2,date_selected3,starttime_selected3,endtime_selected3;
 int i=0;
@@ -82,10 +92,11 @@ Boolean isInternetPresent = false;
 ConnectionDetector cd;
 int date_dialog=0,start_dialog=0,end_dialog=0;
 String parent_id,date_comparision;
-ImageView child_image;
+ImageView child_image,child_friend_image;
 ImageLoader imageLoader;
 boolean clicked=false;
 int count_alert=0;
+LazyAdapter adapter;
 	public Arrange_date_fragment(){
 		
 	}
@@ -99,17 +110,20 @@ int count_alert=0;
 		
 		Calendar c = Calendar.getInstance();
 		System.out.println("Current time => " + c.getTime());
-
-		SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+        Home.menu.setVisibility(View.GONE);
+		SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
 		date_comparision = df.format(c.getTime());
-		 
+		 //imageView_child_friend_arrange
 		getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 		child_image=(ImageView)view.findViewById(R.id.imageView_child_arrange);
+		child_friend_image=(ImageView)view.findViewById(R.id.imageView_child_friend_arrange);
         alternatedatetime=(TextView)view.findViewById(R.id.text_alternatedate);
         send_request=(Button)view.findViewById(R.id.button1_requestdate_send);
 		//save_request=(Button)view.findViewById(R.id.button2_requestdate_save);
-		child=(Spinner)view.findViewById(R.id.spinner_requestdate_childname);
-		friend=(Spinner)view.findViewById(R.id.spinner_requestdate_childfriend);
+		//child=(Spinner)view.findViewById(R.id.spinner_requestdate_childname);
+		//friend=(Spinner)view.findViewById(R.id.spinner_requestdate_childfriend);
+        add_child=(Button)view.findViewById(R.id.add_more_child);
+        add_friend=(Button)view.findViewById(R.id.add_more_friend);
 		 user_guardian_id = getArguments().getString("user_guardian_id"); 
 		 facebook_friends=getArguments().getString("facebook_friends"); 
 		date=(EditText)view.findViewById(R.id.edit_requestdate_date);
@@ -120,6 +134,9 @@ int count_alert=0;
 		starttime1=(EditText)view.findViewById(R.id.edit_requestdate_starttime1);
 		endtime1=(EditText)view.findViewById(R.id.edit_requestdate_endtime1);
 		
+		txt_child_friend_name=(TextView)view.findViewById(R.id.txt_friend_name);
+        txt_child_name=(TextView)view.findViewById(R.id.txt_child_name);
+        
 		date2=(EditText)view.findViewById(R.id.edit_requestdate_date2);
 		starttime2=(EditText)view.findViewById(R.id.edit_requestdate_starttime2);
 		endtime2=(EditText)view.findViewById(R.id.edit_requestdate_endtime2);
@@ -181,6 +198,149 @@ int count_alert=0;
 		
 		endtime3.setFocusable(false);
 		endtime3.setClickable(true);
+add_child.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				
+				
+				
+				 final Dialog dialog = new Dialog(getActivity());
+				dialog.setContentView(R.layout.home);
+				dialog.setTitle("SELECT CHILD");
+				ListView list_child=(ListView)dialog.findViewById(R.id.listView1_home);
+				list_child.setDivider(null);
+				list_child.setDividerHeight(0);
+				
+				if(child_name_list.size()>0){
+					adapter = new LazyAdapter(getActivity(), child_name_list);
+
+					list_child.setAdapter(adapter);
+					
+					
+				}else{
+					Toast.makeText(getActivity(),"Please add child",1).show();
+				}
+				list_child.setOnItemClickListener(new OnItemClickListener() {
+
+					@Override
+					public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+							long arg3) {
+						
+						child_id=child_name_list.get(arg2).id;
+						image_url=child_name_list.get(arg2).child_profile;
+				         imageLoader.DisplayImage(image_url, child_image);
+				         child_image.requestLayout();
+				         txt_child_name.setText(child_name_list.get(arg2).name.toUpperCase());
+				         
+				         int density = getResources().getDisplayMetrics().densityDpi;
+						  switch (density) {
+						  case DisplayMetrics.DENSITY_LOW:
+							  child_image.getLayoutParams().height = 40;
+							  child_image.getLayoutParams().width = 40;
+							 
+							  break;
+						  case DisplayMetrics.DENSITY_MEDIUM:
+							  child_image.getLayoutParams().height = 85;
+							  child_image.getLayoutParams().width = 85;
+							  break;
+						  case DisplayMetrics.DENSITY_HIGH:
+							  child_image.getLayoutParams().height = 85;
+							  child_image.getLayoutParams().width = 85;
+							  break;
+						  case DisplayMetrics.DENSITY_XHIGH:
+							  child_image.getLayoutParams().height = 120;
+							  child_image.getLayoutParams().width = 120;
+							  break;
+						  case DisplayMetrics.DENSITY_XXHIGH:
+							  child_image.getLayoutParams().height = 120;
+							  child_image.getLayoutParams().width = 120;
+							  break;
+							  
+						  }
+						  dialog.dismiss();
+						
+					}
+				});
+					
+				
+				dialog.show();
+			
+				
+			}
+		});
+add_friend.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				 final Dialog dialog = new Dialog(getActivity());
+				dialog.setContentView(R.layout.home);
+				dialog.setTitle("SELECT FRIEND");
+				ListView list_child=(ListView)dialog.findViewById(R.id.listView1_home);
+				list_child.setDivider(null);
+				list_child.setDividerHeight(0);
+				if(child_name_list_friend.size()>0){
+					adapter = new LazyAdapter(getActivity(), child_name_list_friend);
+
+					list_child.setAdapter(adapter);
+					
+					
+				}else{
+					Toast.makeText(getActivity(),"Please add child",1).show();
+					dialog.dismiss();
+				}
+				list_child.setOnItemClickListener(new OnItemClickListener() {
+
+					@Override
+					public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+							long arg3) {
+						   
+						     receiver_id=child_name_list_friend.get(arg2).g_id;
+					         System.out.println("parent_child_friend.............."+parent_id);
+					         friend_id=child_name_list_friend.get(arg2).id;
+					         String image_url_1= friend_profilepic.get(arg2);
+					         txt_child_friend_name.setText(child_name_list_friend.get(arg2).name.toUpperCase());
+					         System.out.println("..................."+child_id);
+					         imageLoader.DisplayImage(image_url_1, child_friend_image);
+					         child_friend_image.requestLayout();
+					         int density = getResources().getDisplayMetrics().densityDpi;
+							  switch (density) {
+							  case DisplayMetrics.DENSITY_LOW:
+								  child_friend_image.getLayoutParams().height = 40;
+								  child_friend_image.getLayoutParams().width = 40;
+								 
+								  break;
+							  case DisplayMetrics.DENSITY_MEDIUM:
+								  child_friend_image.getLayoutParams().height = 85;
+								  child_friend_image.getLayoutParams().width = 85;
+								  break;
+							  case DisplayMetrics.DENSITY_HIGH:
+								  child_friend_image.getLayoutParams().height = 85;
+								  child_friend_image.getLayoutParams().width = 85;
+								  break;
+							  case DisplayMetrics.DENSITY_XHIGH:
+								  child_friend_image.getLayoutParams().height = 120;
+								  child_friend_image.getLayoutParams().width = 120;
+								  break;
+							  case DisplayMetrics.DENSITY_XXHIGH:
+								  child_friend_image.getLayoutParams().height = 120;
+								  child_friend_image.getLayoutParams().width = 120;
+								  break;
+								  
+							  }
+							  dialog.dismiss();
+					}
+				});
+					
+				
+				dialog.show();
+			
+				
+			}
+		});
+
 		
 		child_image.setOnClickListener(new OnClickListener() {
 			
@@ -214,7 +374,7 @@ int count_alert=0;
 							TextView text_allergies = (TextView) dialog.findViewById(R.id.text_child_allergies_arrange);
 							TextView text_hobbies = (TextView) dialog.findViewById(R.id.text_child_hobbies_arrange);
 							TextView text_school = (TextView) dialog.findViewById(R.id.text_child_school_arrange);
-							TextView text_youthclub = (TextView) dialog.findViewById(R.id.text_child_youth_arrange);
+						//	TextView text_youthclub = (TextView) dialog.findViewById(R.id.text_child_youth_arrange);
 							
 							text_name.setText(childname.toUpperCase());
 							text_dob.setText(childdob.toUpperCase());
@@ -222,7 +382,60 @@ int count_alert=0;
 							text_allergies.setText(childallergies.toUpperCase());
 							text_hobbies.setText(childhobbies.toUpperCase());
 							text_school.setText(childschool.toUpperCase());
-							text_youthclub.setText(childyouthclub.toUpperCase());
+						//	text_youthclub.setText(childyouthclub.toUpperCase());
+				 
+
+				 
+							dialog.show();
+						}
+						id_child++;
+						}
+					}
+					
+				
+			}
+		});
+child_friend_image.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				int id_child=0;
+				
+				if(friend_id.equals("")||friend_id.equals(null)){
+					
+				}else{
+					for(childname child : child_name_list_friend){
+						if(child.id.equals(friend_id)){
+							String childname=	child_name_list_friend.get(id_child).name;
+							String childallergies=	child_name_list_friend.get(id_child).allergies;
+							String childdob="";	
+							String childfreetime=	child_name_list_friend.get(id_child).freetime;
+							String childhobbies=	child_name_list_friend.get(id_child).hobbies;
+							String childschool=	child_name_list_friend.get(id_child).school;
+							String childyouthclub=	child_name_list_friend.get(id_child).youthclub;
+								
+								
+							final Dialog dialog = new Dialog(getActivity());
+							dialog.setContentView(R.layout.child_detail_arrange_view);
+							dialog.setTitle("CHILD DETAILS");
+				 
+							// set the custom dialog components - text, image and button
+							TextView text_name = (TextView) dialog.findViewById(R.id.arrange_childname);
+							TextView text_dob = (TextView) dialog.findViewById(R.id.textchild_dob_arrange);
+							TextView text_freetime = (TextView) dialog.findViewById(R.id.freetime_child_arrange);
+							TextView text_allergies = (TextView) dialog.findViewById(R.id.text_child_allergies_arrange);
+							TextView text_hobbies = (TextView) dialog.findViewById(R.id.text_child_hobbies_arrange);
+							TextView text_school = (TextView) dialog.findViewById(R.id.text_child_school_arrange);
+						//	TextView text_youthclub = (TextView) dialog.findViewById(R.id.text_child_youth_arrange);
+							
+							text_name.setText(childname.toUpperCase());
+							text_dob.setText(childdob.toUpperCase());
+							text_freetime.setText(childfreetime.toUpperCase());
+							text_allergies.setText(childallergies.toUpperCase());
+							text_hobbies.setText(childhobbies.toUpperCase());
+							text_school.setText(childschool.toUpperCase());
+						//	text_youthclub.setText(childyouthclub.toUpperCase());
 				 
 
 				 
@@ -241,7 +454,8 @@ int count_alert=0;
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-		
+		time="";
+		time_to="";
 				/*String date_pick=date.getText().toString();
 				String start_pick=starttime.getText().toString();
 				String end_pick=endtime.getText().toString();*/
@@ -293,7 +507,29 @@ int count_alert=0;
 					if(date_from_edit_text.equals("")||date_from_edit_text.equals(null)){
 						
 					}else{
-						String[] dateArr = date_from_edit_text.split("-");
+						SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yy");
+						// SimpleDateFormat sdf1=new SimpleDateFormat("dd-MMM-yy");
+						 Date date_1=null,date_2=null,date_3=null,date_4=null;
+						 try {
+							 date_1=sdf.parse(date_from_edit_text);
+							
+							 
+							 
+						} catch (ParseException e) {
+							
+							e.printStackTrace();
+						}
+						 SimpleDateFormat destDf = new SimpleDateFormat("dd/MM/yyyy");
+						
+						               
+					
+						             // format the date into another format
+						try {
+							date_from_edit_text = destDf.format(date_1);
+						} catch (Exception e) {
+							// TODO: handle exception
+						}
+						String[] dateArr = date_from_edit_text.split("/");
 						
 						myDay=Integer.parseInt(dateArr[0]);
 						myMonth=Integer.parseInt(dateArr[1])-1;
@@ -313,23 +549,19 @@ int count_alert=0;
 			
 			@Override
 			public void onClick(View v) {
-			
+				// TODO Auto-generated method stub
 				i=1;
 				clicked=true;
-				
-//				CustomTimePickerDialog tiiPickerDialog = new CustomTimePickerDialog(getActivity(), mTimelistener, hours, minutes, true);
+				//time="";time_to="";
+//				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistener, hours, minutes, true);
 //				tiiPickerDialog.setTitle("START TIME");
 //				tiiPickerDialog.show();
 				
-				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistener, hours, minutes, true);
-				tiiPickerDialog.setTitle("START TIME");
-				tiiPickerDialog.show();
-				
-//				 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), mTimelistener, 
-//		                    Calendar.getInstance().get(Calendar.HOUR), 
-//		                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
-//		        timePickerDialog.setTitle("START TIME");
-//		        timePickerDialog.show();
+				 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), R.style.AndroDev,mTimelistener, 
+		         Calendar.getInstance().get(Calendar.HOUR),CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+		         timePickerDialog.setTitle("START TIME");
+		        
+		        timePickerDialog.show();
 				
 			}
 		});
@@ -340,20 +572,18 @@ int count_alert=0;
 				// TODO Auto-generated method stub
 				i=1;
 				clicked=true;
-				
-//				CustomTimePickerDialog tiiPickerDialog = new CustomTimePickerDialog(getActivity(), mTimelistenerto, hours, minutes*15, true);
+				//time="";time_to="";
+//				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistenerto, hours, minutes, true);
 //				tiiPickerDialog.setTitle("END TIME");
 //				tiiPickerDialog.show();
 				
-				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistenerto, hours, minutes, true);
-				tiiPickerDialog.setTitle("END TIME");
-				tiiPickerDialog.show();
+				CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), R.style.AppTheme,mTimelistenerto, 
+	                    Calendar.getInstance().get(Calendar.HOUR), 
+	                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+		        timePickerDialog.setTitle("END TIME");
+		        timePickerDialog.show();
 				
-//				 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), mTimelistenerto, 
-//		                    Calendar.getInstance().get(Calendar.HOUR), 
-//		                   CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
-//		        timePickerDialog.setTitle("END TIME");
-//		        timePickerDialog.show();
+				
 			}
 		});
 		
@@ -374,7 +604,29 @@ date_dialog=1;
 					if(date_from_edit_text.equals("")||date_from_edit_text.equals(null)){
 						
 					}else{
-						String[] dateArr = date_from_edit_text.split("-");
+						SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yy");
+						// SimpleDateFormat sdf1=new SimpleDateFormat("dd-MMM-yy");
+						 Date date_1=null,date_2=null,date_3=null,date_4=null;
+						 try {
+							 date_1=sdf.parse(date_from_edit_text);
+							
+							 
+							 
+						} catch (ParseException e) {
+							
+							e.printStackTrace();
+						}
+						 SimpleDateFormat destDf = new SimpleDateFormat("dd/MM/yyyy");
+						
+						               
+					
+						             // format the date into another format
+						try {
+							date_from_edit_text = destDf.format(date_1);
+						} catch (Exception e) {
+							// TODO: handle exception
+						}
+						String[] dateArr = date_from_edit_text.split("/");
 						
 						myDay=Integer.parseInt(dateArr[0]);
 						myMonth=Integer.parseInt(dateArr[1])-1;
@@ -399,9 +651,16 @@ date_dialog=1;
 				i=2;
 				start_dialog=1;
 				clicked=true;
-				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistener, hours, minutes, true);
-				tiiPickerDialog.setTitle("START TIME");
-				tiiPickerDialog.show();
+				//time="";time_to="";
+//				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistener, hours, minutes, true);
+//				tiiPickerDialog.setTitle("START TIME");
+//				tiiPickerDialog.show();
+				
+				 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), R.style.AppTheme,mTimelistener, 
+		                    Calendar.getInstance().get(Calendar.HOUR), 
+		                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+		        timePickerDialog.setTitle("START TIME");
+		        timePickerDialog.show();
 			}
 		});
 		endtime1.setOnClickListener(new OnClickListener() {
@@ -412,9 +671,15 @@ date_dialog=1;
 				end_dialog=1;
 				i=2;
 				clicked=true;
-				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistenerto, hours, minutes, true);
-				tiiPickerDialog.setTitle("END TIME");
-				tiiPickerDialog.show();
+			//	time="";time_to="";
+				CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), R.style.AppTheme,mTimelistenerto, 
+	                    Calendar.getInstance().get(Calendar.HOUR), 
+	                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+		        timePickerDialog.setTitle("END TIME");
+		        timePickerDialog.show();
+//				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistenerto, hours, minutes, true);
+//				tiiPickerDialog.setTitle("END TIME");
+//				tiiPickerDialog.show();
 			}
 		});
 		
@@ -437,7 +702,29 @@ date2.setOnClickListener(new OnClickListener() {
 					if(date_from_edit_text.equals("")||date_from_edit_text.equals(null)){
 						
 					}else{
-						String[] dateArr = date_from_edit_text.split("-");
+						SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yy");
+						// SimpleDateFormat sdf1=new SimpleDateFormat("dd-MMM-yy");
+						 Date date_1=null,date_2=null,date_3=null,date_4=null;
+						 try {
+							 date_1=sdf.parse(date_from_edit_text);
+							
+							 
+							 
+						} catch (ParseException e) {
+							
+							e.printStackTrace();
+						}
+						 SimpleDateFormat destDf = new SimpleDateFormat("dd/MM/yyyy");
+						
+						               
+					
+						             // format the date into another format
+						try {
+							date_from_edit_text = destDf.format(date_1);
+						} catch (Exception e) {
+							// TODO: handle exception
+						}
+						String[] dateArr = date_from_edit_text.split("/");
 						
 						myDay=Integer.parseInt(dateArr[0]);
 						myMonth=Integer.parseInt(dateArr[1])-1;
@@ -461,9 +748,23 @@ date2.setOnClickListener(new OnClickListener() {
 				start_dialog=2;
 				i=3;
 				clicked=true;
-				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistener, hours, minutes, true);
-				tiiPickerDialog.setTitle("START TIME");
-				tiiPickerDialog.show();
+				//time="";time_to="";
+//				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistener, hours, minutes, true);
+//				tiiPickerDialog.setTitle("START TIME");
+//				tiiPickerDialog.show();
+//				
+//				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistener, hours, minutes, true);
+//				tiiPickerDialog.setTitle("START TIME");
+//				tiiPickerDialog.show();
+				
+				
+				CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), R.style.AppTheme,mTimelistener, 
+	                    Calendar.getInstance().get(Calendar.HOUR), 
+	                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+		        timePickerDialog.setTitle("START TIME");
+		        timePickerDialog.show();
+				
+				
 			}
 		});
 		endtime2.setOnClickListener(new OnClickListener() {
@@ -474,9 +775,17 @@ date2.setOnClickListener(new OnClickListener() {
 				end_dialog=2;
 				i=3;
 				clicked=true;
-				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistenerto, hours, minutes, true);
-				tiiPickerDialog.setTitle("END TIME");
-				tiiPickerDialog.show();
+			//	time="";time_to="";
+//				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistenerto, hours, minutes, true);
+//				tiiPickerDialog.setTitle("END TIME");
+//				tiiPickerDialog.show();
+				
+				CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), R.style.AppTheme,mTimelistenerto, 
+	                    Calendar.getInstance().get(Calendar.HOUR), 
+	                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+		        timePickerDialog.setTitle("START TIME");
+		        timePickerDialog.show();
+				
 			}
 		});
 		
@@ -498,7 +807,29 @@ date3.setOnClickListener(new OnClickListener() {
 					if(date_from_edit_text.equals("")||date_from_edit_text.equals(null)){
 						
 					}else{
-						String[] dateArr = date_from_edit_text.split("-");
+						SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yy");
+						// SimpleDateFormat sdf1=new SimpleDateFormat("dd-MMM-yy");
+						 Date date_1=null,date_2=null,date_3=null,date_4=null;
+						 try {
+							 date_1=sdf.parse(date_from_edit_text);
+							
+							 
+							 
+						} catch (ParseException e) {
+							
+							e.printStackTrace();
+						}
+						 SimpleDateFormat destDf = new SimpleDateFormat("dd/MM/yyyy");
+						
+						               
+					
+						             // format the date into another format
+						try {
+							date_from_edit_text = destDf.format(date_1);
+						} catch (Exception e) {
+							// TODO: handle exception
+						}
+						String[] dateArr = date_from_edit_text.split("/");
 						
 						myDay=Integer.parseInt(dateArr[0]);
 						myMonth=Integer.parseInt(dateArr[1])-1;
@@ -521,9 +852,16 @@ date3.setOnClickListener(new OnClickListener() {
 				// TODO Auto-generated method stub
 				start_dialog=3;
 				clicked=true;
-				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistener, hours, minutes, true);
-				tiiPickerDialog.setTitle("START TIME");
-				tiiPickerDialog.show();
+			//	time="";time_to="";
+				 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), R.style.AppTheme,mTimelistener, 
+		                    Calendar.getInstance().get(Calendar.HOUR), 
+		                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+		        timePickerDialog.setTitle("START TIME");
+		        timePickerDialog.show();
+				
+//				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistener, hours, minutes, true);
+//				tiiPickerDialog.setTitle("START TIME");
+//				tiiPickerDialog.show();
 			}
 		});
 		endtime3.setOnClickListener(new OnClickListener() {
@@ -533,21 +871,28 @@ date3.setOnClickListener(new OnClickListener() {
 				// TODO Auto-generated method stub
 				end_dialog=3;
 				clicked=true;
-				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistenerto, hours, minutes, true);
-				tiiPickerDialog.setTitle("END TIME");
-				tiiPickerDialog.show();
+				//time="";time_to="";
+				 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), R.style.AppTheme,mTimelistenerto, 
+		                    Calendar.getInstance().get(Calendar.HOUR), 
+		                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+				
+				 timePickerDialog.setTitle("END TIME");
+				 
+		        timePickerDialog.show();
+				
+				
+				
+//				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistenerto, hours, minutes, true);
+//				tiiPickerDialog.setTitle("END TIME");
+//				tiiPickerDialog.show();
+				
+//				TimePickerDialog tiiPickerDialog = new TimePickerDialog(getActivity(), mTimelistenerto, hours, minutes, true);
+//				tiiPickerDialog.setTitle("END TIME");
+//				tiiPickerDialog.show();
 			}
 		});
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+	
 		send_request.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -562,7 +907,7 @@ date3.setOnClickListener(new OnClickListener() {
 				} catch (Exception e) {
 					// TODO: handle exception
 				}
-				
+			
 				
 				 date_selected=date.getText().toString();
 			     starttime_selected=starttime.getText().toString();
@@ -581,6 +926,11 @@ date3.setOnClickListener(new OnClickListener() {
 				 endtime_selected3=endtime3.getText().toString();
 				 
 				 
+					
+					if(date_selected1.equals("")||date_selected1.equals(null)){
+						
+					}
+				
 				 if(date_selected.equals(date_selected1)){
 					 if(starttime_selected.equals(starttime_selected1)&&endtime_selected.equals(endtime_selected1)){
 						 new AlertDialog.Builder(getActivity())
@@ -630,38 +980,49 @@ date3.setOnClickListener(new OnClickListener() {
 					 }
 				 }
 				 
-				 if(date_selected1.equals(date_selected2)){
-					 if(starttime_selected1.equals(starttime_selected2)&&endtime_selected1.equals(endtime_selected2)){
-						 new AlertDialog.Builder(getActivity())
-						    .setTitle("Invalid entry")
-						    .setMessage("Alternate Date/Time can't same as alternate date/time")
-						    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-						        public void onClick(DialogInterface dialog, int which) { 
-						        	
-						        }
-						     })
-						   
-						    .setIcon(android.R.drawable.ic_dialog_alert)
-						     .show();
-						 return; 
+				 if(date_selected1!=null && date_selected1.length()>0 && date_selected2!=null && date_selected2.length()>0)
+				 {
+					 if(date_selected1.equals(date_selected2)){
+						 if(starttime_selected1.equals(starttime_selected2)&& endtime_selected1.equals(endtime_selected2)){
+							 new AlertDialog.Builder(getActivity())
+							    .setTitle("Invalid entry")
+							    .setMessage("Alternate Date/Time can't same as alternate date/time")
+							    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							        public void onClick(DialogInterface dialog, int which) { 
+							        	
+							        }
+							     })
+							   
+							    .setIcon(android.R.drawable.ic_dialog_alert)
+							     .show();
+							 return; 
+						 }
 					 }
 				 }
-				 if(date_selected1.equals(date_selected3)){
-					 if(starttime_selected1.equals(starttime_selected3)&&endtime_selected1.equals(endtime_selected3)){
-						 new AlertDialog.Builder(getActivity())
-						    .setTitle("Invalid entry")
-						    .setMessage("Alternate Date/Time can't same as alternate date/time")
-						    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-						        public void onClick(DialogInterface dialog, int which) { 
-						        	
-						        }
-						     })
-						   
-						    .setIcon(android.R.drawable.ic_dialog_alert)
-						     .show();
-						 return;	 
+				 
+				 if(date_selected1!=null && date_selected1.length()>0 && date_selected3!=null && date_selected3.length()>0)
+				 {
+					 if(date_selected1.equals(date_selected3)){
+						 if(starttime_selected1.equals(starttime_selected3)&&endtime_selected1.equals(endtime_selected3)){
+							 new AlertDialog.Builder(getActivity())
+							    .setTitle("Invalid entry")
+							    .setMessage("Alternate Date/Time can't same as alternate date/time")
+							    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							        public void onClick(DialogInterface dialog, int which) { 
+							        	
+							        }
+							     })
+							   
+							    .setIcon(android.R.drawable.ic_dialog_alert)
+							     .show();
+							 return;	 
+						 }
 					 }
 				 }
+				
+			if(date_selected2!=null && date_selected2.length()>0 && date_selected3!=null && date_selected3.length()>0)
+			{
+
 				 if(date_selected2.equals(date_selected3)){
 					 if(starttime_selected2.equals(starttime_selected3)&&endtime_selected2.equals(endtime_selected3)){
 						 new AlertDialog.Builder(getActivity())
@@ -678,11 +1039,9 @@ date3.setOnClickListener(new OnClickListener() {
 						 return; 
 					 }
 				 }
-				 
-				 
-				 
-				 
-				 SimpleDateFormat sdf=new SimpleDateFormat("dd-MM-yyyy");
+			}
+		
+				 SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yy");
 				 Date date_1=null,date_2=null,date_3=null,date_4=null;
 				 try {
 					 date_1=sdf.parse(date_selected);
@@ -716,31 +1075,17 @@ date3.setOnClickListener(new OnClickListener() {
 					        public void onClick(DialogInterface dialog, int which) { 
 					        	child_id="";
 					        	friend_id="";
+					        	return;
 					        }
 					     })
 					   
 					    .setIcon(android.R.drawable.ic_dialog_alert)
 					     .show();
-
+return;
 					}
 				 
-				 try {
-					
-				
-				if(child_id.length()>0 && friend_id.length()>0 && date.getText().toString().length()>0 && starttime.getText().toString().length()>0 && endtime.getText().toString().length()>0 && location.getText().toString().length()>0){
-					
-					
-					
-					/*if(date_selected1.equals(null)){
-						date_selected1="";
-					}
-					if(date_selected2.equals(null)){
-						date_selected2="";
-					}
-					if(date_selected3.equals(null)){
-						date_selected3="";
-					}*/
-					if(date_selected1.equals(null)){
+				 
+				 if(date_selected1.equals(null)){
 						date_selected1="";
 					}
 					else{
@@ -794,6 +1139,139 @@ date3.setOnClickListener(new OnClickListener() {
 					if(endtime_selected1.equals(null)){
 						endtime_selected1="";
 					}
+					
+					System.out.println(">>>>>>>>>>>>"+date_selected1+" "+starttime_selected1+" "+endtime_selected1);
+				 if(date_selected1.equals("")&&starttime_selected1.equals("")&&endtime_selected1.equals("")){
+					 System.out.println("1");
+				 }else if(date_selected1.length()>0 && starttime_selected1.length()>0 && endtime_selected1.length()>0 ){
+					 System.out.println("2");
+				 }else{
+					 System.out.println("3");
+					 new AlertDialog.Builder(getActivity())
+					    .setTitle("Invalid entry")
+					    .setMessage("Please fill all alternate date/time for first block ")
+					    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					        public void onClick(DialogInterface dialog, int which) { 
+					        	
+					        	return;
+					        }
+					     })
+					   
+					    .setIcon(android.R.drawable.ic_dialog_alert)
+					     .show();
+					 return;
+				 }
+				 if(date_selected2.equals("")&&starttime_selected2.equals("")&&endtime_selected2.equals("")){
+					 System.out.println("1");
+				 }else if(date_selected2.length()>0 && starttime_selected2.length()>0 && endtime_selected2.length()>0 ){
+					 System.out.println("2");
+				 }else{
+					 System.out.println("3");
+					 new AlertDialog.Builder(getActivity())
+					    .setTitle("Invalid entry")
+					    .setMessage("Please fill all alternate date/time for second block ")
+					    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					        public void onClick(DialogInterface dialog, int which) { 
+					        	
+					        	return;
+					        }
+					     })
+					   
+					    .setIcon(android.R.drawable.ic_dialog_alert)
+					     .show();
+					 return;
+				 }
+				 if(date_selected3.equals("")&&starttime_selected3.equals("")&&endtime_selected3.equals("")){
+					 System.out.println("1");
+				 }else if(date_selected3.length()>0 && starttime_selected3.length()>0 && endtime_selected3.length()>0 ){
+					 System.out.println("2");
+				 }else{
+					 System.out.println("3");
+					 new AlertDialog.Builder(getActivity())
+					    .setTitle("Invalid entry")
+					    .setMessage("Please fill all alternate date/time for third block ")
+					    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					        public void onClick(DialogInterface dialog, int which) { 
+					        	
+					        	return;
+					        }
+					     })
+					   
+					    .setIcon(android.R.drawable.ic_dialog_alert)
+					     .show();
+					 return;
+				 }
+ 
+				 try {
+					
+				
+				if(child_id.length()>0 && friend_id.length()>0 && date.getText().toString().length()>0 && starttime.getText().toString().length()>0 && endtime.getText().toString().length()>0 && location.getText().toString().length()>0){
+					
+					
+					
+					/*if(date_selected1.equals(null)){
+						date_selected1="";
+					}
+					if(date_selected2.equals(null)){
+						date_selected2="";
+					}
+					if(date_selected3.equals(null)){
+						date_selected3="";
+					}*/
+					/*if(date_selected1.equals(null)){
+						date_selected1="";
+					}
+					else{
+						 try {
+							date_2=sdf.parse(date_selected1);
+							 eventdate1 = destDf.format(date_2);
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					if(date_selected2.equals(null)){
+						date_selected2="";
+					}
+					else{
+						try {
+							date_3=sdf.parse(date_selected2);
+							 eventdate2 = destDf.format(date_3);
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					if(date_selected3.equals(null)){
+						date_selected3="";
+					}
+					else{
+						try {
+							date_4=sdf.parse(date_selected3);
+							 eventdate3 = destDf.format(date_4);
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					if(starttime_selected1.equals(null)){
+						starttime_selected1="";
+					}
+					if(starttime_selected2.equals(null)){
+						starttime_selected2="";
+					}
+					if(starttime_selected3.equals(null)){
+						starttime_selected3="";
+					}
+					if(endtime_selected3.equals(null)){
+						endtime_selected3="";
+					}
+					if(endtime_selected2.equals(null)){
+						endtime_selected2="";
+					}
+					if(endtime_selected1.equals(null)){
+						endtime_selected1="";
+					}*/
 					cd=new ConnectionDetector(getActivity());
 					isInternetPresent = cd.isConnectingToInternet();
 					 if (isInternetPresent) {
@@ -898,7 +1376,7 @@ date3.setOnClickListener(new OnClickListener() {
 			}
 		});*/
 
-child.setOnItemSelectedListener(new OnItemSelectedListener() 
+/*child.setOnItemSelectedListener(new OnItemSelectedListener() 
 {
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) 
     {
@@ -939,9 +1417,9 @@ child.setOnItemSelectedListener(new OnItemSelectedListener()
        System.out.println("..................."+child_id);
         
         if(selectedItem.equals("Add new category"))
-        {/*childname child_name=new childname();
+        {childname child_name=new childname();
         
-        String child_id=child_name.getId();*/
+        String child_id=child_name.getId();
              // do your stuff
         }
 
@@ -964,11 +1442,38 @@ friend.setOnItemSelectedListener(new OnItemSelectedListener()
        // String parent_id=friend_name_child.getparent_id(child_friend_name.get(position));
         _items=child_friend_name;
         
-        receiver_id=_items.get(position).getparent_id();
+        receiver_id=child_name_list_friend.get(position).g_id;
         System.out.println("parent_child_friend.............."+parent_id);
          friend_id=friend_id_forspinner.get(position);
+        String image_url_1= friend_profilepic.get(position);
          System.out.println("..................."+child_id);
-    
+         imageLoader.DisplayImage(image_url_1, child_friend_image);
+         child_friend_image.requestLayout();
+         int density = getResources().getDisplayMetrics().densityDpi;
+		  switch (density) {
+		  case DisplayMetrics.DENSITY_LOW:
+			  child_friend_image.getLayoutParams().height = 40;
+			  child_friend_image.getLayoutParams().width = 40;
+			 
+			  break;
+		  case DisplayMetrics.DENSITY_MEDIUM:
+			  child_friend_image.getLayoutParams().height = 85;
+			  child_friend_image.getLayoutParams().width = 85;
+			  break;
+		  case DisplayMetrics.DENSITY_HIGH:
+			  child_friend_image.getLayoutParams().height = 85;
+			  child_friend_image.getLayoutParams().width = 85;
+			  break;
+		  case DisplayMetrics.DENSITY_XHIGH:
+			  child_friend_image.getLayoutParams().height = 120;
+			  child_friend_image.getLayoutParams().width = 120;
+			  break;
+		  case DisplayMetrics.DENSITY_XXHIGH:
+			  child_friend_image.getLayoutParams().height = 120;
+			  child_friend_image.getLayoutParams().width = 120;
+			  break;
+			  
+		  }
         
          
         if(selectedItem.equals("Add new category"))
@@ -984,7 +1489,7 @@ friend.setOnItemSelectedListener(new OnItemSelectedListener()
 		// TODO Auto-generated method stub
 		
 	}
-});
+});*/
 		final Home home=new Home();
         
       
@@ -1052,12 +1557,37 @@ DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDat
 	        	year1="0"+year1;
 	        	
 	        }
-	       String date_generated=day+"-"+month+"-"+year1; 
+	       String date_generated=day+"/"+month+"/"+year1; 
+	       
+
+	    	   
+	    	   SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy");
+				
+				 Date date_1=null;
+				 try {
+					 date_1=sdf.parse(date_generated);
+					
+					 
+					 
+				} catch (ParseException e) {
+					
+					e.printStackTrace();
+				}
+				 SimpleDateFormat destDf = new SimpleDateFormat("dd/MM/yy");
+				
+				  String date_to_set=null;             
+			
+				             // format the date into another format
+				try {
+					date_to_set = destDf.format(date_1);
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
 	       
 	       try{
 
-			      SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
-			       Date date1_1 = formatter.parse(date_generated);
+			      SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
+			       Date date1_1 = formatter.parse(date_to_set);
 			       Date date2_2 = formatter.parse(date_comparision);
 			    if (date1_1.compareTo(date2_2)<0)
 			    {
@@ -1097,19 +1627,15 @@ DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDat
 		    // TODO Auto-generated catch block
 		    e1.printStackTrace();
 		                        }
-	   
+	       
 	     
 	    }
 	};
-	
-	
-	TimePickerDialog.OnTimeSetListener mTimelistener = new TimePickerDialog.OnTimeSetListener() {
+	CustomTimePickerDialog.OnTimeSetListener mTimelistener = new CustomTimePickerDialog.OnTimeSetListener() {
 		
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-			
-			Log.e("Min==",""+minute);
-			// TODO Auto-generated method stub
+		
 			if(clicked==true){
 				clicked=false;
 			String hour_s=String.valueOf(hourOfDay);
@@ -1121,8 +1647,6 @@ DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDat
 			int length1=minut_s.length();
 			if(length1==1){
 				minut_s="0"+String.valueOf(minute);
-				
-				Log.e("Minutes15==",""+minut_s);
 			}
 			
 			
@@ -1153,7 +1677,7 @@ DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDat
 					    	new AlertDialog.Builder(getActivity())
 							
 						    .setTitle("Invalid Entry")
-						    .setMessage("Start time can't greater than or equal start time")
+						    .setMessage("Start time can't greater than or equal end time")
 						    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
 						        public void onClick(DialogInterface dialog, int which) { 
 						        		return;			        	
@@ -1164,6 +1688,7 @@ DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDat
 						     .show();
 					    	
 		                }else{
+		                	
 		                	 if(start_dialog==0){
 		                		 starttime.setText(time);
 						       }
@@ -1190,7 +1715,7 @@ DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDat
 		}
 		
 	};
-	TimePickerDialog.OnTimeSetListener mTimelistenerto = new TimePickerDialog.OnTimeSetListener() {
+	CustomTimePickerDialog.OnTimeSetListener mTimelistenerto = new CustomTimePickerDialog.OnTimeSetListener() {
 		
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -1286,9 +1811,15 @@ ProgressDialog dialog=new ProgressDialog(getActivity());
 	@Override
 protected void onPreExecute() {
 		friend_id_repeat_check.clear();
-		dialog.setMessage("Loading.......please wait");
-		dialog.setCancelable(false);
-		dialog.show();
+	
+		try {
+			dialog.setMessage("Loading.......please wait");
+			dialog.setCancelable(false);
+			dialog.show();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
 		url="http://54.191.67.152/playdate/guardianfriend_child.php";//?g_id=46&friend_fbid=%2750%27,%2746%27
 	}
 	
@@ -1340,7 +1871,7 @@ protected void onPreExecute() {
 		}
 
         try {
-			String sResponse = reader.readLine();
+			/*String sResponse = reader.readLine();
 			
 			System.out.println("response"+sResponse);
 			JSONObject json = null;
@@ -1379,7 +1910,7 @@ protected void onPreExecute() {
 				
 				for(int i=0;i<jarrayfriend.length();i++){
 					
-					 childfriendname friend_name_child= new childfriendname();
+					childname child_name_friend = new childname();
 					JSONObject jsonarrayobj1=jarrayfriend.getJSONObject(i);
 					
 					if(friend_id_repeat_check.contains(jsonarrayobj1.optString("child_id"))){
@@ -1387,13 +1918,134 @@ protected void onPreExecute() {
 					}else{
 						friend_id_repeat_check.add(jsonarrayobj1.optString("child_id"));
 						String name=jsonarrayobj1.optString("name");
+						String profile_pic_friend=jsonarrayobj1.optString("c_profile_image");
 						String name1=name.toUpperCase();
 						friend_name_child.setName(name1);
 						friend_name_child.setId(jsonarrayobj1.optString("child_id"));
 						friend_name_child.setparent_id(jsonarrayobj1.optString("g_id"));
 						child_friend_name.add(friend_name_child);
+						friend_profilepic.add(profile_pic_friend);
 						friend_name_forspinner.add(jsonarrayobj1.optString("name"));
 						friend_id_forspinner.add(jsonarrayobj1.optString("child_id"));
+						
+						
+						childname child_name = new childname();
+						
+						JSONObject jsonarrayobj=jarray.getJSONObject(i);
+						String name=jsonarrayobj1.optString("name");
+						name=name.toUpperCase();
+						child_name_friend.name=name;
+						child_name_friend.g_id= jsonarrayobj1.optString("g_id");
+						child_name_friend.id=jsonarrayobj1.optString("child_id");
+						//child_name_friend.date_of_birth=jsonarrayobj1.optString("dob");
+						child_name_friend.freetime=jsonarrayobj1.optString("c_set_fixed_freetime");
+						child_name_friend.allergies=jsonarrayobj1.optString("allergies");
+						child_name_friend.hobbies=jsonarrayobj1.optString("hobbies");
+						child_name_friend.school=jsonarrayobj1.optString("school");
+						child_name_friend.youthclub=jsonarrayobj1.optString("youth_club");
+						child_name_friend.child_profile=jsonarrayobj1.optString("c_profile_image");
+						friend_profilepic.add(jsonarrayobj1.optString("c_profile_image"));
+//						child_name.setId(jsonarrayobj.optString("child_id"));
+						 child_name_list_friend.add(child_name_friend);
+						 friend_name_forspinner.add(jsonarrayobj1.optString("name"));
+						 friend_id_forspinner.add(jsonarrayobj1.optString("child_id"));
+					}
+					
+					
+				}
+				
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} 
+				// child_name.setName(json.optString("name"));
+				 
+			
+			
+			
+				
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        */
+String sResponse = reader.readLine();
+			
+			System.out.println("response"+sResponse);
+			JSONObject json = null;
+			try {
+				json = new JSONObject(sResponse);
+				
+				JSONArray jarray=json.getJSONArray("guardianchild");
+				for(int i=0;i<jarray.length();i++){
+					childname child_name = new childname();
+					
+					JSONObject jsonarrayobj=jarray.getJSONObject(i);
+					String name=jsonarrayobj.optString("Childname");
+					name=name.toUpperCase();
+					child_name.name=name;
+					child_name.id=jsonarrayobj.optString("child_id");
+					child_name.date_of_birth=jsonarrayobj.optString("dob");
+					child_name.freetime=jsonarrayobj.optString("c_set_fixed_freetime");
+					child_name.allergies=jsonarrayobj.optString("allergies");
+					child_name.hobbies=jsonarrayobj.optString("hobbies");
+					child_name.school=jsonarrayobj.optString("school");
+					child_name.youthclub=jsonarrayobj.optString("youth_club");
+					child_name.child_profile=jsonarrayobj.optString("c_profile_image");
+//					child_name.setId(jsonarrayobj.optString("child_id"));
+					 child_name_list.add(child_name);
+					 //child_name_forspinner.add(jsonarrayobj.optString("Childname"));
+					// child_id_forspinner.add(jsonarrayobj.optString("child_id"));
+					
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+				
+				JSONArray jarrayfriend;
+				try {
+					jarrayfriend = json.getJSONArray("data");
+				
+				for(int i=0;i<jarrayfriend.length();i++){
+					
+					childname child_name_friend = new childname();
+					JSONObject jsonarrayobj1=jarrayfriend.getJSONObject(i);
+					
+					if(friend_id_repeat_check.contains(jsonarrayobj1.optString("child_id"))){
+						
+					}else{
+						friend_id_repeat_check.add(jsonarrayobj1.optString("child_id"));
+						/*String name=jsonarrayobj1.optString("name");
+						String profile_pic_friend=jsonarrayobj1.optString("c_profile_image");
+						String name1=name.toUpperCase();
+						friend_name_child.setName(name1);
+						friend_name_child.setId(jsonarrayobj1.optString("child_id"));
+						friend_name_child.setparent_id(jsonarrayobj1.optString("g_id"));
+						child_friend_name.add(friend_name_child);
+						friend_profilepic.add(profile_pic_friend);
+						friend_name_forspinner.add(jsonarrayobj1.optString("name"));
+						friend_id_forspinner.add(jsonarrayobj1.optString("child_id"));
+						
+						
+						childname child_name = new childname();
+						
+						JSONObject jsonarrayobj=jarray.getJSONObject(i);*/
+						String name=jsonarrayobj1.optString("name");
+						name=name.toUpperCase();
+						child_name_friend.name=name;
+						child_name_friend.g_id= jsonarrayobj1.optString("g_id");
+						child_name_friend.id=jsonarrayobj1.optString("child_id");
+						//child_name_friend.date_of_birth=jsonarrayobj1.optString("dob");
+						child_name_friend.freetime=jsonarrayobj1.optString("c_set_fixed_freetime");
+						child_name_friend.allergies=jsonarrayobj1.optString("allergies");
+						child_name_friend.hobbies=jsonarrayobj1.optString("hobbies");
+						child_name_friend.school=jsonarrayobj1.optString("school");
+						child_name_friend.youthclub=jsonarrayobj1.optString("youth_club");
+						child_name_friend.child_profile=jsonarrayobj1.optString("c_profile_image");
+						friend_profilepic.add(jsonarrayobj1.optString("c_profile_image"));
+//						child_name.setId(jsonarrayobj.optString("child_id"));
+						 child_name_list_friend.add(child_name_friend);
+						 //friend_name_forspinner.add(jsonarrayobj1.optString("name"));
+						// friend_id_forspinner.add(jsonarrayobj1.optString("child_id"));
 					}
 					
 					
@@ -1417,9 +2069,14 @@ protected void onPreExecute() {
 		return null;
 	}
 protected void onPostExecute(String resultt) {
+	try {
 		dialog.dismiss();
-		friend.setAdapter(new ArrayAdapter<String>(getActivity(),R.layout.textview, friend_name_forspinner));
-		 child.setAdapter(new ArrayAdapter<String>(getActivity(), R.layout.textview, child_name_forspinner));
+	} catch (Exception e) {
+		// TODO: handle exception
+	}
+//	friend.setAdapter(new ArrayAdapter<String>(getActivity(), R.layout.textview,android.R.layout.simple_list_item_1, friend_name_forspinner));	
+	//	friend.setAdapter(new ArrayAdapter<String>(getActivity(),R.layout.textview, friend_name_forspinner));
+	//	 child.setAdapter(new ArrayAdapter<String>(getActivity(), R.layout.textview, child_name_forspinner));
 		 
 		 }
 }
@@ -1441,7 +2098,7 @@ protected void onPreExecute() {
 		HttpClient httpClient = new DefaultHttpClient();
         HttpContext localContext = new BasicHttpContext();
         HttpPost httpPost = new HttpPost(url);
-       
+        
         ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
         nameValuePairs.add(new BasicNameValuePair("child_id",child_id));
         nameValuePairs.add(new BasicNameValuePair("friend_childid",friend_id));
@@ -1581,7 +2238,8 @@ protected void onPostExecute(String resultt) {
 		dialog.dismiss();
 
 if(success.equals("1") && publish.equals("1")){
-	
+	time="";
+	time_to="";
 	
 	location.setText("");
 	date.setText("");
@@ -1627,12 +2285,14 @@ else{
 		 
 		 }
 }
+
+
 public static class CustomTimePickerDialog extends TimePickerDialog{
 	 
     public static final int TIME_PICKER_INTERVAL=15;
     private boolean mIgnoreEvent=false;
 
-    public CustomTimePickerDialog(Context context, OnTimeSetListener callBack, int hourOfDay, int minute, boolean is24HourView) {
+    public CustomTimePickerDialog(Context context, int apptheme,OnTimeSetListener callBack, int hourOfDay, int minute, boolean is24HourView) {
     super(context, callBack, hourOfDay, minute, is24HourView);
     }
 
@@ -1657,6 +2317,112 @@ public static class CustomTimePickerDialog extends TimePickerDialog{
         return minute;
     }
 }
+public class LazyAdapter extends BaseAdapter {
+	String _imgurl = "";
+	private Activity activity;
+	private ArrayList<childname> _items;
+	private LayoutInflater inflater = null;
+
+	
+
+	public ImageLoader imageLoader;
+
+	
+
+	public LazyAdapter(Activity activity, ArrayList<childname> getcat_for_sets) {
+
+		
+		this.activity = activity;
+		this._items = getcat_for_sets;
+		try {
+			inflater = (LayoutInflater) getActivity()
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		imageLoader = new ImageLoader(getActivity());
 	}
 
-//http://sunil-android.blogspot.in/2013/09/lazy-loading-image-download-from.html
+	public int getCount() {
+		return _items.size();
+	}
+
+	public Object getItem(int position) {
+		return position;
+	}
+
+	public long getItemId(int position) {
+		return position;
+	}
+
+
+	class ViewHolder {
+		public TextView event_title, event_date;
+		public ImageView _image = null;
+
+	}
+
+	public View getView(final int position, View convertView,
+			ViewGroup parent) {
+		View vi = convertView;
+		ViewHolder _holder;
+		if (convertView == null) {
+			convertView = inflater
+					.inflate(R.layout.parent_sets, null);
+			_holder = new ViewHolder();
+
+			_holder.event_title = (TextView) convertView
+					.findViewById(R.id.textView11);
+			_holder._image = (ImageView) convertView
+					.findViewById(R.id.imageView11);
+		
+			convertView.setTag(_holder);
+		} else {
+			_holder = (ViewHolder) convertView.getTag();
+		}
+		String name_of_child=_items.get(position).name;
+		name_of_child=name_of_child.toUpperCase();
+		_holder.event_title.setText(name_of_child);
+		
+		_imgurl = _items.get(position).child_profile;
+		
+		Log.d("", "_imgurl" + _imgurl);
+		Log.d("", "_imgurl" + _imgurl);
+		Log.d("", "_imgurl" + _imgurl);
+		Log.d("", "_imgurl" + _imgurl);
+		Log.d("", "_imgurl" + _imgurl);
+		_holder._image.setTag(_imgurl);
+		imageLoader.DisplayImage(_imgurl,_holder._image);
+		
+		_holder._image.requestLayout();
+		 int density = getResources().getDisplayMetrics().densityDpi;
+		  switch (density) {
+		  case DisplayMetrics.DENSITY_LOW:
+			  _holder._image.getLayoutParams().height = 40;
+			  _holder._image.getLayoutParams().width = 40;
+			 
+			  break;
+		  case DisplayMetrics.DENSITY_MEDIUM:
+			  _holder._image.getLayoutParams().height = 85;
+			  _holder._image.getLayoutParams().width = 85;
+			  break;
+		  case DisplayMetrics.DENSITY_HIGH:
+			  _holder._image.getLayoutParams().height = 85;
+			  _holder._image.getLayoutParams().width = 85;
+			  break;
+		  case DisplayMetrics.DENSITY_XHIGH:
+			  _holder._image.getLayoutParams().height = 120;
+			  _holder._image.getLayoutParams().width = 120;
+			  break;
+		  case DisplayMetrics.DENSITY_XXHIGH:
+			  _holder._image.getLayoutParams().height = 120;
+			  _holder._image.getLayoutParams().width = 120;
+			  break;
+		  }
+		
+		return convertView;
+	}
+}
+	}
+

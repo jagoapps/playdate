@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Window;
 
+import com.crittercism.app.Crittercism;
 import com.flurry.android.FlurryAgent;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.iapp.playdate.R;
@@ -15,8 +17,11 @@ public class Splash_screen extends Activity {
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.splashscreen);
-
+		Crittercism.initialize(getApplicationContext(), "548035400729df790700000d");
+		
+		
 		new Handler().postDelayed(new Runnable() {
 			@Override
 			public void run() {
@@ -42,5 +47,10 @@ public class Splash_screen extends Activity {
 		FlurryAgent.onEndSession(this);
 		 EasyTracker.getInstance(this).activityStop(this); 
 	}
-
+@Override
+protected void onResume() {
+	// TODO Auto-generated method stub
+	super.onResume();
+	com.facebook.AppEventsLogger.activateApp(this, "272047936334195");
+}
 }

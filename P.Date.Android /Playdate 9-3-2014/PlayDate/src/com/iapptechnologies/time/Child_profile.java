@@ -2,6 +2,8 @@ package com.iapptechnologies.time;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,14 +38,20 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
+import android.app.TimePickerDialog.OnTimeSetListener;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -59,11 +67,13 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.NumberPicker.OnValueChangeListener;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.NumberPicker;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -71,16 +81,20 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.iapp.playdate.R;
-
+import com.iapptechnologies.time.Parent_profile.parent_pic_update;
 
 public class Child_profile extends android.support.v4.app.Fragment {
-	int RESULT_LOAD_IMAGE = 1, dayselect = 0,count_alert=0;
+	int RESULT_LOAD_IMAGE = 1, dayselect = 0, count_alert = 0;
 	EditText dob, setfixedfree_time, allergies, hobbies, school,
-			youthclub, name, editallergies, edit_hobbies;
+			name, editallergies, edit_hobbies;//youthclub
 	ImageView child_image;
 	String data, url, child_name, child_ID, child_profile_pic, child_hobbies,
 			child_allergies, child_conditions, child_school, child_youthclub,
-			guardian_id, child_dob, free_time_child, urlreturned,child_parent_id;
+			guardian_id, child_dob, free_time_child, urlreturned,
+			child_parent_id;
+	 String picker_days="";
+	 String picker_hr_from="", picker_min_from="", picker_hr_to="", picker_min_to="",free_time_picker="";
+	
 	ImageLoader imageLoader;
 	ListView list_parent;
 	Bitmap imageData;
@@ -88,7 +102,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 	ArrayList<String> parent_id;
 	ArrayList<Getcatagory_for_sets> parentItems;
 	LazyAdapter adapter;
-	Button addmore_freetime, update_info;
+	Button addmore_freetime, update_info, back_button, unlinkButton;
 	String name_update, dob_update, freetime_update, allergies_update,
 			hobbies_update, conditions_update, school_update, youthclub_update,
 			phone_number;
@@ -99,26 +113,27 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			user_guardian_id, date_of_birth_child, parent_name,
 			parent_profilepic;
 	private int myYear, myMonth, myDay;
-	String date_comparision,days = "", daysadd = "", time, facebook_friends;
+	String date_comparision, days = "", daysadd = "", time, facebook_friends;
 	int hours, minutes;
 	String allergies_selected = "", hobbies_selected = "", parent_freetime,
 			date_of_birth_of_parent, parent_type, parent_location, fb_id;
 	// for checking checkboxes clicking allergies
-	int i = 1, i2 = 1, i3 = 1, i4 = 1, i5 = 1, i6 = 1, i7 = 1, i8 = 1, i9 = 1,
-			i10 = 1, i11 = 1, i12 = 1, i13 = 1, i14 = 1, i15 = 1;;
+	int i_none = 1, i = 1, i2 = 1, i3 = 1, i4 = 1, i5 = 1, i6 = 1, i7 = 1,
+			i8 = 1, i9 = 1, i10 = 1, i11 = 1, i12 = 1, i13 = 1, i14 = 1,
+			i15 = 1;;
 	// for allergies
-	String nutMilk = "", egg = "", wheat = "", soyfish = "", corn = "",
-			gelate = "", seed = "", spices = "", grass = "", banana = "",
-			dairy = "", hay = "", insect = "", stings = "", celiacGluten = "",
-			other = "";
+	String none = "", nutMilk = "", egg = "", wheat = "", soyfish = "",
+			corn = "", gelate = "", seed = "", spices = "", grass = "",
+			banana = "", dairy = "", hay = "", insect = "", stings = "",
+			celiacGluten = "", other = "";
 	// for checkbox clicking hobbies
-	int ii = 1, ii2 = 1, ii3 = 1, ii4 = 1, ii5 = 1, ii6 = 1, ii7 = 1, ii8 = 1,
+	int ii_none=1,ii = 1, ii2 = 1, ii3 = 1, ii4 = 1, ii5 = 1, ii6 = 1, ii7 = 1, ii8 = 1,
 			ii9 = 1, ii10 = 1, ii11 = 1, ii12 = 1, ii13 = 1, ii14 = 1,
 			ii15 = 1, ii16 = 1, ii17 = 1, ii18 = 1, ii19 = 1, ii20 = 1,
 			ii21 = 1, ii22 = 1, ii23 = 1, ii24 = 1, ii25 = 1, ii26 = 1,
 			ii27 = 1, ii28 = 1, ii29 = 1;
 	// for hobbies
-	String cooking = "", dance = "", drama = "", drawing = "", lego = "",
+	String none_hobbies="",cooking = "", dance = "", drama = "", drawing = "", lego = "",
 			buildingMagicModel = "", painting = "", puzzles = "",
 			scrapbooking = "", sewing = "", singing = "", videogaming = "",
 			woodworking = "", writing = "", skating = "", otherhobbies = "",
@@ -137,54 +152,73 @@ public class Child_profile extends android.support.v4.app.Fragment {
 	public View onCreateView(final LayoutInflater inflater,
 			ViewGroup container, Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
-		ViewGroup view = (ViewGroup) inflater.inflate(R.layout.child_profile_show,
-				container, false);
-		getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+		ViewGroup view = (ViewGroup) inflater.inflate(
+				R.layout.child_profile_show, container, false);
+		getActivity().getWindow().setSoftInputMode(
+				WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 		Calendar c = Calendar.getInstance();
 		System.out.println("Current time => " + c.getTime());
-
-		SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
-		 date_comparision = df.format(c.getTime());
+Home.menu.setVisibility(View.GONE);
+		SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
+		date_comparision = df.format(c.getTime());
 		imageLoader = new ImageLoader(getActivity());
 		dob = (EditText) view.findViewById(R.id.textView_dob_child_profile);
-		setfixedfree_time = (EditText) view.findViewById(R.id.textView_freetime_child_profile);
-		//conditions = (EditText) view.findViewById(R.id.textView_condition_childprofile);
-		allergies = (EditText) view.findViewById(R.id.textView_child_profile_allergies);
-		hobbies = (EditText) view.findViewById(R.id.textView_child_profile_hobbies);
-		school = (EditText) view.findViewById(R.id.textView_child_profile_school);
-		youthclub = (EditText) view.findViewById(R.id.textView_child_profile_youthclub);
+		setfixedfree_time = (EditText) view
+				.findViewById(R.id.textView_freetime_child_profile);
+		// conditions = (EditText)
+		// view.findViewById(R.id.textView_condition_childprofile);
+		allergies = (EditText) view
+				.findViewById(R.id.textView_child_profile_allergies);
+		hobbies = (EditText) view
+				.findViewById(R.id.textView_child_profile_hobbies);
+		school = (EditText) view
+				.findViewById(R.id.textView_child_profile_school);
+		/*youthclub = (EditText) view
+				.findViewById(R.id.textView_child_profile_youthclub);*/
 		name = (EditText) view.findViewById(R.id.child_profile_name);
-		child_image = (ImageView) view.findViewById(R.id.imageView_child_profile);
-		list_parent = (ListView) view.findViewById(R.id.listView_child_profile_child);
-		addmore_freetime = (Button) view.findViewById(R.id.button1_add_moredays_child_profile);
+		child_image = (ImageView) view
+				.findViewById(R.id.imageView_child_profile);
+		list_parent = (ListView) view
+				.findViewById(R.id.listView_child_profile_child);
+		addmore_freetime = (Button) view
+				.findViewById(R.id.button1_add_moredays_child_profile);
 		update_info = (Button) view.findViewById(R.id.button_save_child_update);
+		unlinkButton = (Button) view.findViewById(R.id.unlink_child);
+		// back_button=(Button) view.findViewById(R.id.button_back);
 		try {
 
-		
-		parent_freetime = getArguments().getString("parent_freetime");
-		date_of_birth_of_parent = getArguments().getString("parent_dob");
-		parent_type = getArguments().getString("parent_type");
-		parent_location = getArguments().getString("parent_location");
-		fb_id = getArguments().getString("parent_fbid");
-		parent_name = getArguments().getString("parent_name");
-		parent_profilepic = getArguments().getString("parent_profilepic");
-		child_dob = getArguments().getString("dob");
-		child_name = getArguments().getString("child_name");
-		child_ID = getArguments().getString("Child_id");
-		child_profile_pic = getArguments().getString("Child_profilepic");
-		child_hobbies = getArguments().getString("hobbies");
-		child_allergies = getArguments().getString("allergies");
-		//child_conditions = getArguments().getString("conditions");
-		child_school = getArguments().getString("school");
-		child_youthclub = getArguments().getString("youthclub");
-		guardian_id = getArguments().getString("Child_guardianId");
-		free_time_child = getArguments().getString("free_time");
-		facebook_friends = getArguments().getString("facebook_friends");
-		phone_number = getArguments().getString("phone");
+			parent_freetime = getArguments().getString("parent_freetime");
+			date_of_birth_of_parent = getArguments().getString("parent_dob");
+			parent_type = getArguments().getString("parent_type");
+			parent_location = getArguments().getString("parent_location");
+			fb_id = getArguments().getString("parent_fbid");
+			parent_name = getArguments().getString("parent_name");
+			parent_profilepic = getArguments().getString("parent_profilepic");
+			child_dob = getArguments().getString("dob");
+			child_name = getArguments().getString("child_name");
+			child_ID = getArguments().getString("Child_id");
+			child_profile_pic = getArguments().getString("Child_profilepic");
+			child_hobbies = getArguments().getString("hobbies");
+			child_allergies = getArguments().getString("allergies");
+			// child_conditions = getArguments().getString("conditions");
+			child_school = getArguments().getString("school");
+			//child_youthclub = getArguments().getString("youthclub");
+			guardian_id = getArguments().getString("Child_guardianId");
+			free_time_child = getArguments().getString("free_time");
+			facebook_friends = getArguments().getString("facebook_friends");
+			phone_number = getArguments().getString("phone");
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		 new parent_profile_show().execute();
+		cd = new ConnectionDetector(getActivity());
+		if (GlobalVariable.appers_unlink_button) {
+			GlobalVariable.appers_unlink_button = false;
+			unlinkButton.setVisibility(View.VISIBLE);
+		} else {
+
+		}
+
+		new parent_profile_show().execute();
 		DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		Date date_of_birth = null;
 		try {
@@ -192,16 +226,28 @@ public class Child_profile extends android.support.v4.app.Fragment {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		DateFormat destDf = new SimpleDateFormat("dd-MM-yyyy");
-        String dob_formated = destDf.format(date_of_birth);
+		/*
+		 * back_button.setOnClickListener(new OnClickListener() {
+		 * 
+		 * @Override public void onClick(View v) { // TODO Auto-generated method
+		 * stub System.out.println("back pressed"); FragmentManager
+		 * fm=getActivity().getFragmentManager(); fm.popBackStack();
+		 * android.support.v4.app.FragmentManager
+		 * fm=getActivity().getSupportFragmentManager(); fm.popBackStack(); }
+		 * });
+		 */
+		DateFormat destDf = new SimpleDateFormat("dd/MM/yy");
+		String dob_formated = destDf.format(date_of_birth);
 
 		dob.setText(dob_formated);
 		setfixedfree_time.setText(free_time_child);
-		//conditions.setText(child_conditions);
+		Log.e("FreeeTime===", "" + free_time_child);
+
+		// conditions.setText(child_conditions);
 		allergies.setText(child_allergies);
 		hobbies.setText(child_hobbies);
 		school.setText(child_school);
-		youthclub.setText(child_youthclub);
+		//youthclub.setText(child_youthclub);
 		name.setText(child_name.toUpperCase());
 
 		dob.setFocusable(false);
@@ -220,44 +266,84 @@ public class Child_profile extends android.support.v4.app.Fragment {
 		int density = getResources().getDisplayMetrics().densityDpi;
 		switch (density) {
 		case DisplayMetrics.DENSITY_LOW:
-			child_image.getLayoutParams().height = 100;
-			child_image.getLayoutParams().width = 100;
+			child_image.getLayoutParams().height = 120;
+			child_image.getLayoutParams().width = 120;
 			list_parent.getLayoutParams().height = 100;
 			list_parent.getLayoutParams().width = 150;
+			unlinkButton.getLayoutParams().width = 150;
 			break;
 		case DisplayMetrics.DENSITY_MEDIUM:
-			child_image.getLayoutParams().height = 180;
-			child_image.getLayoutParams().width = 180;
+			child_image.getLayoutParams().height = 200;
+			child_image.getLayoutParams().width = 200;
 			list_parent.getLayoutParams().height = 180;
 			list_parent.getLayoutParams().width = 250;
+			unlinkButton.getLayoutParams().width = 250;
 			break;
 		case DisplayMetrics.DENSITY_HIGH:
-			child_image.getLayoutParams().height = 180;
-			child_image.getLayoutParams().width = 180;
+			child_image.getLayoutParams().height = 200;
+			child_image.getLayoutParams().width = 200;
 			list_parent.getLayoutParams().height = 180;
 			list_parent.getLayoutParams().width = 300;
+			unlinkButton.getLayoutParams().width = 300;
 
 			break;
 		case DisplayMetrics.DENSITY_XHIGH:
-			child_image.getLayoutParams().height = 250;
-			child_image.getLayoutParams().width = 250;
+			child_image.getLayoutParams().height = 280;
+			child_image.getLayoutParams().width = 280;
 			list_parent.getLayoutParams().height = 250;
 			list_parent.getLayoutParams().width = 350;
+			unlinkButton.getLayoutParams().width = 350;
 
 			break;
 		case DisplayMetrics.DENSITY_XXHIGH:
-			child_image.getLayoutParams().height = 250;
-			child_image.getLayoutParams().width = 250;
+			child_image.getLayoutParams().height = 300;
+			child_image.getLayoutParams().width = 300;
 			list_parent.getLayoutParams().height = 250;
 			list_parent.getLayoutParams().width = 350;
+			unlinkButton.getLayoutParams().width = 350;
 
 			break;
 		}
-		
-		
-		
+		isInternetPresent = cd.isConnectingToInternet();
+		unlinkButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				
+				new AlertDialog.Builder(getActivity())
+				.setTitle("Unlink child")
+				.setMessage("Would you like to unlink child? ")
+				.setPositiveButton("Yes",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int which) {
+								if (isInternetPresent) {
+									new unlink_child().execute();
+								} else {
+									Toast.makeText(getActivity(), "Please check internet",
+											Toast.LENGTH_LONG).show();
+								}
+								
+							}
+						})
+				.setNegativeButton("No",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int which) {
+
+								return;
+							}
+						}).setIcon(android.R.drawable.ic_dialog_alert)
+				.show();
+
+
+				
+
+			}
+		});
+
 		parentItems = new ArrayList<Getcatagory_for_sets>();
-		
 
 		list_parent.setOnItemClickListener(new OnItemClickListener() {
 
@@ -265,15 +351,15 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
 				// TODO Auto-generated method stub
-			
-				parent_name=parentItems.get(arg2).parent_name;
-				parent_profilepic=parentItems.get(arg2).parent_profilepic;
-				parent_freetime=parentItems.get(arg2).parent_freetime;
-				date_of_birth_of_parent=parentItems.get(arg2).parent_date_ofbirth;
-				parent_type=parentItems.get(arg2).parent_type;
-				parent_location=parentItems.get(arg2).parent_location;
-				guardian_id=parentItems.get(arg2).parent_id;
-				phone_number=parentItems.get(arg2).parent_phone;
+
+				parent_name = parentItems.get(arg2).parent_name;
+				parent_profilepic = parentItems.get(arg2).parent_profilepic;
+				parent_freetime = parentItems.get(arg2).parent_freetime;
+				date_of_birth_of_parent = parentItems.get(arg2).parent_date_ofbirth;
+				parent_type = parentItems.get(arg2).parent_type;
+				parent_location = parentItems.get(arg2).parent_location;
+				guardian_id = parentItems.get(arg2).parent_id;
+				phone_number = parentItems.get(arg2).parent_phone;
 				Bundle bundle = new Bundle();
 				bundle.putString("name", parent_name);
 				bundle.putString("url", parent_profilepic);
@@ -289,8 +375,16 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				android.support.v4.app.Fragment fragment = new Parent_profile();
 				fragment.setArguments(bundle);
 				android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
-				fragmentManager.beginTransaction()
-						.replace(R.id.content_frame, fragment).commit();
+				android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
+						.beginTransaction();
+				fragmentTransaction.replace(R.id.content_frame, fragment);
+				fragmentTransaction.addToBackStack("first4");
+				fragmentTransaction.commit();
+				/*
+				 * android.support.v4.app.FragmentManager fragmentManager =
+				 * getFragmentManager(); fragmentManager.beginTransaction()
+				 * .replace(R.id.content_frame, fragment).commit();
+				 */
 
 			}
 		});
@@ -299,7 +393,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 			@Override
 			public void onClick(View v) {
-				
+
 				new AlertDialog.Builder(getActivity())
 						.setTitle("Select Picture")
 						.setMessage("Complete action using")
@@ -312,43 +406,50 @@ public class Child_profile extends android.support.v4.app.Fragment {
 												Intent.ACTION_GET_CONTENT);
 										intent.setType("image/*");
 										intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-										startActivityForResult(intent,
-												RESULT_LOAD_IMAGE);
+										getActivity().startActivityForResult(
+												intent, RESULT_LOAD_IMAGE);
 									}
 								})
 						.setNegativeButton("Camera",
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int which) {
-										
-										
+
 										GlobalVariable.parent_picute_update = 2;
 										Intent it = new Intent(getActivity(),
 												Home.class);
-										
 
 										it.putExtra("child_dob", child_dob);
 
 										it.putExtra("child_name", child_name);
 										it.putExtra("child_ID", child_ID);
-										it.putExtra("child_profile_pic",child_profile_pic);
-										it.putExtra("child_hobbies",child_hobbies);
-										it.putExtra("child_allergies",child_allergies);
-										it.putExtra("child_conditions","");
-										it.putExtra("child_school",child_school);
-										it.putExtra("child_youthclub",child_youthclub);
-										it.putExtra("free_time_child",free_time_child);
+										it.putExtra("child_profile_pic",
+												child_profile_pic);
+										it.putExtra("child_hobbies",
+												child_hobbies);
+										it.putExtra("child_allergies",
+												child_allergies);
+										it.putExtra("child_conditions", "");
+										it.putExtra("child_school",
+												child_school);
+										it.putExtra("child_youthclub",
+												child_youthclub);
+										it.putExtra("free_time_child",
+												free_time_child);
 										it.putExtra("phone", phone_number);
 										it.putExtra("url", parent_profilepic);
 										it.putExtra("name", parent_name);
 										it.putExtra("firstname", parent_name);
 										it.putExtra("iD", fb_id);
 										it.putExtra("location", parent_location);
-										it.putExtra("dob",date_of_birth_of_parent);
+										it.putExtra("dob",
+												date_of_birth_of_parent);
 										it.putExtra("guardiantype", parent_type);
 										it.putExtra("freetime", parent_freetime);
-										it.putExtra("user_guardian_id",guardian_id);
-										it.putExtra("facebook_friends",facebook_friends);
+										it.putExtra("user_guardian_id",
+												guardian_id);
+										it.putExtra("facebook_friends",
+												facebook_friends);
 
 										getActivity().startActivity(it);
 									}
@@ -363,24 +464,51 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				count_alert=0;
+				count_alert = 0;
 				Calendar c = Calendar.getInstance();
 
 				myYear = c.get(Calendar.YEAR);
 				myMonth = c.get(Calendar.MONTH);
 				myDay = c.get(Calendar.DAY_OF_MONTH);
+
 				
-				try {
-					String date_from_edit_text = dob.getText().toString();
+					
+					try {
+						String date_from_edit_text = dob.getText().toString();
+						
+						SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yy");
+						// SimpleDateFormat sdf1=new SimpleDateFormat("dd-MMM-yy");
+						 Date date_1=null;//,date_2=null,date_3=null,date_4=null;
+						 try {
+							 date_1=sdf.parse(date_from_edit_text);
+							
+							 
+							 
+						} catch (ParseException e) {
+							
+							e.printStackTrace();
+						}
+						 SimpleDateFormat destDf = new SimpleDateFormat("yyyy-MM-dd");
+						
+						               
+					
+						             // format the date into another format
+						try {
+							date_from_edit_text = destDf.format(date_1);
+						} catch (Exception e) {
+							// TODO: handle exception
+						}
+						
+						
 					if (date_from_edit_text.equals("")
 							|| date_from_edit_text.equals(null)) {
 
 					} else {
 						String[] dateArr = date_from_edit_text.split("-");
 
-						myDay = Integer.parseInt(dateArr[0]);
+						myDay = Integer.parseInt(dateArr[2]);
 						myMonth = Integer.parseInt(dateArr[1]) - 1;
-						myYear = Integer.parseInt(dateArr[2]);
+						myYear = Integer.parseInt(dateArr[0]);
 					}
 
 				} catch (Exception e) {
@@ -398,7 +526,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			@Override
 			public void onClick(View v) {
 
-				hours = new Time(System.currentTimeMillis()).getHours();
+			/*	hours = new Time(System.currentTimeMillis()).getHours();
 				minutes = new Time(System.currentTimeMillis()).getMinutes();
 
 				LinearLayout viewGroup = (LinearLayout) getActivity()
@@ -435,16 +563,45 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 						clicked = true;
 
-						TimePickerDialog tiiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenermonto, hours,
-								minutes, true);
-						tiiPickerDialog.setTitle("TO");
-						tiiPickerDialog.show();
-						TimePickerDialog tiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenermon, hours,
-								minutes, true);
-						tiPickerDialog.setTitle("FROM");
-						tiPickerDialog.show();
+						// TimePickerDialog tiiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenermonto, hours,
+						// minutes, true);
+						// tiiPickerDialog.setTitle("TO");
+						// tiiPickerDialog.show();
+
+						CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenermonto,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
+						timePickerDialog.setTitle("TO");
+						timePickerDialog.show();
+
+						// TimePickerDialog tiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenermon, hours,
+						// minutes, true);
+						// tiPickerDialog.setTitle("FROM");
+						// tiPickerDialog.show();
+
+						CustomTimePickerDialog timePickerDialogg = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenermon,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
+						timePickerDialogg.setTitle("FROM");
+						timePickerDialogg.show();
 						popup.dismiss();
 
 					}
@@ -460,14 +617,43 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 						clicked = true;
 
-						TimePickerDialog tiiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenertueto, hours,
-								minutes, true);
-						tiiPickerDialog.setTitle("TO");
-						tiiPickerDialog.show();
-						TimePickerDialog tiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenertue, hours,
-								minutes, true);
+						// TimePickerDialog tiiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenertueto, hours,
+						// minutes, true);
+						// tiiPickerDialog.setTitle("TO");
+						// tiiPickerDialog.show();
+
+						CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenertueto,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
+						timePickerDialog.setTitle("TO");
+						timePickerDialog.show();
+
+						// TimePickerDialog tiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenertue, hours,
+						// minutes, true);
+						// tiPickerDialog.setTitle("FROM");
+						// tiPickerDialog.show();
+
+						CustomTimePickerDialog tiPickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenertue,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
 						popup.dismiss();
@@ -485,16 +671,46 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 						clicked = true;
 
-						TimePickerDialog tiiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenerwedto, hours,
-								minutes, true);
-						tiiPickerDialog.setTitle("TO");
-						tiiPickerDialog.show();
-						TimePickerDialog tiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenerwed, hours,
-								minutes, true);
+						// TimePickerDialog tiiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenerwedto, hours,
+						// minutes, true);
+						// tiiPickerDialog.setTitle("TO");
+						// tiiPickerDialog.show();
+
+						CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenerwedto,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
+						timePickerDialog.setTitle("TO");
+						timePickerDialog.show();
+
+						// TimePickerDialog tiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenerwed, hours,
+						// minutes, true);
+						// tiPickerDialog.setTitle("FROM");
+						// tiPickerDialog.show();
+
+						CustomTimePickerDialog tiPickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenerwed,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+
 						popup.dismiss();
 
 					}
@@ -509,16 +725,46 @@ public class Child_profile extends android.support.v4.app.Fragment {
 						dayselect = 4;
 						clicked = true;
 
-						TimePickerDialog tiiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenerthuto, hours,
-								minutes, true);
-						tiiPickerDialog.setTitle("TO");
-						tiiPickerDialog.show();
-						TimePickerDialog tiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenerthu, hours,
-								minutes, true);
+						// TimePickerDialog tiiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenerthuto, hours,
+						// minutes, true);
+						// tiiPickerDialog.setTitle("TO");
+						// tiiPickerDialog.show();
+
+						CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenerthuto,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
+						timePickerDialog.setTitle("TO");
+						timePickerDialog.show();
+
+						// TimePickerDialog tiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenerthu, hours,
+						// minutes, true);
+						// tiPickerDialog.setTitle("FROM");
+						// tiPickerDialog.show();
+
+						CustomTimePickerDialog tiPickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenerthu,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+
 						popup.dismiss();
 					}
 				});
@@ -533,17 +779,48 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 						clicked = true;
 
-						TimePickerDialog tiiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenerfrito, hours,
-								minutes, true);
-						tiiPickerDialog.setTitle("TO");
-						tiiPickerDialog.show();
-						TimePickerDialog tiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenerfri, hours,
-								minutes, true);
+						// TimePickerDialog tiiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenerfrito, hours,
+						// minutes, true);
+						// tiiPickerDialog.setTitle("TO");
+						// tiiPickerDialog.show();
 
+						CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenerfrito,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
+						timePickerDialog.setTitle("TO");
+						timePickerDialog.show();
+
+						//
+						// TimePickerDialog tiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenerfri, hours,
+						// minutes, true);
+						//
+						// tiPickerDialog.setTitle("FROM");
+						// tiPickerDialog.show();
+
+						CustomTimePickerDialog tiPickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenerfri,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+
 						popup.dismiss();
 
 					}
@@ -559,16 +836,46 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 						clicked = true;
 
-						TimePickerDialog tiiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenersatto, hours,
-								minutes, true);
-						tiiPickerDialog.setTitle("TO");
-						tiiPickerDialog.show();
-						TimePickerDialog tiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenersat, hours,
-								minutes, true);
+						// TimePickerDialog tiiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenersatto, hours,
+						// minutes, true);
+						// tiiPickerDialog.setTitle("TO");
+						// tiiPickerDialog.show();
+
+						CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenersatto,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
+						timePickerDialog.setTitle("TO");
+						timePickerDialog.show();
+
+						// TimePickerDialog tiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenersat, hours,
+						// minutes, true);
+						// tiPickerDialog.setTitle("FROM");
+						// tiPickerDialog.show();
+
+						CustomTimePickerDialog tiPickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenersat,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+
 						popup.dismiss();
 					}
 				});
@@ -583,19 +890,268 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 						clicked = true;
 
-						TimePickerDialog tiiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenersunto, hours,
-								minutes, true);
-						tiiPickerDialog.setTitle("TO");
-						tiiPickerDialog.show();
-						TimePickerDialog tiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenersun, hours,
-								minutes, true);
+						// TimePickerDialog tiiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenersunto, hours,
+						// minutes, true);
+						// tiiPickerDialog.setTitle("TO");
+						// tiiPickerDialog.show();
+
+						CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenersunto,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
+						timePickerDialog.setTitle("TO");
+						timePickerDialog.show();
+
+						// TimePickerDialog tiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenersun, hours,
+						// minutes, true);
+						// tiPickerDialog.setTitle("FROM");
+						// tiPickerDialog.show();
+
+						CustomTimePickerDialog tiPickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenersun,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+
 						popup.dismiss();
 					}
 				});
+*/
+				free_time_picker="";picker_days="";picker_hr_from="";picker_hr_to="";picker_min_from="";picker_min_to="";
+				LinearLayout viewGroup = (LinearLayout) getActivity().findViewById(R.id.numberpicker);
+				View layout = inflater.inflate(R.layout.number_picker, viewGroup);
+				final PopupWindow popup = new PopupWindow(getActivity());
+				popup.setContentView(layout);
+				popup.setWidth(WindowManager.LayoutParams.MATCH_PARENT);
+				popup.setHeight(WindowManager.LayoutParams.MATCH_PARENT);
+				popup.setFocusable(true);
+				int OFFSET_X = 0;
+				int OFFSET_Y = 0;
+				popup.setBackgroundDrawable(new BitmapDrawable());
+				popup.showAtLocation(getView(), Gravity.NO_GRAVITY, OFFSET_X,OFFSET_Y);
+				
+				
+				
+				NumberPicker npdays_=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_days);
+				NumberPicker np_hr_from=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_hr_from);
+				NumberPicker np_min_from=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_min_from);
+				NumberPicker np_hr_to=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_hr_to);
+				NumberPicker np_min_to=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_min_to);
+				
+				TextView btn_done_picker=(TextView) layout.findViewById(R.id.done_numberpicker);
+				TextView btn_cancel_picker=(TextView) layout.findViewById(R.id.cancel_numberpicker);
+				final TextView time_display=(TextView) layout.findViewById(R.id.time_numberpicker);
+				btn_cancel_picker.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+						popup.dismiss();
+					}
+				});
+				
+				btn_done_picker.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+						if(picker_hr_from.equals("") || picker_hr_to.equals("") ){
+							Toast.makeText(getActivity(),"Please select time", 2000).show();
+						}else{
+							if(picker_days.equals("")){
+								picker_days="Monday";
+							}
+							if(picker_min_from.equals("")){
+								picker_min_from="00";
+							}
+							if(picker_min_to.equals("")){
+								picker_min_to="00";
+							}
+							 int hr_picker_from=Integer.parseInt(picker_hr_from);
+						     	int min_picker_from=Integer.parseInt(picker_min_from);
+						     	int hr_picker_to=Integer.parseInt(picker_hr_to);
+						     	int min_picker_to=Integer.parseInt(picker_min_to);
+						     	
+						     	if(hr_picker_from<hr_picker_to){
+						     		 free_time_picker=picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to;
+						     		setfixedfree_time.setText(free_time_picker);
+						     		popup.dismiss();
+						     	}else if(hr_picker_from==hr_picker_to){
+						     		if(min_picker_from<min_picker_to){
+						     			 free_time_picker=picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to;
+						     			setfixedfree_time.setText(free_time_picker);
+						     			popup.dismiss();
+						     		}
+						     		else{
+						     			Toast.makeText(getActivity(), "Time from can't greater or equal to time to", 2000).show();
+						     		}
+						     	}else{
+						     		Toast.makeText(getActivity(), "Time from can't greater or equal to time to", 2000).show();
+						     	}
+						     	
+						
+						}
+					}
+				});
+				
+				String[] values=new String[7];
+				values[0]="Monday";
+				values[1]="Tuesday";
+				values[2]="Wednesday";
+				values[3]="Thursday";
+				values[4]="Friday";
+				values[5]="Saturday";
+				values[6]="Sunday";
+				npdays_.setMaxValue(values.length-1);
+				npdays_.setMinValue(0);
+				npdays_.setDisplayedValues(values);
+				
+				npdays_.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_days=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
+				
+				String[] values_hr=new String[24];
+				values_hr[0]="01";
+				values_hr[1]="02";
+				values_hr[2]="03";
+				values_hr[3]="04";
+				values_hr[4]="05";
+				values_hr[5]="06";
+				values_hr[6]="07";
+				values_hr[7]="08";
+				values_hr[8]="09";
+				values_hr[9]="10";
+				values_hr[10]="11";
+				values_hr[11]="12";
+				values_hr[12]="13";
+				values_hr[13]="14";
+				values_hr[14]="15";
+				values_hr[15]="16";
+				values_hr[16]="17";
+				values_hr[17]="18";
+				values_hr[18]="19";
+				values_hr[19]="20";
+				values_hr[20]="21";
+				values_hr[21]="22";
+				values_hr[22]="23";
+				values_hr[23]="24";
+				
+				
+				np_hr_from.setMaxValue(values_hr.length-1);
+				np_hr_from.setMinValue(0);
+				np_hr_from.setDisplayedValues(values_hr);
+				
+				np_hr_from.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_hr_from=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
+
+				np_hr_to.setMaxValue(values_hr.length-1);
+				np_hr_to.setMinValue(0);
+				np_hr_to.setDisplayedValues(values_hr);
+				
+				np_hr_to.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_hr_to=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
+				
+				String[] values_min=new String[4];
+				values_min[0]="00";
+				values_min[1]="15";
+				values_min[2]="30";
+				values_min[3]="45";
+				
+				np_min_from.setMaxValue(values_min.length-1);
+				np_min_from.setMinValue(0);
+				np_min_from.setDisplayedValues(values_min);
+				
+				np_min_from.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_min_from=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
+				
+				np_min_to.setMaxValue(values_min.length-1);
+				np_min_to.setMinValue(0);
+				np_min_to.setDisplayedValues(values_min);
+				
+				np_min_to.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_min_to=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
+				
 
 			}
 		});
@@ -604,7 +1160,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				hours = new Time(System.currentTimeMillis()).getHours();
+				/*hours = new Time(System.currentTimeMillis()).getHours();
 				minutes = new Time(System.currentTimeMillis()).getMinutes();
 
 				LinearLayout viewGroup = (LinearLayout) getActivity()
@@ -640,14 +1196,43 @@ public class Child_profile extends android.support.v4.app.Fragment {
 						// dayselect=1;
 						clicked = true;
 
-						TimePickerDialog tiiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenermonto, hours,
-								minutes, true);
-						tiiPickerDialog.setTitle("TO");
-						tiiPickerDialog.show();
-						TimePickerDialog tiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenermon, hours,
-								minutes, true);
+						// TimePickerDialog tiiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenermonto, hours,
+						// minutes, true);
+						// tiiPickerDialog.setTitle("TO");
+						// tiiPickerDialog.show();
+
+						CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenermonto,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
+						timePickerDialog.setTitle("TO");
+						timePickerDialog.show();
+
+						// TimePickerDialog tiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenermon, hours,
+						// minutes, true);
+						// tiPickerDialog.setTitle("FROM");
+						// tiPickerDialog.show();
+
+						CustomTimePickerDialog tiPickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenermon,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
 
@@ -665,14 +1250,43 @@ public class Child_profile extends android.support.v4.app.Fragment {
 						// dayselect=2;
 						clicked = true;
 
-						TimePickerDialog tiiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenertueto, hours,
-								minutes, true);
-						tiiPickerDialog.setTitle("TO");
-						tiiPickerDialog.show();
-						TimePickerDialog tiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenertue, hours,
-								minutes, true);
+						// TimePickerDialog tiiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenertueto, hours,
+						// minutes, true);
+						// tiiPickerDialog.setTitle("TO");
+						// tiiPickerDialog.show();
+
+						CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenertueto,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
+						timePickerDialog.setTitle("TO");
+						timePickerDialog.show();
+
+						// TimePickerDialog tiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenertue, hours,
+						// minutes, true);
+						// tiPickerDialog.setTitle("FROM");
+						// tiPickerDialog.show();
+
+						CustomTimePickerDialog tiPickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenertue,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
 
@@ -689,16 +1303,46 @@ public class Child_profile extends android.support.v4.app.Fragment {
 						// dayselect=3;
 						clicked = true;
 
-						TimePickerDialog tiiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenerwedto, hours,
-								minutes, true);
-						tiiPickerDialog.setTitle("TO");
-						tiiPickerDialog.show();
-						TimePickerDialog tiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenerwed, hours,
-								minutes, true);
+						// TimePickerDialog tiiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenerwedto, hours,
+						// minutes, true);
+						// tiiPickerDialog.setTitle("TO");
+						// tiiPickerDialog.show();
+
+						CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenerwedto,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
+						timePickerDialog.setTitle("TO");
+						timePickerDialog.show();
+
+						// TimePickerDialog tiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenerwed, hours,
+						// minutes, true);
+						// tiPickerDialog.setTitle("FROM");
+						// tiPickerDialog.show();
+
+						CustomTimePickerDialog tiPickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenerwed,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+
 						popup.dismiss();
 
 					}
@@ -713,14 +1357,43 @@ public class Child_profile extends android.support.v4.app.Fragment {
 						// dayselect=4;
 						clicked = true;
 
-						TimePickerDialog tiiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenerthuto, hours,
-								minutes, true);
-						tiiPickerDialog.setTitle("TO");
-						tiiPickerDialog.show();
-						TimePickerDialog tiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenerthu, hours,
-								minutes, true);
+						// TimePickerDialog tiiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenerthuto, hours,
+						// minutes, true);
+						// tiiPickerDialog.setTitle("TO");
+						// tiiPickerDialog.show();
+
+						CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenerthuto,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
+						timePickerDialog.setTitle("TO");
+						timePickerDialog.show();
+
+						// TimePickerDialog tiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenerthu, hours,
+						// minutes, true);
+						// tiPickerDialog.setTitle("FROM");
+						// tiPickerDialog.show();
+
+						CustomTimePickerDialog tiPickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenerthu,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
 
@@ -737,18 +1410,48 @@ public class Child_profile extends android.support.v4.app.Fragment {
 						// TODO Auto-generated method stub
 						// dayselect=5;
 						clicked = true;
+						//
+						// TimePickerDialog tiiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenerfrito, hours,
+						// minutes, true);
+						// tiiPickerDialog.setTitle("TO");
+						// tiiPickerDialog.show();
 
-						TimePickerDialog tiiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenerfrito, hours,
-								minutes, true);
-						tiiPickerDialog.setTitle("TO");
-						tiiPickerDialog.show();
-						TimePickerDialog tiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenerfri, hours,
-								minutes, true);
+						CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenerfrito,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
+						timePickerDialog.setTitle("TO");
+						timePickerDialog.show();
 
+						// TimePickerDialog tiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenerfri, hours,
+						// minutes, true);
+						//
+						// tiPickerDialog.setTitle("FROM");
+						// tiPickerDialog.show();
+
+						CustomTimePickerDialog tiPickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenerfri,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+
 						popup.dismiss();
 
 					}
@@ -763,16 +1466,46 @@ public class Child_profile extends android.support.v4.app.Fragment {
 						// dayselect=6;
 						clicked = true;
 
-						TimePickerDialog tiiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenersatto, hours,
-								minutes, true);
-						tiiPickerDialog.setTitle("TO");
-						tiiPickerDialog.show();
-						TimePickerDialog tiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenersat, hours,
-								minutes, true);
+						// TimePickerDialog tiiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenersatto, hours,
+						// minutes, true);
+						// tiiPickerDialog.setTitle("TO");
+						// tiiPickerDialog.show();
+
+						CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenerfrito,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
+						timePickerDialog.setTitle("TO");
+						timePickerDialog.show();
+
+						// TimePickerDialog tiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenersat, hours,
+						// minutes, true);
+						// tiPickerDialog.setTitle("FROM");
+						// tiPickerDialog.show();
+
+						CustomTimePickerDialog tiPickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenersat,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+
 						System.out.println(timechk6);
 						popup.dismiss();
 
@@ -785,22 +1518,265 @@ public class Child_profile extends android.support.v4.app.Fragment {
 					@Override
 					public void onClick(View v) {
 						clicked = true;
-						TimePickerDialog tiiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenersunto, hours,
-								minutes, true);
-						tiiPickerDialog.setTitle("TO");
-						tiiPickerDialog.show();
+						// TimePickerDialog tiiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenersunto, hours,
+						// minutes, true);
+						// tiiPickerDialog.setTitle("TO");
+						// tiiPickerDialog.show();
 
-						TimePickerDialog tiPickerDialog = new TimePickerDialog(
-								getActivity(), mTimesetlistenersun, hours,
-								minutes, true);
+						CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenersunto,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
+						timePickerDialog.setTitle("TO");
+						timePickerDialog.show();
+
+						// TimePickerDialog tiPickerDialog = new
+						// TimePickerDialog(
+						// getActivity(), mTimesetlistenersun, hours,
+						// minutes, true);
+						// tiPickerDialog.setTitle("FROM");
+						// tiPickerDialog.show();
+						// System.out.println(timechk7);
+
+						CustomTimePickerDialog tiPickerDialog = new CustomTimePickerDialog(
+								getActivity(),
+								mTimesetlistenersun,
+								Calendar.getInstance().get(Calendar.HOUR),
+								CustomTimePickerDialog
+										.getRoundedMinute(Calendar
+												.getInstance().get(
+														Calendar.MINUTE)
+												+ CustomTimePickerDialog.TIME_PICKER_INTERVAL),
+								true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
-						System.out.println(timechk7);
+
 						popup.dismiss();
 					}
 				});
+*/
+				
+				picker_days="";picker_hr_from="";picker_hr_to="";picker_min_from="";picker_min_to="";
+				LinearLayout viewGroup = (LinearLayout) getActivity().findViewById(R.id.numberpicker);
+				View layout = inflater.inflate(R.layout.number_picker, viewGroup);
+				final PopupWindow popup = new PopupWindow(getActivity());
+				popup.setContentView(layout);
+				popup.setWidth(WindowManager.LayoutParams.MATCH_PARENT);
+				popup.setHeight(WindowManager.LayoutParams.MATCH_PARENT);
+				popup.setFocusable(true);
+				int OFFSET_X = 0;
+				int OFFSET_Y = 0;
+				popup.setBackgroundDrawable(new BitmapDrawable());
+				popup.showAtLocation(getView(), Gravity.NO_GRAVITY, OFFSET_X,OFFSET_Y);
+				
+				NumberPicker npdays_=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_days);
+				NumberPicker np_hr_from=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_hr_from);
+				NumberPicker np_min_from=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_min_from);
+				NumberPicker np_hr_to=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_hr_to);
+				NumberPicker np_min_to=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_min_to);
+				final TextView time_display=(TextView) layout.findViewById(R.id.time_numberpicker);
+				TextView btn_done_picker=(TextView) layout.findViewById(R.id.done_numberpicker);
+				TextView btn_cancel_picker=(TextView) layout.findViewById(R.id.cancel_numberpicker);
+				
+				btn_cancel_picker.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+						popup.dismiss();
+					}
+				});
+				
+				btn_done_picker.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+						if(picker_hr_from.equals("") || picker_hr_to.equals("") ){
+							Toast.makeText(getActivity(),"Please select time", 2000).show();
+						}else{
+							if(picker_days.equals("")){
+								picker_days="Monday";
+							}
+							if(picker_min_from.equals("")){
+								picker_min_from="00";
+							}
+							if(picker_min_to.equals("")){
+								picker_min_to="00";
+							}
+							 int hr_picker_from=Integer.parseInt(picker_hr_from);
+						     	int min_picker_from=Integer.parseInt(picker_min_from);
+						     	int hr_picker_to=Integer.parseInt(picker_hr_to);
+						     	int min_picker_to=Integer.parseInt(picker_min_to);
+						     	
+						     	if(hr_picker_from<hr_picker_to){
+						     		 free_time_picker=free_time_picker +" "+picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to;
+						     		setfixedfree_time.setText(free_time_picker);
+						     		popup.dismiss();
+						     	}else if(hr_picker_from==hr_picker_to){
+						     		if(min_picker_from<min_picker_to){
+						     			 free_time_picker=free_time_picker +" "+picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to;
+						     			setfixedfree_time.setText(free_time_picker);
+						     			popup.dismiss();
+						     		}
+						     		else{
+						     			Toast.makeText(getActivity(), "Time from can't greater or equal to time to", 2000).show();
+						     		}
+						     	}else{
+						     		Toast.makeText(getActivity(), "Time from can't greater or equal to time to", 2000).show();
+						     	}
+						}
+					}
+				});
+				
+				String[] values=new String[7];
+				values[0]="Monday";
+				values[1]="Tuesday";
+				values[2]="Wednesday";
+				values[3]="Thursday";
+				values[4]="Friday";
+				values[5]="Saturday";
+				values[6]="Sunday";
+				npdays_.setMaxValue(values.length-1);
+				npdays_.setMinValue(0);
+				npdays_.setDisplayedValues(values);
+				
+				npdays_.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						 picker_days=values_picked[newVal];
+						 time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
 
+					}
+				});
+				
+				String[] values_hr=new String[24];
+				values_hr[0]="01";
+				values_hr[1]="02";
+				values_hr[2]="03";
+				values_hr[3]="04";
+				values_hr[4]="05";
+				values_hr[5]="06";
+				values_hr[6]="07";
+				values_hr[7]="08";
+				values_hr[8]="09";
+				values_hr[9]="10";
+				values_hr[10]="11";
+				values_hr[11]="12";
+				values_hr[12]="13";
+				values_hr[13]="14";
+				values_hr[14]="15";
+				values_hr[15]="16";
+				values_hr[16]="17";
+				values_hr[17]="18";
+				values_hr[18]="19";
+				values_hr[19]="20";
+				values_hr[20]="21";
+				values_hr[21]="22";
+				values_hr[22]="23";
+				values_hr[23]="24";
+				
+				np_hr_from.setMaxValue(values_hr.length-1);
+				np_hr_from.setMinValue(0);
+				np_hr_from.setDisplayedValues(values_hr);
+				
+				np_hr_from.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_hr_from=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
+
+				np_hr_to.setMaxValue(values_hr.length-1);
+				np_hr_to.setMinValue(0);
+				np_hr_to.setDisplayedValues(values_hr);
+				
+				np_hr_to.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_hr_to=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
+				
+				String[] values_min=new String[4];
+				values_min[0]="00";
+				values_min[1]="15";
+				values_min[2]="30";
+				values_min[3]="45";
+				
+				np_min_from.setMaxValue(values_min.length-1);
+				np_min_from.setMinValue(0);
+				np_min_from.setDisplayedValues(values_min);
+				
+				np_min_from.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_min_from=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
+				
+				np_min_to.setMaxValue(values_min.length-1);
+				np_min_to.setMinValue(0);
+				np_min_to.setDisplayedValues(values_min);
+				
+				np_min_to.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_min_to=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
+				
 			}
 		});
 		allergies.setOnClickListener(new OnClickListener() {
@@ -808,23 +1784,21 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				
+
 				allergies.setText("");
 
-				
 				// Inflate the popup_layout.xml
 				LinearLayout viewGroup = (LinearLayout) getActivity()
 						.findViewById(R.id.popup_allergies);
 				System.out.println("view Started11");
 
-				
 				System.out.println("view Started22");
 				View layout = inflater.inflate(R.layout.allergies, viewGroup);
 				System.out.println("view Started33");
 				// Creating the PopupWindow
 				final PopupWindow popup = new PopupWindow(getActivity());
 				popup.setContentView(layout);
-				
+
 				popup.setWidth(WindowManager.LayoutParams.MATCH_PARENT);
 				popup.setHeight(WindowManager.LayoutParams.MATCH_PARENT);
 				popup.setFocusable(true);
@@ -842,11 +1816,9 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				popup.showAtLocation(getView(), Gravity.NO_GRAVITY, OFFSET_X,
 						OFFSET_Y);
 
-			
-
 				RelativeLayout nutmilk = (RelativeLayout) layout
 						.findViewById(R.id.Nutmilk);
-				CheckBox chk = (CheckBox) nutmilk
+				final CheckBox chk = (CheckBox) nutmilk
 						.findViewById(R.id.checkBox1_1);
 				chk.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -867,10 +1839,10 @@ public class Child_profile extends android.support.v4.app.Fragment {
 					}
 				});
 
-				
 				RelativeLayout egg1 = (RelativeLayout) layout
 						.findViewById(R.id.egg);
-				CheckBox chk2 = (CheckBox) egg1.findViewById(R.id.checkBox1_2);
+				final CheckBox chk2 = (CheckBox) egg1
+						.findViewById(R.id.checkBox1_2);
 				chk2.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
 					@Override
@@ -892,7 +1864,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 				RelativeLayout wheat1 = (RelativeLayout) layout
 						.findViewById(R.id.wheat);
-				CheckBox chk3 = (CheckBox) wheat1
+				final CheckBox chk3 = (CheckBox) wheat1
 						.findViewById(R.id.checkBox1_3);
 				chk3.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -914,7 +1886,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout soyfish1 = (RelativeLayout) layout
 						.findViewById(R.id.SoyFish);
-				CheckBox chk4 = (CheckBox) soyfish1
+				final CheckBox chk4 = (CheckBox) soyfish1
 						.findViewById(R.id.checkBox1_4);
 				chk4.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -936,7 +1908,8 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Corn = (RelativeLayout) layout
 						.findViewById(R.id.Corn);
-				CheckBox chk5 = (CheckBox) Corn.findViewById(R.id.checkBox1_5);
+				final CheckBox chk5 = (CheckBox) Corn
+						.findViewById(R.id.checkBox1_5);
 				chk5.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
 					@Override
@@ -957,7 +1930,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout GelatinMeat = (RelativeLayout) layout
 						.findViewById(R.id.GelatinMeat);
-				CheckBox chk6 = (CheckBox) GelatinMeat
+				final CheckBox chk6 = (CheckBox) GelatinMeat
 						.findViewById(R.id.checkBox1_6);
 				chk6.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -979,7 +1952,8 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Seeds = (RelativeLayout) layout
 						.findViewById(R.id.Seeds);
-				CheckBox chk7 = (CheckBox) Seeds.findViewById(R.id.checkBox1_7);
+				final CheckBox chk7 = (CheckBox) Seeds
+						.findViewById(R.id.checkBox1_7);
 				chk7.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
 					@Override
@@ -1001,7 +1975,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 				RelativeLayout Spices = (RelativeLayout) layout
 						.findViewById(R.id.Spices);
-				CheckBox chk8 = (CheckBox) Spices
+				final CheckBox chk8 = (CheckBox) Spices
 						.findViewById(R.id.checkBox1_8);
 				chk8.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1023,7 +1997,8 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Grass = (RelativeLayout) layout
 						.findViewById(R.id.Grass);
-				CheckBox chk9 = (CheckBox) Grass.findViewById(R.id.checkBox1_9);
+				final CheckBox chk9 = (CheckBox) Grass
+						.findViewById(R.id.checkBox1_9);
 				chk9.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
 					@Override
@@ -1044,7 +2019,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Banana = (RelativeLayout) layout
 						.findViewById(R.id.Banana);
-				CheckBox chk10 = (CheckBox) Banana
+				final CheckBox chk10 = (CheckBox) Banana
 						.findViewById(R.id.checkBox1_10);
 				chk10.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1067,7 +2042,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 				RelativeLayout DairyAnaphylaxis = (RelativeLayout) layout
 						.findViewById(R.id.DairyAnaphylaxis);
-				CheckBox chk11 = (CheckBox) DairyAnaphylaxis
+				final CheckBox chk11 = (CheckBox) DairyAnaphylaxis
 						.findViewById(R.id.checkBox1_11);
 				chk11.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1090,7 +2065,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 				RelativeLayout HayfeaverInsect = (RelativeLayout) layout
 						.findViewById(R.id.HayfeaverInsect);
-				CheckBox chk12 = (CheckBox) HayfeaverInsect
+				final CheckBox chk12 = (CheckBox) HayfeaverInsect
 						.findViewById(R.id.checkBox1_12);
 				chk12.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1111,7 +2086,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Insect = (RelativeLayout) layout
 						.findViewById(R.id.Insect);
-				CheckBox chk13 = (CheckBox) Insect
+				final CheckBox chk13 = (CheckBox) Insect
 						.findViewById(R.id.checkBox1_13);
 				chk13.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1133,7 +2108,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 				RelativeLayout StingsLactose = (RelativeLayout) layout
 						.findViewById(R.id.StingsLactose);
-				CheckBox chk14 = (CheckBox) StingsLactose
+				final CheckBox chk14 = (CheckBox) StingsLactose
 						.findViewById(R.id.checkBox1_14);
 				chk14.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1154,7 +2129,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout CeliacGluten = (RelativeLayout) layout
 						.findViewById(R.id.CeliacGluten);
-				CheckBox chk15 = (CheckBox) CeliacGluten
+				final CheckBox chk15 = (CheckBox) CeliacGluten
 						.findViewById(R.id.checkBox1_15);
 				chk15.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1175,6 +2150,139 @@ public class Child_profile extends android.support.v4.app.Fragment {
 						}
 					}
 				});
+				RelativeLayout none_layout = (RelativeLayout) layout
+						.findViewById(R.id.None);
+				CheckBox chk_none = (CheckBox) none_layout
+						.findViewById(R.id.checkBox1_1_none);
+				chk_none.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView,
+							boolean isChecked) {
+						// TODO Auto-generated method stub
+
+						if (i_none % 2 == 0) {
+							none = "";
+							System.out.println("even" + nutMilk);
+							i_none++;
+							nutMilk = "";
+							egg = "";
+							wheat = "";
+							soyfish = "";
+							corn = "";
+							gelate = "";
+							seed = "";
+							spices = "";
+							grass = "";
+							banana = "";
+							dairy = "";
+							hay = "";
+							insect = "";
+							stings = "";
+							celiacGluten = "";
+							other = "";
+							i = 1;
+							i2 = 1;
+							i3 = 1;
+							i4 = 1;
+							i5 = 1;
+							i6 = 1;
+							i7 = 1;
+							i8 = 1;
+							i9 = 1;
+							i10 = 1;
+							i11 = 1;
+							i12 = 1;
+							i13 = 1;
+							i14 = 1;
+							i15 = 1;
+
+							chk15.setVisibility(View.VISIBLE);
+							chk14.setVisibility(View.VISIBLE);
+							chk13.setVisibility(View.VISIBLE);
+							chk12.setVisibility(View.VISIBLE);
+							chk11.setVisibility(View.VISIBLE);
+							chk10.setVisibility(View.VISIBLE);
+							chk9.setVisibility(View.VISIBLE);
+							chk8.setVisibility(View.VISIBLE);
+							chk7.setVisibility(View.VISIBLE);
+							chk6.setVisibility(View.VISIBLE);
+							chk5.setVisibility(View.VISIBLE);
+							chk4.setVisibility(View.VISIBLE);
+							chk3.setVisibility(View.VISIBLE);
+							chk2.setVisibility(View.VISIBLE);
+							chk.setVisibility(View.VISIBLE);
+
+						} else {
+
+							none = "None";
+							System.out.println("odd" + nutMilk);
+							i_none++;
+							nutMilk = "";
+							egg = "";
+							wheat = "";
+							soyfish = "";
+							corn = "";
+							gelate = "";
+							seed = "";
+							spices = "";
+							grass = "";
+							banana = "";
+							dairy = "";
+							hay = "";
+							insect = "";
+							stings = "";
+							celiacGluten = "";
+							other = "";
+							i = 1;
+							i2 = 1;
+							i3 = 1;
+							i4 = 1;
+							i5 = 1;
+							i6 = 1;
+							i7 = 1;
+							i8 = 1;
+							i9 = 1;
+							i10 = 1;
+							i11 = 1;
+							i12 = 1;
+							i13 = 1;
+							i14 = 1;
+							i15 = 1;
+							chk15.setVisibility(View.INVISIBLE);
+							chk14.setVisibility(View.INVISIBLE);
+							chk13.setVisibility(View.INVISIBLE);
+							chk12.setVisibility(View.INVISIBLE);
+							chk11.setVisibility(View.INVISIBLE);
+							chk10.setVisibility(View.INVISIBLE);
+							chk9.setVisibility(View.INVISIBLE);
+							chk8.setVisibility(View.INVISIBLE);
+							chk7.setVisibility(View.INVISIBLE);
+							chk6.setVisibility(View.INVISIBLE);
+							chk5.setVisibility(View.INVISIBLE);
+							chk4.setVisibility(View.INVISIBLE);
+							chk3.setVisibility(View.INVISIBLE);
+							chk2.setVisibility(View.INVISIBLE);
+							chk.setVisibility(View.INVISIBLE);
+							chk15.setChecked(false);
+							chk14.setChecked(false);
+							chk13.setChecked(false);
+							chk12.setChecked(false);
+							chk11.setChecked(false);
+							chk10.setChecked(false);
+							chk9.setChecked(false);
+							chk8.setChecked(false);
+							chk7.setChecked(false);
+							chk.setChecked(false);
+							chk6.setChecked(false);
+							chk5.setChecked(false);
+							chk4.setChecked(false);
+							chk3.setChecked(false);
+							chk2.setChecked(false);
+
+						}
+					}
+				});
 				RelativeLayout edittext = (RelativeLayout) layout
 						.findViewById(R.id.edit_allergies);
 				editallergies = (EditText) edittext
@@ -1189,163 +2297,201 @@ public class Child_profile extends android.support.v4.app.Fragment {
 					@Override
 					public void onClick(View v) {
 						allergies_selected = "";
-						other = editallergies.getText().toString();
-						if (other.equals("") || other.equals(null)) {
+						if (none.equals("")) {
 
+							other = editallergies.getText().toString();
+							if (other.equals("") || other.equals(null)) {
+
+							} else {
+
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = other;
+								} else {
+									allergies_selected = allergies_selected
+											+ "," + other;
+								}
+							}
+							if (!nutMilk.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = nutMilk;
+								} else {
+									allergies_selected = allergies_selected
+											+ "," + nutMilk;
+								}
+							}
+							if (!egg.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = egg;
+								} else {
+									allergies_selected = allergies_selected
+											+ "," + egg;
+								}
+							}
+							if (!wheat.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = wheat;
+								} else {
+									allergies_selected = allergies_selected
+											+ "," + wheat;
+								}
+							}
+							if (!soyfish.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = soyfish;
+								} else {
+									allergies_selected = allergies_selected
+											+ "," + soyfish;
+								}
+							}
+							if (!corn.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = corn;
+								} else {
+									allergies_selected = allergies_selected
+											+ "," + corn;
+								}
+							}
+							if (!gelate.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = gelate;
+								} else {
+									allergies_selected = allergies_selected
+											+ "," + gelate;
+								}
+							}
+							if (!seed.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = seed;
+								} else {
+									allergies_selected = allergies_selected
+											+ "," + seed;
+								}
+							}
+							if (!spices.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = spices;
+								} else {
+									allergies_selected = allergies_selected
+											+ "," + spices;
+								}
+							}
+							if (!grass.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = grass;
+								} else {
+									allergies_selected = allergies_selected
+											+ "," + grass;
+								}
+							}
+							if (!dairy.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = dairy;
+								} else {
+									allergies_selected = allergies_selected
+											+ "," + banana;
+								}
+							}
+							if (!dairy.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = dairy;
+								} else {
+									allergies_selected = allergies_selected
+											+ "," + dairy;
+								}
+							}
+							if (!hay.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = hay;
+								} else {
+									allergies_selected = allergies_selected
+											+ "," + hay;
+								}
+							}
+							if (!insect.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = insect;
+								} else {
+									allergies_selected = allergies_selected
+											+ "," + insect;
+								}
+							}
+							if (!stings.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = stings;
+								} else {
+									allergies_selected = allergies_selected
+											+ "," + stings;
+								}
+							}
+							if (!celiacGluten.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = celiacGluten;
+								} else {
+									allergies_selected = allergies_selected
+											+ "," + celiacGluten;
+								}
+							}
 						} else {
-
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = other;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ other;
-							}
-						}
-						if (!nutMilk.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = nutMilk;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ nutMilk;
-							}
-						}
-						if (!egg.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = egg;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ egg;
-							}
-						}
-						if (!wheat.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = wheat;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ wheat;
-							}
-						}
-						if (!soyfish.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = soyfish;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ soyfish;
-							}
-						}
-						if (!corn.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = corn;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ corn;
-							}
-						}
-						if (!gelate.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = gelate;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ gelate;
-							}
-						}
-						if (!seed.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = seed;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ seed;
-							}
-						}
-						if (!spices.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = spices;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ spices;
-							}
-						}
-						if (!grass.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = grass;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ grass;
-							}
-						}
-						if (!dairy.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = dairy;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ banana;
-							}
-						}
-						if (!dairy.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = dairy;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ dairy;
-							}
-						}
-						if (!hay.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = hay;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ hay;
-							}
-						}
-						if (!insect.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = insect;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ insect;
-							}
-						}
-						if (!stings.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = stings;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ stings;
-							}
-						}
-						if (!celiacGluten.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = celiacGluten;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ celiacGluten;
-							}
+							allergies_selected = "None";
 						}
 						System.out.println(allergies_selected);
 						allergies.setText(allergies_selected.toUpperCase());
+						none = "";
+						nutMilk = "";
+						egg = "";
+						wheat = "";
+						soyfish = "";
+						corn = "";
+						gelate = "";
+						seed = "";
+						spices = "";
+						grass = "";
+						banana = "";
+						dairy = "";
+						hay = "";
+						insect = "";
+						stings = "";
+						celiacGluten = "";
+						other = "";
+						i_none = 1;
+						i = 1;
+						i2 = 1;
+						i3 = 1;
+						i4 = 1;
+						i5 = 1;
+						i6 = 1;
+						i7 = 1;
+						i8 = 1;
+						i9 = 1;
+						i10 = 1;
+						i11 = 1;
+						i12 = 1;
+						i13 = 1;
+						i14 = 1;
+						i15 = 1;
+
 						popup.dismiss();
 					}
 
 				});
-			
+
 			}
-			
 
 		});
 
@@ -1355,20 +2501,19 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				hobbies.setText("");
-				
+
 				// Inflate the popup_layout.xml
 				LinearLayout viewGroup = (LinearLayout) getActivity()
 						.findViewById(R.id.popup_hobbies);
 				System.out.println("view Started11");
 
-				
 				System.out.println("view Started22");
 				View layout = inflater.inflate(R.layout.hobbies, viewGroup);
 				System.out.println("view Started33");
 				// Creating the PopupWindow
 				final PopupWindow popup = new PopupWindow(getActivity());
 				popup.setContentView(layout);
-				
+
 				popup.setWidth(WindowManager.LayoutParams.MATCH_PARENT);
 				popup.setHeight(WindowManager.LayoutParams.MATCH_PARENT);
 				popup.setFocusable(true);
@@ -1386,10 +2531,9 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				popup.showAtLocation(getView(), Gravity.NO_GRAVITY, OFFSET_X,
 						OFFSET_Y);
 
-			
 				RelativeLayout cooKing = (RelativeLayout) layout
 						.findViewById(R.id.Cooking);
-				CheckBox chk = (CheckBox) cooKing
+				final CheckBox chk = (CheckBox) cooKing
 						.findViewById(R.id.checkBox11_1);
 				chk.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1410,10 +2554,9 @@ public class Child_profile extends android.support.v4.app.Fragment {
 					}
 				});
 
-				
 				RelativeLayout Dance = (RelativeLayout) layout
 						.findViewById(R.id.Dance);
-				CheckBox chk2 = (CheckBox) Dance
+				final CheckBox chk2 = (CheckBox) Dance
 						.findViewById(R.id.checkBox11_2);
 				chk2.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1436,7 +2579,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 				RelativeLayout Drama = (RelativeLayout) layout
 						.findViewById(R.id.Drama);
-				CheckBox chk3 = (CheckBox) Drama
+				final CheckBox chk3 = (CheckBox) Drama
 						.findViewById(R.id.checkBox11_3);
 				chk3.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1458,7 +2601,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Drawing = (RelativeLayout) layout
 						.findViewById(R.id.Drawing);
-				CheckBox chk4 = (CheckBox) Drawing
+				final CheckBox chk4 = (CheckBox) Drawing
 						.findViewById(R.id.checkBox11_4);
 				chk4.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1480,7 +2623,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Lego = (RelativeLayout) layout
 						.findViewById(R.id.Lego);
-				CheckBox chk5 = (CheckBox) Lego.findViewById(R.id.checkBox11_5);
+				final CheckBox chk5 = (CheckBox) Lego.findViewById(R.id.checkBox11_5);
 				chk5.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
 					@Override
@@ -1501,7 +2644,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout BuildingMagicModel = (RelativeLayout) layout
 						.findViewById(R.id.BuildingMagicModel);
-				CheckBox chk6 = (CheckBox) BuildingMagicModel
+				final CheckBox chk6 = (CheckBox) BuildingMagicModel
 						.findViewById(R.id.checkBox11_6);
 				chk6.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1523,7 +2666,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Painting = (RelativeLayout) layout
 						.findViewById(R.id.Painting);
-				CheckBox chk7 = (CheckBox) Painting
+				final CheckBox chk7 = (CheckBox) Painting
 						.findViewById(R.id.checkBox11_7);
 				chk7.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1546,7 +2689,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 				RelativeLayout Puzzles = (RelativeLayout) layout
 						.findViewById(R.id.Puzzles);
-				CheckBox chk8 = (CheckBox) Puzzles
+				final CheckBox chk8 = (CheckBox) Puzzles
 						.findViewById(R.id.checkBox11_8);
 				chk8.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1568,7 +2711,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Scrapbooking = (RelativeLayout) layout
 						.findViewById(R.id.Scrapbooking);
-				CheckBox chk9 = (CheckBox) Scrapbooking
+				final CheckBox chk9 = (CheckBox) Scrapbooking
 						.findViewById(R.id.checkBox11_9);
 				chk9.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1590,7 +2733,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Sewing = (RelativeLayout) layout
 						.findViewById(R.id.Sewing);
-				CheckBox chk10 = (CheckBox) Sewing
+				final CheckBox chk10 = (CheckBox) Sewing
 						.findViewById(R.id.checkBox11_10);
 				chk10.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1613,7 +2756,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 				RelativeLayout Singing = (RelativeLayout) layout
 						.findViewById(R.id.Singing);
-				CheckBox chk11 = (CheckBox) Singing
+				final CheckBox chk11 = (CheckBox) Singing
 						.findViewById(R.id.checkBox11_11);
 				chk11.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1636,7 +2779,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 				RelativeLayout Videogaming = (RelativeLayout) layout
 						.findViewById(R.id.Videogaming);
-				CheckBox chk12 = (CheckBox) Videogaming
+				final CheckBox chk12 = (CheckBox) Videogaming
 						.findViewById(R.id.checkBox11_12);
 				chk12.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1658,7 +2801,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Woodworking = (RelativeLayout) layout
 						.findViewById(R.id.Woodworking);
-				CheckBox chk13 = (CheckBox) Woodworking
+				final CheckBox chk13 = (CheckBox) Woodworking
 						.findViewById(R.id.checkBox11_13);
 				chk13.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1681,7 +2824,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 				RelativeLayout Writing = (RelativeLayout) layout
 						.findViewById(R.id.Writing);
-				CheckBox chk14 = (CheckBox) Writing
+				final CheckBox chk14 = (CheckBox) Writing
 						.findViewById(R.id.checkBox11_14);
 				chk14.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1704,7 +2847,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 				RelativeLayout Skating = (RelativeLayout) layout
 						.findViewById(R.id.Skating);
-				CheckBox chk15 = (CheckBox) Skating
+				final CheckBox chk15 = (CheckBox) Skating
 						.findViewById(R.id.checkBox11_15);
 				chk15.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1728,7 +2871,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout SkiingSurfing = (RelativeLayout) layout
 						.findViewById(R.id.SkiingSurfing);
-				CheckBox chk16 = (CheckBox) SkiingSurfing
+				final CheckBox chk16 = (CheckBox) SkiingSurfing
 						.findViewById(R.id.checkBox11_16);
 				chk16.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1750,7 +2893,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Snowboarding = (RelativeLayout) layout
 						.findViewById(R.id.Snowboarding);
-				CheckBox chk17 = (CheckBox) Snowboarding
+				final CheckBox chk17 = (CheckBox) Snowboarding
 						.findViewById(R.id.checkBox11_17);
 				chk17.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1772,7 +2915,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout SwimmingWater = (RelativeLayout) layout
 						.findViewById(R.id.SwimmingWater);
-				CheckBox chk18 = (CheckBox) SwimmingWater
+				final CheckBox chk18 = (CheckBox) SwimmingWater
 						.findViewById(R.id.checkBox11_18);
 				chk18.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1794,7 +2937,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Football = (RelativeLayout) layout
 						.findViewById(R.id.Football);
-				CheckBox chk19 = (CheckBox) Football
+				final CheckBox chk19 = (CheckBox) Football
 						.findViewById(R.id.checkBox11_19);
 				chk19.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1816,7 +2959,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Baseball = (RelativeLayout) layout
 						.findViewById(R.id.Baseball);
-				CheckBox chk20 = (CheckBox) Baseball
+				final CheckBox chk20 = (CheckBox) Baseball
 						.findViewById(R.id.checkBox11_20);
 				chk20.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1839,7 +2982,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 				RelativeLayout Basketball = (RelativeLayout) layout
 						.findViewById(R.id.Basketball);
-				CheckBox chk21 = (CheckBox) Basketball
+				final CheckBox chk21 = (CheckBox) Basketball
 						.findViewById(R.id.checkBox11_21);
 				chk21.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1861,7 +3004,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Climbing = (RelativeLayout) layout
 						.findViewById(R.id.Climbing);
-				CheckBox chk22 = (CheckBox) Climbing
+				final CheckBox chk22 = (CheckBox) Climbing
 						.findViewById(R.id.checkBox11_22);
 				chk22.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1883,7 +3026,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Cricket = (RelativeLayout) layout
 						.findViewById(R.id.Cricket);
-				CheckBox chk23 = (CheckBox) Cricket
+				final CheckBox chk23 = (CheckBox) Cricket
 						.findViewById(R.id.checkBox11_23);
 				chk23.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1906,7 +3049,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 				RelativeLayout Cycling = (RelativeLayout) layout
 						.findViewById(R.id.Cycling);
-				CheckBox chk24 = (CheckBox) Cycling
+				final CheckBox chk24 = (CheckBox) Cycling
 						.findViewById(R.id.checkBox11_24);
 				chk24.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1929,7 +3072,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 				RelativeLayout Judo = (RelativeLayout) layout
 						.findViewById(R.id.Judo);
-				CheckBox chk25 = (CheckBox) Judo
+				final CheckBox chk25 = (CheckBox) Judo
 						.findViewById(R.id.checkBox11_25);
 				chk25.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1951,7 +3094,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Running = (RelativeLayout) layout
 						.findViewById(R.id.Running);
-				CheckBox chk26 = (CheckBox) Running
+				final CheckBox chk26 = (CheckBox) Running
 						.findViewById(R.id.checkBox11_26);
 				chk26.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1974,7 +3117,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 				RelativeLayout Table = (RelativeLayout) layout
 						.findViewById(R.id.Table);
-				CheckBox chk27 = (CheckBox) Table
+				final CheckBox chk27 = (CheckBox) Table
 						.findViewById(R.id.checkBox11_27);
 				chk27.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1996,7 +3139,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout LawnTennis = (RelativeLayout) layout
 						.findViewById(R.id.LawnTennis);
-				CheckBox chk28 = (CheckBox) LawnTennis
+				final CheckBox chk28 = (CheckBox) LawnTennis
 						.findViewById(R.id.checkBox11_28);
 				chk28.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -2018,7 +3161,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Reading = (RelativeLayout) layout
 						.findViewById(R.id.Reading);
-				CheckBox chk29 = (CheckBox) Reading
+				final CheckBox chk29 = (CheckBox) Reading
 						.findViewById(R.id.checkBox11_29);
 				chk29.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -2038,7 +3181,170 @@ public class Child_profile extends android.support.v4.app.Fragment {
 						}
 					}
 				});
+				RelativeLayout none_layout = (RelativeLayout) layout
+						.findViewById(R.id.None);
+			final	CheckBox chk_none = (CheckBox) none_layout
+						.findViewById(R.id.checkBox1_1_none);
+				chk_none.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView,
+							boolean isChecked) {
+						// TODO Auto-generated method stub
+
+						if (ii_none % 2 == 0) {
+							none_hobbies = "";
+							System.out.println("even" + nutMilk);
+							ii_none++;
+							otherhobbies="";
+							cooking = ""; dance = ""; drama = ""; drawing = ""; lego = "";
+									buildingMagicModel = ""; painting = ""; puzzles = "";
+									scrapbooking = ""; sewing = ""; singing = ""; videogaming = "";
+									woodworking = ""; writing = ""; skating = ""; otherhobbies = "";
+									skiingSurfing = ""; snowboarding = ""; swimmingWater = "";
+									football = ""; baseball = ""; basketball = ""; climbing = "";
+									cricket = ""; cycling = ""; judo = ""; running = ""; table = "";
+									lawnTennis = ""; reading = "";
+							ii = 1;ii16=1;ii17=1;ii18=1;ii19=1;ii20=1;ii21=1;ii22=1;ii23=1;ii24=1;ii25=1;ii26=1;ii27=1;ii28=1;ii29=1;
+							ii2 = 1;
+							ii3 = 1;
+							ii4 = 1;
+							ii5 = 1;
+							ii6 = 1;
+							ii7 = 1;
+							ii8 = 1;
+							ii9 = 1;
+							ii10 = 1;
+							ii11 = 1;
+							ii12 = 1;
+							ii13 = 1;
+							ii14 = 1;
+							ii15 = 1;
+
+							chk29.setVisibility(View.VISIBLE);
+							chk28.setVisibility(View.VISIBLE);
+							chk27.setVisibility(View.VISIBLE);
+							chk26.setVisibility(View.VISIBLE);
+							chk25.setVisibility(View.VISIBLE);
+							chk24.setVisibility(View.VISIBLE);
+							chk23.setVisibility(View.VISIBLE);
+							chk22.setVisibility(View.VISIBLE);
+							chk21.setVisibility(View.VISIBLE);
+							chk20.setVisibility(View.VISIBLE);
+							chk19.setVisibility(View.VISIBLE);
+							chk18.setVisibility(View.VISIBLE);
+							chk17.setVisibility(View.VISIBLE);
+							chk16.setVisibility(View.VISIBLE);
+							chk15.setVisibility(View.VISIBLE);
+							chk14.setVisibility(View.VISIBLE);
+							chk13.setVisibility(View.VISIBLE);
+							chk12.setVisibility(View.VISIBLE);
+							chk11.setVisibility(View.VISIBLE);
+							chk10.setVisibility(View.VISIBLE);
+							chk9.setVisibility(View.VISIBLE);
+							chk8.setVisibility(View.VISIBLE);
+							chk7.setVisibility(View.VISIBLE);
+							chk6.setVisibility(View.VISIBLE);
+							chk5.setVisibility(View.VISIBLE);
+							chk4.setVisibility(View.VISIBLE);
+							chk3.setVisibility(View.VISIBLE);
+							chk2.setVisibility(View.VISIBLE);
+							chk.setVisibility(View.VISIBLE);
+
+						} else {
+
+							none_hobbies = "None";
+							System.out.println("odd" + nutMilk);
+							ii_none++;
+							otherhobbies="";
+							cooking = ""; dance = ""; drama = ""; drawing = ""; lego = "";
+							buildingMagicModel = ""; painting = ""; puzzles = "";
+							scrapbooking = ""; sewing = ""; singing = ""; videogaming = "";
+							woodworking = ""; writing = ""; skating = ""; otherhobbies = "";
+							skiingSurfing = ""; snowboarding = ""; swimmingWater = "";
+							football = ""; baseball = ""; basketball = ""; climbing = "";
+							cricket = ""; cycling = ""; judo = ""; running = ""; table = "";
+							lawnTennis = ""; reading = "";
+							i = 1;ii16=1;ii17=1;ii18=1;ii19=1;ii20=1;ii21=1;ii22=1;ii23=1;ii24=1;ii25=1;ii26=1;ii27=1;ii28=1;ii29=1;
+							i2 = 1;
+							i3 = 1;
+							i4 = 1;
+							i5 = 1;
+							i6 = 1;
+							i7 = 1;
+							i8 = 1;
+							i9 = 1;
+							i10 = 1;
+							i11 = 1;
+							i12 = 1;
+							i13 = 1;
+							i14 = 1;
+							i15 = 1;
+							
+							chk29.setVisibility(View.INVISIBLE);
+							chk28.setVisibility(View.INVISIBLE);
+							chk27.setVisibility(View.INVISIBLE);
+							chk26.setVisibility(View.INVISIBLE);
+							chk25.setVisibility(View.INVISIBLE);
+							chk24.setVisibility(View.INVISIBLE);
+							chk23.setVisibility(View.INVISIBLE);
+							chk22.setVisibility(View.INVISIBLE);
+							chk21.setVisibility(View.INVISIBLE);
+							chk20.setVisibility(View.INVISIBLE);
+							chk19.setVisibility(View.INVISIBLE);
+							chk18.setVisibility(View.INVISIBLE);
+							chk17.setVisibility(View.INVISIBLE);
+							chk16.setVisibility(View.INVISIBLE);
+							chk15.setVisibility(View.INVISIBLE);
+							chk14.setVisibility(View.INVISIBLE);
+							chk13.setVisibility(View.INVISIBLE);
+							chk12.setVisibility(View.INVISIBLE);
+							chk11.setVisibility(View.INVISIBLE);
+							chk10.setVisibility(View.INVISIBLE);
+							chk9.setVisibility(View.INVISIBLE);
+							chk8.setVisibility(View.INVISIBLE);
+							chk7.setVisibility(View.INVISIBLE);
+							chk6.setVisibility(View.INVISIBLE);
+							chk5.setVisibility(View.INVISIBLE);
+							chk4.setVisibility(View.INVISIBLE);
+							chk3.setVisibility(View.INVISIBLE);
+							chk2.setVisibility(View.INVISIBLE);
+							chk.setVisibility(View.INVISIBLE);
+							
+							chk29.setChecked(false);
+							chk28.setChecked(false);
+							chk27.setChecked(false);
+							chk26.setChecked(false);
+							chk25.setChecked(false);
+							chk24.setChecked(false);
+							chk23.setChecked(false);
+							chk22.setChecked(false);
+							chk21.setChecked(false);
+							chk20.setChecked(false);
+							chk19.setChecked(false);
+							chk18.setChecked(false);
+							chk17.setChecked(false);
+							chk16.setChecked(false);
+							
+							chk15.setChecked(false);
+							chk14.setChecked(false);
+							chk13.setChecked(false);
+							chk12.setChecked(false);
+							chk11.setChecked(false);
+							chk10.setChecked(false);
+							chk9.setChecked(false);
+							chk8.setChecked(false);
+							chk7.setChecked(false);
+							chk.setChecked(false);
+							chk6.setChecked(false);
+							chk5.setChecked(false);
+							chk4.setChecked(false);
+							chk3.setChecked(false);
+							chk2.setChecked(false);
+
+						}
+					}
+				});
 				RelativeLayout edittext = (RelativeLayout) layout
 						.findViewById(R.id.edit_hobbies);
 				edit_hobbies = (EditText) edittext
@@ -2054,6 +3360,8 @@ public class Child_profile extends android.support.v4.app.Fragment {
 					public void onClick(View v) {
 						// TODO Auto-generated method stub
 						hobbies_selected = "";
+						
+						if(none_hobbies.equals("")){
 						otherhobbies = edit_hobbies.getText().toString();
 						if (otherhobbies.equals("")
 								|| otherhobbies.equals(null)) {
@@ -2105,7 +3413,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 										+ drawing;
 							}
 						}
-						
+
 						if (!lego.equals("")) {
 							if (hobbies_selected.equals("")
 									|| hobbies_selected.equals(null)) {
@@ -2196,8 +3504,6 @@ public class Child_profile extends android.support.v4.app.Fragment {
 										+ writing;
 							}
 						}
-
-						
 
 						if (!skating.equals("")) {
 							if (hobbies_selected.equals("")
@@ -2298,13 +3604,13 @@ public class Child_profile extends android.support.v4.app.Fragment {
 										+ judo;
 							}
 						}
-						if (!singing.equals("")) {
+						if (!lawnTennis.equals("")) {
 							if (hobbies_selected.equals("")
 									|| hobbies_selected.equals(null)) {
 								hobbies_selected = singing;
 							} else {
 								hobbies_selected = hobbies_selected + ","
-										+ singing;
+										+ lawnTennis;
 							}
 						}
 						if (!running.equals("")) {
@@ -2325,15 +3631,13 @@ public class Child_profile extends android.support.v4.app.Fragment {
 										+ table;
 							}
 						}
-						if (!writing.equals("")) {
-							if (hobbies_selected.equals("")
-									|| hobbies_selected.equals(null)) {
-								hobbies_selected = writing;
-							} else {
-								hobbies_selected = hobbies_selected + ","
-										+ writing;
-							}
-						}
+						/*
+						 * if (!writing.equals("")) { if
+						 * (hobbies_selected.equals("") ||
+						 * hobbies_selected.equals(null)) { hobbies_selected =
+						 * writing; } else { hobbies_selected = hobbies_selected
+						 * + "," + writing; } }
+						 */
 						if (!reading.equals("")) {
 							if (hobbies_selected.equals("")
 									|| hobbies_selected.equals(null)) {
@@ -2344,9 +3648,42 @@ public class Child_profile extends android.support.v4.app.Fragment {
 							}
 						}
 						System.out.println(hobbies_selected);
-						hobbies.setText(hobbies_selected.toUpperCase());
-						popup.dismiss();
+						//hobbies.setText(hobbies_selected.toUpperCase());
+						//popup.dismiss();
+					
+					}else {
+						hobbies_selected = "None";
 					}
+					System.out.println(hobbies_selected);
+					hobbies.setText(hobbies_selected.toUpperCase());
+					none_hobbies="";
+					cooking = ""; dance = ""; drama = ""; drawing = ""; lego = "";
+					buildingMagicModel = ""; painting = ""; puzzles = "";
+					scrapbooking = ""; sewing = ""; singing = ""; videogaming = "";
+					woodworking = ""; writing = ""; skating = ""; otherhobbies = "";
+					skiingSurfing = ""; snowboarding = ""; swimmingWater = "";
+					football = ""; baseball = ""; basketball = ""; climbing = "";
+					cricket = ""; cycling = ""; judo = ""; running = ""; table = "";
+					lawnTennis = ""; reading = "";
+					ii_none=1;
+			ii = 1;ii16=1;ii17=1;ii18=1;ii19=1;ii20=1;ii21=1;ii22=1;ii23=1;ii24=1;ii25=1;ii26=1;ii27=1;ii28=1;ii29=1;
+			ii2 = 1;
+			ii3 = 1;
+			ii4 = 1;
+			ii5 = 1;
+			ii6 = 1;
+			ii7 = 1;
+			ii8 = 1;
+			ii9 = 1;
+			ii10 = 1;
+			ii11 = 1;
+			ii12 = 1;
+			ii13 = 1;
+			ii14 = 1;
+			ii15 = 1;
+
+					popup.dismiss();
+				}
 
 				});
 
@@ -2360,11 +3697,11 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				name_update = name.getText().toString();
 				dob_update = dob.getText().toString();
 				freetime_update = setfixedfree_time.getText().toString();
-				//conditions_update = conditions.getText().toString();
+				// conditions_update = conditions.getText().toString();
 				allergies_update = allergies.getText().toString();
 				hobbies_update = hobbies.getText().toString();
 				school_update = school.getText().toString();
-				youthclub_update = youthclub.getText().toString();
+			//	youthclub_update = youthclub.getText().toString();
 				// siBlings=sibling.getText().toString();
 				if (name.length() > 0) {
 
@@ -2372,10 +3709,10 @@ public class Child_profile extends android.support.v4.app.Fragment {
 							|| freetime_update.equals("")) {
 						freetime_update = "";
 					}
-					/*if (conditions_update.equals(null)
-							|| conditions_update.equals("")) {
-						conditions_update = "";
-					}*/
+					/*
+					 * if (conditions_update.equals(null) ||
+					 * conditions_update.equals("")) { conditions_update = ""; }
+					 */
 					if (allergies_update.equals(null)
 							|| allergies_update.equals("")) {
 						allergies_update = "";
@@ -2387,15 +3724,15 @@ public class Child_profile extends android.support.v4.app.Fragment {
 					if (school_update.equals(null) || school_update.equals("")) {
 						school_update = "";
 					}
-					if (youthclub_update.equals(null)
+					/*if (youthclub_update.equals(null)
 							|| youthclub_update.equals("")) {
 						youthclub_update = "";
-					}
+					}*/
 					if (dob_update.equals(null) || dob_update.equals("")) {
 						dob_update = "";
 					}
 
-					SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+					SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
 					Date date_of_birth = null;
 					try {
 						date_of_birth = sdf.parse(dob_update);
@@ -2412,7 +3749,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 					System.out.println("date_of_birthdate_of_birth"
 							+ date_of_birth_child);
-					cd = new ConnectionDetector(getActivity());
+
 					isInternetPresent = cd.isConnectingToInternet();
 					if (isInternetPresent) {
 						new chilprofileupdate_webservice().execute();
@@ -2462,45 +3799,71 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 			}
 
-			String date = day + "-" + month + "-" + year1;
-
-			try{
-
-			      SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
-			       Date date1 = formatter.parse(date_comparision);
-			       Date date2 = formatter.parse(date);
-			    if (date1.compareTo(date2)<0)
-			    {
-			    	if(count_alert==0){
-			    		count_alert=count_alert+1;
-			    	new AlertDialog.Builder(getActivity())
-					
-				    .setTitle("Invalid Entry")
-				    .setMessage("can't select future date")
-				    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-				        public void onClick(DialogInterface dialog, int which) { 
-				        		return;			        	
-				        }
-				     })
-				   
-				    .setIcon(android.R.drawable.ic_dialog_alert)
-				     .show();
-			    	}
-				                    
-			    }else{
-			    	count_alert=0;
-			    	dob.setText(date);
-			    }
-			 } catch (ParseException e1) 
-		      {
-		    // TODO Auto-generated catch block
-		    e1.printStackTrace();
-		                        }
+			String date = day + "/" + month + "/" + year1;
 			
+			 SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy");
+				
+			 Date date_1=null;
+			 try {
+				 date_1=sdf.parse(date);
+				
+				 
+				 
+			} catch (ParseException e) {
+				
+				e.printStackTrace();
+			}
+			 SimpleDateFormat destDf = new SimpleDateFormat("dd/MM/yy");
+			
+			  String date_to_set=null;             
+		
+			             // format the date into another format
+			try {
+				date_to_set = destDf.format(date_1);
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+    	   
+			
+
+			try {
+
+				SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
+				Date date1 = formatter.parse(date_comparision);
+				Date date2 = formatter.parse(date_to_set);
+				if (date1.compareTo(date2) < 0) {
+					if (count_alert == 0) {
+						count_alert = count_alert + 1;
+						new AlertDialog.Builder(getActivity())
+
+								.setTitle("Invalid Entry")
+								.setMessage("can't select future date")
+								.setPositiveButton("OK",
+										new DialogInterface.OnClickListener() {
+											public void onClick(
+													DialogInterface dialog,
+													int which) {
+												return;
+											}
+										})
+
+								.setIcon(android.R.drawable.ic_dialog_alert)
+								.show();
+					}
+
+				} else {
+					count_alert = 0;
+					dob.setText(date_to_set);
+				}
+			} catch (ParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
 		}
 	};
 
-	TimePickerDialog.OnTimeSetListener mTimesetlistenermon = new TimePickerDialog.OnTimeSetListener() {
+	/*CustomTimePickerDialog.OnTimeSetListener mTimesetlistenermon = new CustomTimePickerDialog.OnTimeSetListener() {
 
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -2543,7 +3906,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 	};
 
-	TimePickerDialog.OnTimeSetListener mTimesetlistenertue = new TimePickerDialog.OnTimeSetListener() {
+	CustomTimePickerDialog.OnTimeSetListener mTimesetlistenertue = new CustomTimePickerDialog.OnTimeSetListener() {
 
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -2579,7 +3942,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 		}
 	};
-	TimePickerDialog.OnTimeSetListener mTimesetlistenerwed = new TimePickerDialog.OnTimeSetListener() {
+	CustomTimePickerDialog.OnTimeSetListener mTimesetlistenerwed = new CustomTimePickerDialog.OnTimeSetListener() {
 
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -2614,7 +3977,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 		}
 	};
-	TimePickerDialog.OnTimeSetListener mTimesetlistenerthu = new TimePickerDialog.OnTimeSetListener() {
+	CustomTimePickerDialog.OnTimeSetListener mTimesetlistenerthu = new CustomTimePickerDialog.OnTimeSetListener() {
 
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -2650,7 +4013,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 		}
 	};
-	TimePickerDialog.OnTimeSetListener mTimesetlistenerfri = new TimePickerDialog.OnTimeSetListener() {
+	CustomTimePickerDialog.OnTimeSetListener mTimesetlistenerfri = new CustomTimePickerDialog.OnTimeSetListener() {
 
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -2686,7 +4049,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 		}
 	};
-	TimePickerDialog.OnTimeSetListener mTimesetlistenersat = new TimePickerDialog.OnTimeSetListener() {
+	CustomTimePickerDialog.OnTimeSetListener mTimesetlistenersat = new CustomTimePickerDialog.OnTimeSetListener() {
 
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -2722,7 +4085,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 		}
 	};
-	TimePickerDialog.OnTimeSetListener mTimesetlistenersun = new TimePickerDialog.OnTimeSetListener() {
+	CustomTimePickerDialog.OnTimeSetListener mTimesetlistenersun = new CustomTimePickerDialog.OnTimeSetListener() {
 
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -2759,11 +4122,11 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 		}
 	};
-	TimePickerDialog.OnTimeSetListener mTimesetlistenermonto = new TimePickerDialog.OnTimeSetListener() {
+	CustomTimePickerDialog.OnTimeSetListener mTimesetlistenermonto = new CustomTimePickerDialog.OnTimeSetListener() {
 
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-			
+
 			if (clicked == true) {
 				clicked = false;
 				String hour_s = String.valueOf(hourOfDay);
@@ -2801,7 +4164,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			}
 		}
 	};
-
+*/
 	public void alert() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
@@ -2821,7 +4184,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 		alert.show();
 	}
 
-	TimePickerDialog.OnTimeSetListener mTimesetlistenertueto = new TimePickerDialog.OnTimeSetListener() {
+	/*CustomTimePickerDialog.OnTimeSetListener mTimesetlistenertueto = new CustomTimePickerDialog.OnTimeSetListener() {
 
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -2829,7 +4192,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 				clicked = false;
 
 				System.out.println("to .....");
-				
+
 				String hour_s = String.valueOf(hourOfDay);
 				int length = hour_s.length();
 				if (length == 1) {
@@ -2862,7 +4225,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			}
 		}
 	};
-	TimePickerDialog.OnTimeSetListener mTimesetlistenerwedto = new TimePickerDialog.OnTimeSetListener() {
+	CustomTimePickerDialog.OnTimeSetListener mTimesetlistenerwedto = new CustomTimePickerDialog.OnTimeSetListener() {
 
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -2870,7 +4233,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			if (clicked == true) {
 				clicked = false;
 				System.out.println("to .....");
-				
+
 				String hour_s = String.valueOf(hourOfDay);
 				int length = hour_s.length();
 				if (length == 1) {
@@ -2903,11 +4266,11 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			}
 		}
 	};
-	TimePickerDialog.OnTimeSetListener mTimesetlistenerthuto = new TimePickerDialog.OnTimeSetListener() {
+	CustomTimePickerDialog.OnTimeSetListener mTimesetlistenerthuto = new CustomTimePickerDialog.OnTimeSetListener() {
 
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-			
+
 			if (clicked == true) {
 				clicked = false;
 				String hour_s = String.valueOf(hourOfDay);
@@ -2943,11 +4306,11 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			}
 		}
 	};
-	TimePickerDialog.OnTimeSetListener mTimesetlistenerfrito = new TimePickerDialog.OnTimeSetListener() {
+	CustomTimePickerDialog.OnTimeSetListener mTimesetlistenerfrito = new CustomTimePickerDialog.OnTimeSetListener() {
 
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-			
+
 			if (clicked == true) {
 				clicked = false;
 				String hour_s = String.valueOf(hourOfDay);
@@ -2982,13 +4345,13 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			}
 		}
 	};
-	TimePickerDialog.OnTimeSetListener mTimesetlistenersatto = new TimePickerDialog.OnTimeSetListener() {
+	CustomTimePickerDialog.OnTimeSetListener mTimesetlistenersatto = new CustomTimePickerDialog.OnTimeSetListener() {
 
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 			// TODO Auto-generated method stub
 			System.out.println("to .....sat");
-			
+
 			if (clicked == true) {
 				clicked = false;
 				String hour_s = String.valueOf(hourOfDay);
@@ -3024,7 +4387,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			}
 		}
 	};
-	TimePickerDialog.OnTimeSetListener mTimesetlistenersunto = new TimePickerDialog.OnTimeSetListener() {
+	CustomTimePickerDialog.OnTimeSetListener mTimesetlistenersunto = new CustomTimePickerDialog.OnTimeSetListener() {
 
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -3032,11 +4395,11 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			if (clicked == true) {
 				clicked = false;
 				System.out.println("to .....sun");
-				/*
+				
 				 * timechk7=false;
 				 * timechk2=false;timechk3=false;timechk4=false;timechk5
 				 * =false;timechk6=false;timechk1=false;
-				 */
+				 
 				String hour_s = String.valueOf(hourOfDay);
 				int length = hour_s.length();
 				if (length == 1) {
@@ -3069,7 +4432,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			}
 
 		}
-	};
+	};*/
 
 	private void setsizeofimage() {
 		// TODO Auto-generated method stub
@@ -3107,37 +4470,171 @@ public class Child_profile extends android.support.v4.app.Fragment {
 		if (requestCode == RESULT_LOAD_IMAGE && resultCode == -1
 				&& data != null) {
 
-			InputStream is = null;
+			/*
+			 * InputStream is = null; try { is =
+			 * getActivity().getContentResolver().openInputStream(
+			 * data.getData()); } catch (FileNotFoundException e) { // TODO
+			 * Auto-generated catch block e.printStackTrace(); }
+			 */
+
+			// imageData = BitmapFactory.decodeStream(is, null, null);
 			try {
-				is = getActivity().getContentResolver().openInputStream(
-						data.getData());
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 
-			imageData = BitmapFactory.decodeStream(is, null, null);
+				Uri selectedImageURI = data.getData();
+				File imageFile = new File(getRealPathFromURI(selectedImageURI));
+				String path_get = imageFile.getAbsolutePath();
+				try {
 
-			try {
-				is.close();
+					ExifInterface exif = new ExifInterface(path_get);
+					int orientation = exif.getAttributeInt(
+							ExifInterface.TAG_ORIENTATION,
+							ExifInterface.ORIENTATION_NORMAL);
 
-				child_image.setImageBitmap(imageData);
-				setsizeofimage();
-				cd = new ConnectionDetector(getActivity());
-				isInternetPresent = cd.isConnectingToInternet();
-				if (isInternetPresent) {
-					new child_pic_update().execute();
-				} else {
-					Toast.makeText(getActivity(),
-							"Please check internet connection", 2000).show();
+					int angle = 0;
 
+					if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
+						angle = 90;
+					} else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
+						angle = 180;
+					} else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+						angle = 270;
+					}
+
+					Matrix mat = new Matrix();
+					mat.postRotate(angle);
+
+					Bitmap bmp = BitmapFactory.decodeStream(
+							new FileInputStream(imageFile), null, null);
+					Bitmap correctBmp = Bitmap.createBitmap(bmp, 0, 0,
+							bmp.getWidth(), bmp.getHeight(), mat, true);
+					imageData = correctBmp;
 				}
 
-			} catch (IOException e) {
+				catch (IOException e) {
+					Log.w("TAG", "-- Error in setting image");
+				} catch (OutOfMemoryError oom) {
+					Log.w("TAG", "-- OOM Error in setting image");
+				}
+				try {
 
-				e.printStackTrace();
+					Bitmap dstBmp;
+					if (imageData.getWidth() >= imageData.getHeight()) {
+
+						dstBmp = Bitmap.createBitmap(
+								imageData,
+								imageData.getWidth() / 2
+										- imageData.getHeight() / 2, 0,
+								imageData.getHeight(), imageData.getHeight());
+
+					} else {
+
+						dstBmp = Bitmap.createBitmap(
+								imageData,
+								0,
+								imageData.getHeight() / 2
+										- imageData.getWidth() / 2,
+								imageData.getWidth(), imageData.getWidth());
+					}
+					imageData = dstBmp;
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+				try {
+					// is.close();
+
+					child_image.setImageBitmap(imageData);
+					setsizeofimage();
+					cd = new ConnectionDetector(getActivity());
+					isInternetPresent = cd.isConnectingToInternet();
+					if (isInternetPresent) {
+						new child_pic_update().execute();
+					} else {
+						Toast.makeText(getActivity(),
+								"Please check internet connection", 2000)
+								.show();
+
+					}
+
+				} catch (Exception e) {
+
+					e.printStackTrace();
+
+				}
+			} catch (Exception e) {
+				InputStream is = null;
+				try {
+					is = getActivity().getContentResolver().openInputStream(
+							data.getData());
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
+				imageData = BitmapFactory.decodeStream(is, null, null);
+				
+				 Bitmap dstBmp;
+				 if (imageData.getWidth() >= imageData.getHeight()){
+
+					  dstBmp = Bitmap.createBitmap(
+							  imageData, 
+							  imageData.getWidth()/2 - imageData.getHeight()/2,
+					     0,
+					     imageData.getHeight(), 
+					     imageData.getHeight()
+					     );
+
+					}else{
+
+					  dstBmp = Bitmap.createBitmap(
+							  imageData,
+					     0, 
+					     imageData.getHeight()/2 - imageData.getWidth()/2,
+					     imageData.getWidth(),
+					     imageData.getWidth() 
+					     );
+					}
+				 imageData=dstBmp;
+				
+
+				try {
+					//is.close();
+
+					child_image.setImageBitmap(imageData);
+					
+					setsizeofimage();
+					
+					if (isInternetPresent) {
+						new child_pic_update().execute();
+
+					} else {
+						Toast.makeText(getActivity(),
+								"Please check internet connection", 2000).show();
+
+					}
+
+				} catch (Exception e2) {
+
+					e.printStackTrace();
+				}
 			}
 		}
+	}
+
+	private String getRealPathFromURI(Uri contentURI) {
+		String result;
+		Cursor cursor = getActivity().getContentResolver().query(contentURI,
+				null, null, null, null);
+		if (cursor == null) { // Source is Dropbox or other similar local file
+								// path
+			result = contentURI.getPath();
+		} else {
+			cursor.moveToFirst();
+			int idx = cursor
+					.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+			result = cursor.getString(idx);
+			cursor.close();
+		}
+		return result;
 	}
 
 	public class child_pic_update extends AsyncTask<String, Integer, String> {
@@ -3280,13 +4777,18 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 			ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 			nameValuePairs.add(new BasicNameValuePair("name", name_update));
-			nameValuePairs.add(new BasicNameValuePair("dob",date_of_birth_child));
-			nameValuePairs.add(new BasicNameValuePair("set_fixed_freetime",freetime_update));
+			nameValuePairs.add(new BasicNameValuePair("dob",
+					date_of_birth_child));
+			nameValuePairs.add(new BasicNameValuePair("set_fixed_freetime",
+					freetime_update));
 			nameValuePairs.add(new BasicNameValuePair("school", school_update));
-			nameValuePairs.add(new BasicNameValuePair("conditions",""));
-			nameValuePairs.add(new BasicNameValuePair("allergies",allergies_update));
-			nameValuePairs.add(new BasicNameValuePair("hobbies", hobbies_update));
-			nameValuePairs.add(new BasicNameValuePair("youth_club",youthclub_update));
+			nameValuePairs.add(new BasicNameValuePair("conditions", ""));
+			nameValuePairs.add(new BasicNameValuePair("allergies",
+					allergies_update));
+			nameValuePairs
+					.add(new BasicNameValuePair("hobbies", hobbies_update));
+			nameValuePairs.add(new BasicNameValuePair("youth_club",
+					""));
 			nameValuePairs.add(new BasicNameValuePair("childid", child_ID));
 			Log.d("nameValuePairs", "nameValuePairs" + nameValuePairs);
 			Log.d("nameValuePairs", "nameValuePairs" + nameValuePairs);
@@ -3367,7 +4869,8 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			dialog.dismiss();
 
 			if (data.equals("1")) {
-				Toast.makeText(getActivity(), "Updation Successful", 2000).show();
+				Toast.makeText(getActivity(), "Updation Successful", 2000)
+						.show();
 
 				Bundle bundle = new Bundle();
 				bundle.putString("user_guardian_id", GlobalVariable.guardian_Id);
@@ -3394,7 +4897,8 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 		// int count = 10;
 
-		public LazyAdapter(Activity activity, ArrayList<Getcatagory_for_sets> parentItems) {
+		public LazyAdapter(Activity activity,
+				ArrayList<Getcatagory_for_sets> parentItems) {
 
 			// this.imageLoader.clearCache();
 			this.activity = activity;
@@ -3416,7 +4920,6 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			return position;
 		}
 
-	
 		class ViewHolder {
 			public TextView event_title, event_date;
 			public ImageView _image = null;
@@ -3425,7 +4928,7 @@ public class Child_profile extends android.support.v4.app.Fragment {
 
 		public View getView(final int position, View convertView,
 				ViewGroup parent) {
-			
+
 			ViewHolder _holder;
 			if (convertView == null) {
 				convertView = inflater
@@ -3444,9 +4947,9 @@ public class Child_profile extends android.support.v4.app.Fragment {
 			name_of_child = name_of_child.toUpperCase();
 			_holder.event_title.setText(name_of_child);
 			_imgurl = _items.get(position).parent_profilepic;
-			
+
 			_holder._image.setTag(_imgurl);
-			
+
 			imageLoader.DisplayImage(_imgurl, _holder._image);
 
 			_holder._image.requestLayout();
@@ -3479,181 +4982,334 @@ public class Child_profile extends android.support.v4.app.Fragment {
 		}
 
 	}
-	
-	
-	public  class parent_profile_show extends AsyncTask<String, Integer, String>{
-		ProgressDialog dialog=new ProgressDialog(getActivity());
+
+	public class parent_profile_show extends AsyncTask<String, Integer, String> {
+		ProgressDialog dialog = new ProgressDialog(getActivity());
 		String parentinfo;
 		LazyAdapter adapter;
-			@Override
+
+		@Override
 		protected void onPreExecute() {
+			dialog.setMessage("Loading.......please wait");
+			dialog.setCancelable(false);
+			dialog.show();
+			parentinfo = "http://54.191.67.152/playdate/child_parent_auth.php";// ?child_id=287";
+		}
+
+		@SuppressWarnings("unused")
+		@Override
+		protected String doInBackground(String... arg0) {
+			// TODO Auto-generated method stub
+
+			parentItems = new ArrayList<Getcatagory_for_sets>();
+			Getcatagory_for_sets getcategory = null;
+
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpContext localContext = new BasicHttpContext();
+			HttpPost httpPost = new HttpPost(parentinfo);
+
+			ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+			nameValuePairs.add(new BasicNameValuePair("child_id", child_ID));
+
+			System.out.println("child_id......" + child_ID);
+			StringBuilder sbb = new StringBuilder();
+
+			sbb.append("http://54.191.67.152/playdate/child_parent_auth.php?");
+			sbb.append(nameValuePairs.get(0));
+			System.out.println(sbb);
+			try {
+				httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+				System.out.println(httpPost);
+			} catch (UnsupportedEncodingException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+			HttpResponse response = null;
+			try {
+				response = httpClient.execute(httpPost, localContext);
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			BufferedReader reader = null;
+			try {
+				reader = new BufferedReader(new InputStreamReader(response
+						.getEntity().getContent(), "UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalStateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			String sResponse = null;
+
+			try {
+				sResponse = reader.readLine();
+
+				System.out.println("response.................................."
+						+ sResponse);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			parent_id = new ArrayList<String>();
+			try {
+
+				if (sResponse.equals(null) || sResponse.equals("")) {
+
+				} else {
+
+					try {
+						JSONObject json = new JSONObject(sResponse);
+						JSONObject jobj_parent = json.getJSONObject("parent");
+						getcategory = new Getcatagory_for_sets();
+						getcategory.parent_name = jobj_parent
+								.getString("Parentname");
+						getcategory.parent_id = jobj_parent.getString("g_id");
+						child_parent_id = jobj_parent.getString("g_id");
+						getcategory.parent_profilepic = jobj_parent
+								.getString("profile_image");
+						getcategory.parent_location = jobj_parent
+								.getString("location");
+						getcategory.parent_freetime = jobj_parent
+								.getString("set_fixed_freetime");
+						getcategory.parent_phone = jobj_parent
+								.getString("phone");
+						getcategory.parent_date_ofbirth = jobj_parent
+								.getString("dob");
+						getcategory.parent_type = jobj_parent
+								.getString("guardian_type");
+						parent_id.add(child_parent_id);
+						parentItems.add(getcategory);
+						try {
+							JSONArray jarray = json.getJSONArray("auth_parent");
+
+							for (int i = 0; i < jarray.length(); i++) {
+								JSONObject c = jarray.getJSONObject(i);
+								getcategory = new Getcatagory_for_sets();
+								getcategory.parent_name = c
+										.getString("Parentname");
+								getcategory.parent_id = c
+										.getString("auth_g_id");
+								getcategory.parent_profilepic = c
+										.getString("profile_image");
+								getcategory.parent_location = c
+										.getString("location");
+								getcategory.parent_freetime = c
+										.getString("set_fixed_freetime");
+								getcategory.parent_phone = c.getString("phone");
+								getcategory.parent_date_ofbirth = c
+										.getString("dob");
+								getcategory.parent_type = c
+										.getString("guardian_type");
+								parent_id.add(c.getString("auth_g_id"));
+								parentItems.add(getcategory);
+
+							}
+						} catch (Exception e) {
+							// TODO: handle exception
+						}
+
+						String success = json.getString("success");
+						String msg = json.getString("msg");
+
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+				}
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			return null;
+		}
+
+		protected void onPostExecute(String resultt) {
+
+			/* if(child_parent_id.equals(GlobalVariable.guardian_Id)) */
+			if (parent_id.contains(GlobalVariable.guardian_Id)) {
+
+			} else {
+				dob.setEnabled(false);
+				setfixedfree_time.setEnabled(false);
+				// conditions.setEnabled(false);
+				allergies.setEnabled(false);
+				hobbies.setEnabled(false);
+				school.setEnabled(false);
+			//	youthclub.setEnabled(false);
+				name.setEnabled(false);
+				dob.setFocusable(false);
+				dob.setClickable(false);
+				setfixedfree_time.setFocusable(false);
+				setfixedfree_time.setClickable(false);
+				allergies.setFocusable(false);
+				allergies.setClickable(false);
+				hobbies.setFocusable(false);
+				hobbies.setClickable(false);
+				child_image.setClickable(false);
+				addmore_freetime.setClickable(false);
+				update_info.setVisibility(View.GONE);
+			}
+			adapter = new LazyAdapter(getActivity(), parentItems);
+
+			list_parent.setAdapter(adapter);
+
+			dialog.dismiss();
+
+		}
+	}
+
+	public static class CustomTimePickerDialog extends TimePickerDialog {
+
+		public static final int TIME_PICKER_INTERVAL = 15;
+		private boolean mIgnoreEvent = false;
+
+		public CustomTimePickerDialog(Context context,
+				OnTimeSetListener callBack, int hourOfDay, int minute,
+				boolean is24HourView) {
+			super(context, callBack, hourOfDay, minute, is24HourView);
+		}
+
+		@Override
+		public void onTimeChanged(TimePicker timePicker, int hourOfDay,
+				int minute) {
+			super.onTimeChanged(timePicker, hourOfDay, minute);
+			if (!mIgnoreEvent) {
+				minute = getRoundedMinute(minute);
+				mIgnoreEvent = true;
+				timePicker.setCurrentMinute(minute);
+				mIgnoreEvent = false;
+			}
+		}
+
+		public static int getRoundedMinute(int minute) {
+			if (minute % TIME_PICKER_INTERVAL != 0) {
+				int minuteFloor = minute - (minute % TIME_PICKER_INTERVAL);
+				minute = minuteFloor
+						+ (minute == minuteFloor + 1 ? TIME_PICKER_INTERVAL : 0);
+				if (minute == 60)
+					minute = 0;
+			}
+
+			return minute;
+		}
+	}
+
+	public class unlink_child extends AsyncTask<String, Integer, String> {
+		ProgressDialog dialog = new ProgressDialog(getActivity());
+		String msg;
+		String url_unlink_child = "http://54.191.67.152/playdate/all_assign_child_remove.php";// ?assign_gid=&child_id=
+
+		@Override
+		protected void onPreExecute() {
+			try {
 				dialog.setMessage("Loading.......please wait");
 				dialog.setCancelable(false);
 				dialog.show();
-				parentinfo="http://54.191.67.152/playdate/child_parent_auth.php";//?child_id=287";
-		}
-			@SuppressWarnings("unused")
-			@Override
-			protected String doInBackground(String... arg0) {
-				// TODO Auto-generated method stub
-				
-				parentItems = new ArrayList<Getcatagory_for_sets>();
-				Getcatagory_for_sets getcategory = null;
-				
-				HttpClient httpClient = new DefaultHttpClient();
-		        HttpContext localContext = new BasicHttpContext();
-		        HttpPost httpPost = new HttpPost(parentinfo);
-		      
-		    
-
-		        ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-		        nameValuePairs.add(new BasicNameValuePair("child_id",child_ID));
-		        
-		        System.out.println("child_id......"+child_ID);
-		        StringBuilder sbb = new StringBuilder();
-
-				sbb.append("http://54.191.67.152/playdate/child_parent_auth.php?");
-				sbb.append(nameValuePairs.get(0));
-				System.out.println(sbb);
-				try {
-					httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-					System.out.println(httpPost);
-				} catch (UnsupportedEncodingException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-
-
-		        HttpResponse response = null;
-				try {
-					response = httpClient.execute(httpPost,
-					        localContext);
-				} catch (ClientProtocolException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		        BufferedReader reader = null;
-				try {
-					reader = new BufferedReader(
-					        new InputStreamReader(
-					                response.getEntity().getContent(), "UTF-8"));
-				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalStateException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				String sResponse = null;
-
-		        try {
-					 sResponse = reader.readLine();
-					
-					System.out.println("response.................................."+sResponse);
-		        } catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		        parent_id=new ArrayList<String>();
-		        try {
-					
-				
-		        if(sResponse.equals(null)||sResponse.equals("")){
-		        	
-		        }else{
-		       
-			try {
-				JSONObject json= new JSONObject(sResponse);
-				JSONObject jobj_parent=json.getJSONObject("parent");
-				getcategory = new Getcatagory_for_sets();
-				getcategory.parent_name=jobj_parent.getString("Parentname");
-				getcategory.parent_id=jobj_parent.getString("g_id");
-				child_parent_id=jobj_parent.getString("g_id");
-				getcategory.parent_profilepic=jobj_parent.getString("profile_image");
-				getcategory.parent_location=jobj_parent.getString("location");
-				getcategory.parent_freetime=jobj_parent.getString("set_fixed_freetime");
-				getcategory.parent_phone=jobj_parent.getString("phone");
-				getcategory.parent_date_ofbirth=jobj_parent.getString("dob");
-				getcategory.parent_type=jobj_parent.getString("guardian_type");
-				parent_id.add(child_parent_id);
-				parentItems.add(getcategory);
-		try {
-                JSONArray jarray=json.getJSONArray("auth_parent");
-			
-		        for(int i=0; i<jarray.length();i++){
-				JSONObject c= jarray.getJSONObject(i);
-				getcategory = new Getcatagory_for_sets();
-				getcategory.parent_name=c.getString("Parentname");
-				getcategory.parent_id=c.getString("auth_g_id");
-				getcategory.parent_profilepic=c.getString("profile_image");
-				getcategory.parent_location=c.getString("location");
-				getcategory.parent_freetime=c.getString("set_fixed_freetime");
-				getcategory.parent_phone=c.getString("phone");
-				getcategory.parent_date_ofbirth=c.getString("dob");
-				getcategory.parent_type=c.getString("guardian_type");
-				parent_id.add(c.getString("auth_g_id"));
-				parentItems.add(getcategory);
-				
+			} catch (Exception e) {
+				// TODO: handle exception
 			}
-		} catch (Exception e) {
-			// TODO: handle exception
-		}		
+
+		}
+
+		@Override
+		protected String doInBackground(String... arg0) {
+
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpContext localContext = new BasicHttpContext();
+			HttpPost httpPost = new HttpPost(url_unlink_child);
+
+			ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+			nameValuePairs.add(new BasicNameValuePair("child_id", child_ID));
+			nameValuePairs.add(new BasicNameValuePair("assign_gid",
+					GlobalVariable.guardian_Id));
+
+			System.out.println("child_id......" + child_ID);
+			System.out.println("assign_gid......" + GlobalVariable.guardian_Id);
+			StringBuilder sbb = new StringBuilder();
+
+			sbb.append("http://54.191.67.152/playdate/all_assign_child_remove.php?");
+			sbb.append(nameValuePairs.get(0) + "&");
+			sbb.append(nameValuePairs.get(1));
+			System.out.println(sbb);
+			try {
+				httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+				System.out.println(httpPost);
+			} catch (UnsupportedEncodingException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+			HttpResponse response = null;
+			try {
+				response = httpClient.execute(httpPost, localContext);
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			BufferedReader reader = null;
+			try {
+				reader = new BufferedReader(new InputStreamReader(response
+						.getEntity().getContent(), "UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalStateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			String sResponse = null;
+
+			try {
+				sResponse = reader.readLine();
+
+				System.out
+						.println("response.............Nitesh....................."
+								+ sResponse);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
-				String success=json.getString("success");
-				String msg=json.getString("msg");
+			try {
+				JSONObject jobj=new JSONObject(sResponse);
+				 msg=jobj.getString("msg");
 				
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		      
-		        }
-		        } catch (Exception e) {
-					// TODO: handle exception
-				}
-				return null;
-			}
-			protected void onPostExecute(String resultt) {
-				
-				/*if(child_parent_id.equals(GlobalVariable.guardian_Id))*/
-				if(parent_id.contains(GlobalVariable.guardian_Id)){
-					
-				}else{
-					dob.setEnabled(false);
-					setfixedfree_time.setEnabled(false);
-					//conditions.setEnabled(false);
-					allergies.setEnabled(false);
-					hobbies.setEnabled(false);
-					school.setEnabled(false);
-					youthclub.setEnabled(false);
-					name.setEnabled(false);
-					dob.setFocusable(false);
-					dob.setClickable(false);
-					setfixedfree_time.setFocusable(false);
-					setfixedfree_time.setClickable(false);
-					allergies.setFocusable(false);
-					allergies.setClickable(false);
-					hobbies.setFocusable(false);
-					hobbies.setClickable(false);
-					child_image.setClickable(false);
-					addmore_freetime.setClickable(false);
-					update_info.setVisibility(View.GONE);
-				}
-				adapter = new LazyAdapter(getActivity(), parentItems);
-
-				list_parent.setAdapter(adapter);
-
-				dialog.dismiss();
-				 
-				
-				}
+			return null;
 		}
-	
+
+		protected void onPostExecute(String resultt) {
+			dialog.dismiss();
+			Toast.makeText(getActivity(), msg,2000).show();
+			Bundle bundle = new Bundle();
+			bundle.putString("user_guardian_id", GlobalVariable.guardian_Id);
+			android.support.v4.app.Fragment fragment = new Home_fragment();
+			fragment.setArguments(bundle);
+			android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+			fragmentManager.beginTransaction()
+					.replace(R.id.content_frame, fragment).commit();
+		}
+
+	}
 }

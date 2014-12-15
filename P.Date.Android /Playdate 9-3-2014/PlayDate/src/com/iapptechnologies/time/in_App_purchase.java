@@ -147,45 +147,45 @@ public class in_App_purchase extends android.support.v4.app.Fragment implements 
             	 SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
          	    boolean purchased_product = prefs.getBoolean("purchased", false);
          	    
-         	   Bundle bundle = new Bundle();
+         	/*   Bundle bundle = new Bundle();
            	bundle.putString("user_guardian_id", user_guardian_id);
            	bundle.putString("facebook_friends",facebook_friends);
            	android.support.v4.app.Fragment  fragment=new authentication();
                fragment.setArguments(bundle);
        		android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
        		fragmentManager.beginTransaction()
-       		        .replace(R.id.content_frame, fragment).commit();
+       		        .replace(R.id.content_frame, fragment).commit();*/
          	    
             	
-//            	if(purchased_product){
-//            		Bundle bundle = new Bundle();
-//	            	bundle.putString("user_guardian_id", user_guardian_id);
-//	            	bundle.putString("facebook_friends",facebook_friends);
-//	            	android.support.v4.app.Fragment  fragment=new authentication();
-//	                fragment.setArguments(bundle);
-//	        		android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
-//	        		fragmentManager.beginTransaction()
-//	        		        .replace(R.id.content_frame, fragment).commit();
-//            	}
-//            	else
-//            	{
-//         	    
-//            	 RandomString randomString = new RandomString(36);
-//                 System.out.println("RandomString>>>>" + randomString.nextString());
-//                 // bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ
-//                 String payload = randomString.nextString();
-//            	
-//                /* if (!mBillingService.requestPurchase("android.test.purchased", ""))*/
-//            	
-//            	 if (!mBillingService.requestPurchase("upgrade_app", payload)) {
-// 		            
-// 	            	
-//            		 
-//            		//Log.e("aa", "billing service called");
-// 	                getActivity().showDialog(DIALOG_BILLING_NOT_SUPPORTED_ID);
-// 	            }
-// 		
-//            	}
+            	if(purchased_product){
+            		Bundle bundle1 = new Bundle();
+	            	bundle1.putString("user_guardian_id", user_guardian_id);
+	            	bundle1.putString("facebook_friends",facebook_friends);
+	            	android.support.v4.app.Fragment  fragment1=new authentication();
+	                fragment1.setArguments(bundle1);
+	        		android.support.v4.app.FragmentManager fragmentManager1 = getFragmentManager();
+	        		fragmentManager1.beginTransaction()
+	        		        .replace(R.id.content_frame, fragment1).commit();
+            	}
+            	else
+            	{
+         	    
+            	 RandomString randomString = new RandomString(36);
+                 System.out.println("RandomString>>>>" + randomString.nextString());
+                 // bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ
+                 String payload = randomString.nextString();
+            	
+                /* if (!mBillingService.requestPurchase("android.test.purchased", ""))*/
+            	
+            	 if (!mBillingService.requestPurchase("upgrade_app", payload)) {
+ 		            
+ 	            	
+            		 
+            		//Log.e("aa", "billing service called");
+ 	                getActivity().showDialog(DIALOG_BILLING_NOT_SUPPORTED_ID);
+ 	            }
+ 		
+            	}
 				
             	
                     break;

@@ -1,9 +1,5 @@
 package com.iapptechnologies.time;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -15,7 +11,6 @@ import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.facebook.Session;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.iapp.playdate.R;
 
@@ -23,7 +18,8 @@ public class GcmIntentService extends IntentService {
     public static final int NOTIFICATION_ID = 1;
     private NotificationManager mNotificationManager;
     NotificationCompat.Builder builder;
-
+    public static String BROADCAST_ACTION = "com.iapptechnologies.time.BroadCast";
+    Database_Handler db;
     public GcmIntentService() {
         super("GcmIntentService");
     }
@@ -31,6 +27,8 @@ public class GcmIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
     	
+    	
+    	 db=new Database_Handler(getApplicationContext());
         Bundle extras = intent.getExtras();
         GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
         // The getMessageType() intent parameter must be the intent you received
@@ -66,15 +64,26 @@ public class GcmIntentService extends IntentService {
                 Log.i("", "Completed work @ " + SystemClock.elapsedRealtime());
                 String message=null;
                 message = intent.getExtras().getString("message");
+                Log.e("Message==",""+message);
+                Intent broadcast = new Intent(BROADCAST_ACTION);
+        	    if(message!=null && message.length()>0)
+        	    {
+        	    	if(message.equalsIgnoreCase("Playdate Requested")||message.equalsIgnoreCase("Playdate Accepted")||message.equalsIgnoreCase("Playdate Rejected")||message.equalsIgnoreCase("Playdate Updated")||message.equalsIgnoreCase("Set Created")||message.equalsIgnoreCase("Child added to your profile")||message.equalsIgnoreCase("Set updated"))
+        	    	{ db.insert_notification(message);
+        	    	}
+        	  //  broadcast.putExtra("Message", message);	
+        	    Log.e("Response==",""+message);
+        	    }
+               // sendBroadcast(broadcast);
                 // Post notification of received message.
-                sendNotification("Received: " + message/*extras.toString()*/);
+                sendNotification( message/*extras.toString()*/);
                 Log.i("", "Received: " + extras.toString());
             }
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.
         GcmBroadcastReceiver.completeWakefulIntent(intent);
+    
     }
-
     // Put the message into a notification and post it.
     // This is just one simple example of what you might choose to do with
     // a GCM message.

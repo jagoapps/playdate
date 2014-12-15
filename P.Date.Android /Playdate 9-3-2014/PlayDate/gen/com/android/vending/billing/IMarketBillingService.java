@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: F:\\android\\comsdk\\Nitesh Workspace\\PlayDate\\src\\com\\android\\vending\\billing\\IMarketBillingService.aidl
+ * Original file: /windows/Nitesh Workspace/PlayDate/src/com/android/vending/billing/IMarketBillingService.aidl
  */
 package com.android.vending.billing;
 public interface IMarketBillingService extends android.os.IInterface

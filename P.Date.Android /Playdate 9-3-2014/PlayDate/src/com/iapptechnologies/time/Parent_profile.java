@@ -3,6 +3,7 @@ package com.iapptechnologies.time;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,10 +38,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -69,6 +73,8 @@ import android.widget.Toast;
 import com.iapp.playdate.R;
 
 public class Parent_profile extends android.support.v4.app.Fragment {
+	
+	boolean firstTime=true;
 	ImageView img, img1;
 	Bitmap bitmap;
 	Float x1, y1, x2, y2;
@@ -114,7 +120,24 @@ public class Parent_profile extends android.support.v4.app.Fragment {
 	public Parent_profile() {
 
 	}
+@Override
+public void onResume() {
+	// TODO Auto-generated method stub
+	if (childinfo == true) {
+		cd = new ConnectionDetector(getActivity());
+		isInternetPresent = cd.isConnectingToInternet();
+		if (isInternetPresent) {
+			new chilprofileshow_webservice().execute();
 
+		} else {
+			Toast.makeText(getActivity(),
+					"Please check internet connection", 2000).show();
+
+		}
+
+	}
+	super.onResume();
+}
 	@Override
 	public View onCreateView(final LayoutInflater inflater,ViewGroup container, Bundle savedInstanceState) {
 
@@ -123,9 +146,9 @@ public class Parent_profile extends android.support.v4.app.Fragment {
 		Calendar c = Calendar.getInstance();
 		System.out.println("Current time => " + c.getTime());
 
-		SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+		SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
 		 date_comparision = df.format(c.getTime());
-		
+		 Home.menu.setVisibility(View.GONE);
 		getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 		parentdob = (EditText) view.findViewById(R.id.textView_dob_parent);
 		txt_free_time = (TextView) view.findViewById(R.id.textView3212);
@@ -243,41 +266,47 @@ try {
 		}
 		
 		
-		if (childinfo == true) {
-			cd = new ConnectionDetector(getActivity());
-			isInternetPresent = cd.isConnectingToInternet();
-			if (isInternetPresent) {
-				new chilprofileshow_webservice().execute();
-
-			} else {
-				Toast.makeText(getActivity(),
-						"Please check internet connection", 2000).show();
-
-			}
-
-		}
+		
 
 		final Home home = new Home();
 try {
-	if (guardiantype.equalsIgnoreCase("f")) {
+	if (guardiantype.equalsIgnoreCase("f")||guardiantype.equalsIgnoreCase("male")) {
 		guardiantype = "FATHER";
+	}else if(guardiantype.equalsIgnoreCase("m")||guardiantype.equalsIgnoreCase("female")) {
+		guardiantype = "MOTHER";
+	}else if(guardiantype.equalsIgnoreCase("b")) {
+		guardiantype = "BROTHER";
+	}
+	else if(guardiantype.equalsIgnoreCase("s")) {
+		guardiantype = "SISTER";
+	}
+	else if(guardiantype.equalsIgnoreCase("n")) {
+		guardiantype = "NANNY";
+	}
+	else if(guardiantype.equalsIgnoreCase("gm")) {
+		guardiantype = "GRAND MOTHER";
+	}
+	else if(guardiantype.equalsIgnoreCase("GF")) {
+		guardiantype = "GRAND FATHER";
+	}
+	else if(guardiantype.equalsIgnoreCase("T")) {
+		guardiantype = "TEACHER";
+	}
+	else if(guardiantype.equalsIgnoreCase("o")) {
+		guardiantype = "OTHER";
 	}
 } catch (Exception e) {
 	// TODO: handle exception
 }
 		
-		try {
-			if (guardiantype.equalsIgnoreCase("m")) {
-				guardiantype = "MOTHER";
-			}
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
+		
 		
 
 		parenttype.setText(guardiantype);
+		parenttype.setFocusable(false);
 		parentdob.setFocusable(false);
 		parentdob.setClickable(true);
+		parenttype.setClickable(true);
 		// parentfreetime.setFocusable(false);
 		// parentfreetime.setClickable(true);
 		if (GlobalVariable.guardian_Id.equals(user_guardian_id)) {
@@ -292,45 +321,134 @@ try {
 			// parentfreetime.setClickable(false);
 			img.setClickable(false);
 			parenttype.setEnabled(false);
+			parenttype.setClickable(false);
 			btn_update.setVisibility(View.GONE);
 			// addmore_freetime.setVisibility(View.GONE);
 		}
-
-		parentdob.setOnClickListener(new OnClickListener() {
-
+		final String relation_array[]={"FATHER","MOTHER","GRAND FATHER","GRAND MOTHER","NANNY","BROTHER","SISTER","TEACHER","OTHER"};
+		parenttype.setOnClickListener(new OnClickListener() {
+			
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				count_alert=0;
-				Calendar c = Calendar.getInstance();
-
-				myYear = c.get(Calendar.YEAR);
-				myMonth = c.get(Calendar.MONTH);
-				myDay = c.get(Calendar.DAY_OF_MONTH);
-
-				try {
-					String date_from_edit_text = parentdob.getText().toString();
-					if (date_from_edit_text.equals("")
-							|| date_from_edit_text.equals(null)) {
-
-					} else {
-						String[] dateArr = date_from_edit_text.split("-");
-
-						myDay = Integer.parseInt(dateArr[0]);
-						myMonth = Integer.parseInt(dateArr[1]) - 1;
-						myYear = Integer.parseInt(dateArr[2]);
-					}
-
-				} catch (Exception e) {
-					// TODO: handle exception
-				}
-				DatePickerDialog d = new DatePickerDialog(getActivity(),
-						mDateSetListener, myYear, myMonth, myDay);
-
-				d.show();
-
+				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+			    builder.setTitle("RELATION")
+			           .setItems(relation_array, new DialogInterface.OnClickListener() {
+			               public void onClick(DialogInterface dialog, int which) {
+			            	   guardiantype=relation_array[which];
+			               parenttype.setText(guardiantype);
+			           }
+			    });
+			    builder.create().show();
 			}
 		});
+		
+		parentdob.setOnTouchListener(new OnTouchListener() {
+			
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+			    switch(event.getAction())
+	            {
+	            case MotionEvent.ACTION_DOWN :
+	            	count_alert=0;
+					Calendar c = Calendar.getInstance();
+
+					myYear = c.get(Calendar.YEAR);
+					myMonth = c.get(Calendar.MONTH);
+					myDay = c.get(Calendar.DAY_OF_MONTH);
+
+					try {
+						String date_from_edit_text = parentdob.getText().toString();
+						
+						SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yy");
+						// SimpleDateFormat sdf1=new SimpleDateFormat("dd-MMM-yy");
+						 Date date_1=null,date_2=null,date_3=null,date_4=null;
+						 try {
+							 date_1=sdf.parse(date_from_edit_text);
+							
+							 
+							 
+						} catch (ParseException e) {
+							
+							e.printStackTrace();
+						}
+						 SimpleDateFormat destDf = new SimpleDateFormat("yyyy-MM-dd");
+						
+						               
+					
+						             // format the date into another format
+						try {
+							date_from_edit_text = destDf.format(date_1);
+						} catch (Exception e) {
+							// TODO: handle exception
+						}
+						
+						if (date_from_edit_text.equals("")
+								|| date_from_edit_text.equals(null)) {
+
+						} else {
+							String[] dateArr = date_from_edit_text.split("-");
+
+							myDay = Integer.parseInt(dateArr[2]);
+							myMonth = Integer.parseInt(dateArr[1]) - 1;
+							myYear = Integer.parseInt(dateArr[0]);
+						}
+
+					} catch (Exception e) {
+					
+					}
+					
+						DatePickerDialog d = new DatePickerDialog(getActivity(),mDateSetListener, myYear, myMonth, myDay);
+						d.show();
+	                break;
+	            case MotionEvent.ACTION_UP  :
+	                break;
+	            }
+				return true;
+			}
+		});
+		
+	
+//		parentdob.setOnClickListener(new OnClickListener() {
+//
+//			@Override
+//			public void onClick(View v) {
+//				// TODO Auto-generated method stub
+//				count_alert=0;
+//				Calendar c = Calendar.getInstance();
+//
+//				myYear = c.get(Calendar.YEAR);
+//				myMonth = c.get(Calendar.MONTH);
+//				myDay = c.get(Calendar.DAY_OF_MONTH);
+//
+//				try {
+//					String date_from_edit_text = parentdob.getText().toString();
+//					if (date_from_edit_text.equals("")
+//							|| date_from_edit_text.equals(null)) {
+//
+//					} else {
+//						String[] dateArr = date_from_edit_text.split("-");
+//
+//						myDay = Integer.parseInt(dateArr[0]);
+//						myMonth = Integer.parseInt(dateArr[1]) - 1;
+//						myYear = Integer.parseInt(dateArr[2]);
+//					}
+//
+//				} catch (Exception e) {
+//				
+//				}
+//				firstTime=true;
+//				if(firstTime==true)
+//				{
+//					DatePickerDialog d = new DatePickerDialog(getActivity(),mDateSetListener, myYear, myMonth, myDay);
+//					d.show();
+//					firstTime=false;
+//				}else
+//				{
+//					
+//				}
+//			}
+//		});
 
 		/*
 		 * parentfreetime.setOnClickListener(new OnClickListener() {
@@ -766,6 +884,28 @@ imgLoaderParnt.DisplayImage(strURL, img);
 				String parent_name = txt_name.getText().toString();
 				String date_of_birth_of_parent = parentdob.getText().toString();
 				String parent_type = parenttype.getText().toString();
+				if (parent_type.equals("") || parent_type.equals(null)) {
+					parent_type = "";
+				}else if(parent_type.equalsIgnoreCase("FATHER")){
+					guardiantype="f";
+				}else if(parent_type.equalsIgnoreCase("MOTHER")){
+					guardiantype="m";
+				}else if(parent_type.equalsIgnoreCase("BROTHER")){
+					parent_type="b";
+				}else if(guardiantype.equalsIgnoreCase("SISTER")){
+					parent_type="s";
+				}else if(guardiantype.equalsIgnoreCase("NANNY")){
+					parent_type="n";
+				}else if(guardiantype.equalsIgnoreCase("GRAND FATHER")){
+					parent_type="gf";
+				}else if(guardiantype.equalsIgnoreCase("GRAND MOTHER")){
+					parent_type="gm";
+				}else if(guardiantype.equalsIgnoreCase("TEACHER")){
+					parent_type="t";
+				}
+				else if(guardiantype.equalsIgnoreCase("OTHER")){
+					parent_type="o";
+				}
 				String parent_location = parentlocation.getText().toString();
 				// String parent_freetime=parentfreetime.getText().toString();
 
@@ -781,7 +921,14 @@ imgLoaderParnt.DisplayImage(strURL, img);
 				String school = _items.get(arg2).school_child;
 				String youthclub = _items.get(arg2).youthclub_child;
 				String free_time = _items.get(arg2).free_time;
-
+				if(GlobalVariable.show_unlink_button){
+				if(_items.get(arg2).guardian_identity.equals(GlobalVariable.guardian_Id)){
+					
+				}else{
+					GlobalVariable.appers_unlink_button=true;
+				}
+				}
+                
 				System.out.println("Child_idChild_id>>>>>>>>>>>" + Child_id);
 
 				Bundle bundle = new Bundle();
@@ -811,9 +958,27 @@ imgLoaderParnt.DisplayImage(strURL, img);
 
 				android.support.v4.app.Fragment fragment = new Child_profile();
 				fragment.setArguments(bundle);
+				
 				android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
-				fragmentManager.beginTransaction()
-						.replace(R.id.content_frame, fragment).commit();
+				android.support.v4.app.FragmentTransaction fragmentTransaction= fragmentManager.beginTransaction();
+				fragmentTransaction.replace(R.id.content_frame, fragment);
+				fragmentTransaction.addToBackStack("first");
+				fragmentTransaction.commit();
+				
+				/*fragmentManager.beginTransaction()
+						.replace(R.id.content_frame, fragment).commit();*/
+				
+				
+				/*FragmentManager fragmentManager = getFragmentManager();
+				FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+				Fragment myFragment = new SecondSelectFishList(navigationBackButton);
+				Bundle b = new Bundle();
+				b.putString("id", idOfImage);
+				myFragment.setArguments(b);
+				fragmentTransaction.replace(R.id.frame_container, myFragment);
+				fragmentTransaction.addToBackStack("first");
+				fragmentTransaction.commit();*/
 			}
 		});
 		btn_update.setOnClickListener(new OnClickListener() {
@@ -830,8 +995,32 @@ imgLoaderParnt.DisplayImage(strURL, img);
                    // parent_dob = parentdob.getText().toString();
 					if (guardiantype.equals("") || guardiantype.equals(null)) {
 						guardiantype = "";
+					}else if(guardiantype.equalsIgnoreCase("FATHER")){
+						guardiantype="f";
+					}else if(guardiantype.equalsIgnoreCase("MOTHER")){
+						guardiantype="m";
+					}else if(guardiantype.equalsIgnoreCase("BROTHER")){
+						guardiantype="b";
+					}else if(guardiantype.equalsIgnoreCase("SISTER")){
+						guardiantype="s";
+					}else if(guardiantype.equalsIgnoreCase("NANNY")){
+						guardiantype="n";
+					}else if(guardiantype.equalsIgnoreCase("GRAND FATHER")){
+						guardiantype="gf";
+					}else if(guardiantype.equalsIgnoreCase("GRAND MOTHER")){
+						guardiantype="gm";
 					}
+					else if(guardiantype.equalsIgnoreCase("TEACHER")){
+						guardiantype="t";
+					}else if(guardiantype.equalsIgnoreCase("OTHER")){
+						guardiantype="o";
+					}
+					
 
+					
+					
+					
+					
 					parent_location = parentlocation.getText().toString();
 					if (parent_location.equals("")
 							|| parent_location.equals(null)) {
@@ -842,7 +1031,7 @@ imgLoaderParnt.DisplayImage(strURL, img);
 						parent_dob = "";
 					}
 
-					SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+					SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
 					Date date_of_birth = null;
 					try {
 						date_of_birth = sdf.parse(parent_dob);
@@ -854,8 +1043,12 @@ imgLoaderParnt.DisplayImage(strURL, img);
 					SimpleDateFormat destDf = new SimpleDateFormat("yyyy-MM-dd");
 
 					// format the date into another format
-
-					date_od_birth_parent = destDf.format(date_of_birth);
+try {
+	date_od_birth_parent = destDf.format(date_of_birth);
+} catch (Exception e) {
+	// TODO: handle exception
+}
+					
 
 					/*
 					 * parent_parentFreetime=parentfreetime.getText().toString();
@@ -972,8 +1165,12 @@ imgLoaderParnt.DisplayImage(strURL, img);
 		System.out.println("data   +  " + data);
 		if (requestCode == RESULT_LOAD_IMAGE && resultCode == -1
 				&& data != null) {
+			try{
+			
+			Uri selectedImageURI = data.getData();
+			File imageFile = new File(getRealPathFromURI(selectedImageURI));
 
-			InputStream is = null;
+			/*InputStream is = null;
 			try {
 				is = getActivity().getContentResolver().openInputStream(
 						data.getData());
@@ -982,12 +1179,79 @@ imgLoaderParnt.DisplayImage(strURL, img);
 				e.printStackTrace();
 			}
 
-			imageData = BitmapFactory.decodeStream(is, null, null);
+			imageData = BitmapFactory.decodeStream(is, null, null);*/
+			String path_get=imageFile.getAbsolutePath();
+			
+	
+			
+			 try {
+			       
+			        ExifInterface exif = new ExifInterface(path_get);
+			        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
+			        int angle = 0;
+
+			        if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
+			            angle = 90;
+			        } 
+			        else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
+			            angle = 180;
+			        } 
+			        else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+			            angle = 270;
+			        }
+
+			        Matrix mat = new Matrix();
+			        mat.postRotate(angle);
+
+			        Bitmap bmp = BitmapFactory.decodeStream(new FileInputStream(imageFile), null, null);
+			        Bitmap correctBmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), mat, true);                 
+			        imageData=correctBmp;
+			 }
+			 
+			 
+			 
+			    catch (IOException e) {
+			        Log.w("TAG", "-- Error in setting image");
+			    }   
+			    catch(OutOfMemoryError oom) {
+			        Log.w("TAG", "-- OOM Error in setting image");
+			    }
+			 
+			 try {
+				
+			
+			 Bitmap dstBmp;
+			 if (imageData.getWidth() >= imageData.getHeight()){
+
+				  dstBmp = Bitmap.createBitmap(
+						  imageData, 
+						  imageData.getWidth()/2 - imageData.getHeight()/2,
+				     0,
+				     imageData.getHeight(), 
+				     imageData.getHeight()
+				     );
+
+				}else{
+
+				  dstBmp = Bitmap.createBitmap(
+						  imageData,
+				     0, 
+				     imageData.getHeight()/2 - imageData.getWidth()/2,
+				     imageData.getWidth(),
+				     imageData.getWidth() 
+				     );
+				}
+			 imageData=dstBmp;
+			 } catch (Exception e) {
+					// TODO: handle exception
+				}
 
 			try {
-				is.close();
+				//is.close();
 
 				img.setImageBitmap(imageData);
+				
 				setsizeofimage();
 				addWhiteBorder(imageData,2);
 				if (isInternetPresent) {
@@ -999,9 +1263,66 @@ imgLoaderParnt.DisplayImage(strURL, img);
 
 				}
 
-			} catch (IOException e) {
+			} catch (Exception e) {
 
 				e.printStackTrace();
+			}
+			}catch(Exception e){
+				InputStream is = null;
+				try {
+					is = getActivity().getContentResolver().openInputStream(
+							data.getData());
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
+				imageData = BitmapFactory.decodeStream(is, null, null);
+				
+				 Bitmap dstBmp;
+				 if (imageData.getWidth() >= imageData.getHeight()){
+
+					  dstBmp = Bitmap.createBitmap(
+							  imageData, 
+							  imageData.getWidth()/2 - imageData.getHeight()/2,
+					     0,
+					     imageData.getHeight(), 
+					     imageData.getHeight()
+					     );
+
+					}else{
+
+					  dstBmp = Bitmap.createBitmap(
+							  imageData,
+					     0, 
+					     imageData.getHeight()/2 - imageData.getWidth()/2,
+					     imageData.getWidth(),
+					     imageData.getWidth() 
+					     );
+					}
+				 imageData=dstBmp;
+				
+
+				try {
+					//is.close();
+
+					img.setImageBitmap(imageData);
+					
+					setsizeofimage();
+					addWhiteBorder(imageData,2);
+					if (isInternetPresent) {
+						new parent_pic_update().execute();
+
+					} else {
+						Toast.makeText(getActivity(),
+								"Please check internet connection", 2000).show();
+
+					}
+
+				} catch (Exception e2) {
+
+					e.printStackTrace();
+				}
 			}
 		}
 if(requestCode==CAMERA_CAPTURE_IMAGE_REQUEST_CODE){
@@ -1023,6 +1344,19 @@ if(requestCode==CAMERA_CAPTURE_IMAGE_REQUEST_CODE){
 
 	}
 
+	private String getRealPathFromURI(Uri contentURI) {
+	    String result;
+	    Cursor cursor = getActivity().getContentResolver().query(contentURI, null, null, null, null);
+	    if (cursor == null) { // Source is Dropbox or other similar local file path
+	        result = contentURI.getPath();
+	    } else { 
+	        cursor.moveToFirst(); 
+	        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA); 
+	        result = cursor.getString(idx);
+	        cursor.close();
+	    }
+	    return result;
+	}
 	
 	public class parent_detail_update extends
 			AsyncTask<String, Integer, String> {
@@ -1051,8 +1385,7 @@ if(requestCode==CAMERA_CAPTURE_IMAGE_REQUEST_CODE){
 			HttpPost httpPost = new HttpPost(url);
 
 			ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-			nameValuePairs
-					.add(new BasicNameValuePair("g_id", user_guardian_id));
+			nameValuePairs.add(new BasicNameValuePair("g_id", user_guardian_id));
 			nameValuePairs.add(new BasicNameValuePair("name", parent_name));
 			nameValuePairs.add(new BasicNameValuePair("dob",date_od_birth_parent));
 			nameValuePairs.add(new BasicNameValuePair("guardian_type",guardiantype));
@@ -1126,7 +1459,7 @@ if(requestCode==CAMERA_CAPTURE_IMAGE_REQUEST_CODE){
 				SharedPreferences.Editor editor = settings.edit(); // Opening
 																	// editor
 																	// for
-																	// SharedPreferences
+						GlobalVariable.global_name=	parent_name;										// SharedPreferences
 				editor.putString("userfirstname", parent_name);
 				editor.putString("userlocation", parent_location);
 				editor.putString("userdob", parent_dob);
@@ -1275,7 +1608,7 @@ if(requestCode==CAMERA_CAPTURE_IMAGE_REQUEST_CODE){
 		protected void onPreExecute() {
 			// Toast.makeText(Login.this,"asynch task",Toast.LENGTH_LONG).show();
 
-			childinfo = false;
+			childinfo = true;
 			dialog.setMessage("Loading.......please wait");
 			dialog.setCancelable(false);
 			dialog.show();
@@ -1347,12 +1680,22 @@ if(requestCode==CAMERA_CAPTURE_IMAGE_REQUEST_CODE){
 			}
 			try {
 				JSONObject json = new JSONObject(sResponse);
+				
+				JSONObject info=json.getJSONObject("parentinfo");
+				String id_parent=info.getString("guardian_id");
+				
+				if(id_parent.equals(GlobalVariable.guardian_Id)){
+					GlobalVariable.show_unlink_button=true;
+				}else{
+					GlobalVariable.show_unlink_button=false;
+				}
 
 				JSONArray jarray = json.getJSONArray("data");
 
 				for (int i = 0; i < jarray.length(); i++) {
 					JSONObject c = jarray.getJSONObject(i);
 					getcategory = new Getcategory();
+					getcategory.guardian_identity=id_parent;
 					getcategory.child_name = c.getString("Childname");
 					getcategory.profile_image = c.getString("profile_image");
 					getcategory.child_id = c.getString("child_id");
@@ -1376,6 +1719,7 @@ if(requestCode==CAMERA_CAPTURE_IMAGE_REQUEST_CODE){
 				for (int i = 0; i < jarray_authchild.length(); i++) {
 					JSONObject c = jarray_authchild.getJSONObject(i);
 					getcategory = new Getcategory();
+					getcategory.guardian_identity=c.getString("g_id");
 					getcategory.child_name = c.getString("Childname");
 					getcategory.profile_image = c.getString("profile_image");
 					getcategory.child_id = c.getString("child_id");
@@ -1883,12 +2227,44 @@ if(requestCode==CAMERA_CAPTURE_IMAGE_REQUEST_CODE){
 
 			}
 
-			String date = day + "-" + month + "-" + year1;
+			String date = day + "/" + month + "/" + year1;
+			
+			
+			 SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy");
+				
+			 Date date_1=null;
+			 try {
+				 date_1=sdf.parse(date);
+				
+				 
+				 
+			} catch (ParseException e) {
+				
+				e.printStackTrace();
+			}
+			 SimpleDateFormat destDf = new SimpleDateFormat("dd/MM/yy");
+			
+			  String date_to_set=null;             
+		
+			             // format the date into another format
+			try {
+				date_to_set = destDf.format(date_1);
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+    	   
+    	   
+    	   
+    	   
+    	   
+    	   
+    	   
+			
 			try{
 
-			      SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+			      SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
 			       Date date1 = formatter.parse(date_comparision);
-			       Date date2 = formatter.parse(date);
+			       Date date2 = formatter.parse(date_to_set);
 			    if (date1.compareTo(date2)<0)
 			    {
 			    	if(count_alert==0){
@@ -1909,7 +2285,7 @@ if(requestCode==CAMERA_CAPTURE_IMAGE_REQUEST_CODE){
 				                    
 			    }else{
 			    	count_alert=0;
-			    	parentdob.setText(date);
+			    	parentdob.setText(date_to_set);
 			    }
 			 } catch (ParseException e1) 
 		      {

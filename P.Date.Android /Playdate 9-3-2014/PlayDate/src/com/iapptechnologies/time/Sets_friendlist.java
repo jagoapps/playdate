@@ -60,7 +60,7 @@ public class Sets_friendlist extends android.support.v4.app.Fragment {
 	 @Override
 		public View onCreateView(final LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
-			ViewGroup view = (ViewGroup) inflater.inflate(R.layout.sets_fragment_list, container,
+			ViewGroup view = (ViewGroup) inflater.inflate(R.layout.sets_fragment_list_1, container,
 	                false);
 			getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 			cd = new ConnectionDetector(getActivity());
@@ -139,10 +139,14 @@ public class Sets_friendlist extends android.support.v4.app.Fragment {
 					
 					android.support.v4.app.Fragment  fragment=new Friend_profile();
 			        fragment.setArguments(bundle);
-					android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+					/*android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
 					fragmentManager.beginTransaction()
-					        .replace(R.id.content_frame, fragment).commit();
-					
+					        .replace(R.id.content_frame, fragment).commit();*/
+			        android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+					android.support.v4.app.FragmentTransaction fragmentTransaction= fragmentManager.beginTransaction();
+					fragmentTransaction.replace(R.id.content_frame, fragment);
+					fragmentTransaction.addToBackStack("first18");
+					fragmentTransaction.commit();
 				
 					
 					
@@ -153,23 +157,31 @@ public class Sets_friendlist extends android.support.v4.app.Fragment {
 			});
 	 
 			return view;
-			
-	 	
+			 
+	 	   
 	 }
 	 public void jsonparsing(String response1) {
 		 System.out.println(response1);
-		ProgressDialog dialog=new ProgressDialog(getActivity());
-		dialog.setMessage("Loading....Please wait");
-		dialog.show();
+		 ProgressDialog dialog = null;
+		 try {
+			 dialog=new ProgressDialog(getActivity());
+			 dialog.setMessage("Loading....Please wait");
+				dialog.show();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		
 		Getcatagory_for_sets getcatagory_for_sets=null;
 		Getcategory childdetaillist=null;
 		getcat_for_sets=new ArrayList<Getcatagory_for_sets>();
-		child_info_list=new ArrayList<Getcategory>();
+		
 		try {
 			JSONObject json=new JSONObject(response1);
 			JSONArray jArray=json.getJSONArray("data");
 			if(jArray.length()>0){
 				for(int i=0;i<jArray.length();i++){
+					child_info_list=new ArrayList<Getcategory>();
 					JSONObject getdetail=jArray.getJSONObject(i);
 					JSONObject friendinfo=getdetail.getJSONObject("friendinfo");
 					getcatagory_for_sets= new Getcatagory_for_sets();
@@ -181,32 +193,51 @@ public class Sets_friendlist extends android.support.v4.app.Fragment {
 					getcatagory_for_sets.parent_freetime=friendinfo.getString("set_fixed_freetime");
 					getcatagory_for_sets.parent_type=friendinfo.getString("guardian_type");
 					getcatagory_for_sets.parent_location=friendinfo.getString("location");
-					JSONArray child=getdetail.getJSONArray("childinfo");
-					for(int j=0;j<child.length();j++){
-						JSONObject child_detail= child.getJSONObject(j);
-						childdetaillist=new Getcategory();
-						childdetaillist.guardian_child=id_parent;
-						childdetaillist.child_name=child_detail.getString("name");
-						childdetaillist.child_id=child_detail.getString("child_id");
-						//childdetaillist.profile_image=child_detail.getString("profile_image");
-						childdetaillist.date_of_birth=child_detail.getString("dob");
-						childdetaillist.free_time=child_detail.getString("set_fixed_freetime");
-						childdetaillist.allergies_child=child_detail.getString("allergies");
-						
-						childdetaillist.hobbies_child=child_detail.getString("hobbies");
-						childdetaillist.condition_child=child_detail.getString("dob");
-						childdetaillist.school_child=child_detail.getString("school");
-						childdetaillist.youthclub_child=child_detail.getString("youth_club");
-						child_info_list.add(childdetaillist);
-						
+					try {
+						JSONArray child=getdetail.getJSONArray("childinfo");
+						for(int j=0;j<child.length();j++){
+							JSONObject child_detail= child.getJSONObject(j);
+							childdetaillist=new Getcategory();
+							childdetaillist.guardian_child=id_parent;
+							childdetaillist.child_name=child_detail.getString("name");
+							childdetaillist.child_id=child_detail.getString("child_id");
+							//childdetaillist.profile_image=child_detail.getString("profile_image");
+							childdetaillist.date_of_birth=child_detail.getString("dob");
+							childdetaillist.free_time=child_detail.getString("set_fixed_freetime");
+							childdetaillist.allergies_child=child_detail.getString("allergies");
+							
+							childdetaillist.hobbies_child=child_detail.getString("hobbies");
+							childdetaillist.condition_child=child_detail.getString("dob");
+							childdetaillist.school_child=child_detail.getString("school");
+							childdetaillist.youthclub_child=child_detail.getString("youth_club");
+							if(child_detail.getString("child_id").equals("")||child_detail.getString("child_id").equals(null)){
+								break;
+							}else{
+								child_info_list.add(childdetaillist);
+							}
+						}
+					} catch (Exception e) {
+						// TODO: handle exception
 					}
+					
+						
+					
+						
+					
 					getcatagory_for_sets.childinfo=child_info_list;
 					getcat_for_sets.add(getcatagory_for_sets);
 					
 					
 				}
+				try {
+					if(dialog!=null || dialog.isShowing()){
+						dialog.dismiss();
+					}
+					
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
 				
-				dialog.dismiss();
 				adapter = new LazyAdapter(getActivity(), getcat_for_sets);
 				list_friend.setAdapter(adapter);
 			}
@@ -218,7 +249,12 @@ public class Sets_friendlist extends android.support.v4.app.Fragment {
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			dialog.dismiss();
+			try {
+				dialog.dismiss();
+			} catch (Exception e2) {
+				// TODO: handle exception
+			}
+			
 		}
 		
 		
@@ -240,8 +276,13 @@ public class Sets_friendlist extends android.support.v4.app.Fragment {
 				
 				this.activity = activity;
 				this._items = getcat_for_sets;
-				inflater = (LayoutInflater) getActivity()
-						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				try {
+					inflater = (LayoutInflater) getActivity()
+							.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+				
 				imageLoader = new ImageLoader(getActivity());
 			}
 
@@ -336,7 +377,7 @@ public class Sets_friendlist extends android.support.v4.app.Fragment {
 						dialog.show();
 						dialog.setMessage("Loading.......please wait");
 						url_sets="http://54.191.67.152/playdate/facebook_friend_detail.php";
-						//http://54.191.67.152/playdate/facebook_friend_detail.php?friend_fbid=%27100004938971287%27,%27100001678200547%27
+						//http://112.196.34.179/playdate/facebook_friend_detail.php?friend_fbid=%27100004938971287%27,%27100001678200547%27
 				}
 
 				
@@ -351,7 +392,7 @@ public class Sets_friendlist extends android.support.v4.app.Fragment {
 
 			        ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 			        nameValuePairs.add(new BasicNameValuePair("friend_fbid",facebookfriends));
-			       System.out.println(facebookfriends);
+			       System.out.println("facebook issue......................"+facebookfriends);
 
 					
 					try {
@@ -449,7 +490,7 @@ public class Sets_friendlist extends android.support.v4.app.Fragment {
 						dialog.show();
 						dialog.setMessage("Loading.......please wait");
 						url_sets="http://54.191.67.152/playdate/set_friend_child.php";
-						//http://54.191.67.152/playdate/set_friend_child.php?&set_id=95&friend_fbid=%27123%27,%2724%27
+						//http://112.196.34.179/playdate/set_friend_child.php?&set_id=95&friend_fbid=%27123%27,%2724%27
 				}
 
 				

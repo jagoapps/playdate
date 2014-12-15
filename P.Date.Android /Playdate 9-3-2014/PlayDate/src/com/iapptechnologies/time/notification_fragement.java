@@ -23,36 +23,50 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Notification;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.iapp.playdate.R;
-import com.iapptechnologies.time.Friend_profile.LazyAdapter.ViewHolder;
-import com.iapptechnologies.time.Home_fragment.LazyAdapter;
 import com.iapptechnologies.time.models.NotificationModels;
+import com.iapptechnologies.time.util.DataBaseSqlliteHelper;
 
 public class notification_fragement extends android.support.v4.app.Fragment {
-	String user_guardian_id;
+	DataBaseSqlliteHelper eventsData;
+	String user_guardian_id, facebook_friends;
 	ListView list_home;
 	ConnectionDetector cd;
-	DB_Helper db;
 	Boolean isInternetPresent = false;
 	String[] stringarray;
+	Button data_btn, notification_btn;
 	ArrayList<Getcatagory_forlist> params = new ArrayList<Getcatagory_forlist>();
-	ArrayList<NotificationModels>modelsDataList;
-	
+	ArrayList<NotificationModels> modelsDataList;
+	BroadcastReceiver receiver;
+	SQLiteDatabase eventDataRead, eventDataWrite;
+	public static String BROADCAST_ACTION = "com.iapptechnologies.time.BroadCast";
+	String notificationMessage = "";
+	Element_notification adapter;
+	DB_Helper db;
+	Database_Handler dbb;
+
 	public notification_fragement() {
 
 	}
@@ -61,22 +75,165 @@ public class notification_fragement extends android.support.v4.app.Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 
-		ViewGroup view = (ViewGroup) inflater.inflate(R.layout.home, container,
-				false);
+		ViewGroup view = (ViewGroup) inflater.inflate(
+				R.layout.notification_layout, container, false);
+		final LinearLayout linearLayout = (LinearLayout) view
+				.findViewById(R.id.btnMain);
+		dbb = new Database_Handler(getActivity());
+		data_btn = (Button) view.findViewById(R.id.data);
+		notification_btn = (Button) view.findViewById(R.id.NotifacationData);
 		db = new DB_Helper(getActivity());
-		modelsDataList=new ArrayList<NotificationModels>();
-		
+		modelsDataList = new ArrayList<NotificationModels>();
+		// data_btn.setTextColor(Color.parseColor("#0097dc"));
+		// notification_btn.setTextColor(Color.parseColor("#ffffff"));
+		// TODO Auto-generated method stub
+		// Drawable d =
+		// getActivity().getResources().getDrawable(R.drawable.left_active);
+		// linearLayout.setBackgroundDrawable(d);
+
+		// eventsData = new DataBaseSqlliteHelper(getActivity());
 		user_guardian_id = getArguments().getString("user_guardian_id");
-		list_home = (ListView) view.findViewById(R.id.listView1_home);
+		facebook_friends = getArguments().getString("facebook_friends");
+		list_home = (ListView) view
+				.findViewById(R.id.listView1_home_notification);
 		cd = new ConnectionDetector(getActivity());
 		isInternetPresent = cd.isConnectingToInternet();
+		modelsDataList.clear();
+		// modelsDataList=dbb.get_notification();
+		// adapter = new Element_notification(getActivity(), modelsDataList);
+
+		// list_home.setAdapter(adapter);
+
+		list_home.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				// TODO Auto-generated method stub
+				String text = modelsDataList.get(position)
+						.getNotificationData();
+				if (text.contains("Playdate created")
+						|| text.contains("Playdate Updated")
+						|| text.contains("Playdate Rejected")
+						|| text.contains("Playdate Accepted")) {
+					Bundle bundle = new Bundle();
+					bundle.putString("user_guardian_id", user_guardian_id);
+
+					android.support.v4.app.Fragment fragment = new Home_fragment();
+					fragment.setArguments(bundle);
+					android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+					android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
+							.beginTransaction();
+					fragmentTransaction.replace(R.id.content_frame, fragment);
+
+					fragmentTransaction.commit();
+				} else if (text.contains("Set Created")
+						|| text.contains("Set updated")) {
+					/*Bundle bundle = new Bundle();
+					bundle.putString("user_guardian_id", user_guardian_id);
+					bundle.putString("facebook_friends", facebook_friends);
+					android.support.v4.app.Fragment fragment = new Sets();
+					fragment.setArguments(bundle);
+					android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+					android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
+							.beginTransaction();
+					fragmentTransaction.replace(R.id.content_frame, fragment);*/
+
+					Bundle bundle = new Bundle();
+					bundle.putString("user_guardian_id", user_guardian_id);
+					bundle.putString("facebook_friends", facebook_friends);
+					android.support.v4.app.Fragment fragment = new Sets();
+					fragment.setArguments(bundle);
+					android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+					android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
+							.beginTransaction();
+					fragmentTransaction.replace(R.id.content_frame, fragment);
+
+					fragmentTransaction.commit();
+				
+				}
+
+			}
+		});
+
+		data_btn.setTextColor(Color.parseColor("#ffffff"));
+		notification_btn.setTextColor(Color.parseColor("#0097dc"));
+
+		// TODO Auto-generated method stub
+		Drawable d = getActivity().getResources().getDrawable(
+				R.drawable.right_active);
+		linearLayout.setBackgroundDrawable(d);
 		if (isInternetPresent) {
 			new getEvents_detail().execute();
 		} else {
 			Toast.makeText(getActivity(), "Please check internet connection",
 					2000).show();
-			return view;
+
 		}
+
+		data_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				data_btn.setTextColor(Color.parseColor("#ffffff"));
+				notification_btn.setTextColor(Color.parseColor("#0097dc"));
+
+				// TODO Auto-generated method stub
+				Drawable d = getActivity().getResources().getDrawable(
+						R.drawable.right_active);
+				linearLayout.setBackgroundDrawable(d);
+				if (isInternetPresent) {
+					new getEvents_detail().execute();
+				} else {
+					Toast.makeText(getActivity(),
+							"Please check internet connection", 2000).show();
+
+				}
+
+			}
+		});
+		notification_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+
+				Drawable d = getActivity().getResources().getDrawable(
+						R.drawable.left_active);
+				linearLayout.setBackgroundDrawable(d);
+				data_btn.setTextColor(Color.parseColor("#0097dc"));
+				notification_btn.setTextColor(Color.parseColor("#ffffff"));
+
+				modelsDataList.clear();
+				modelsDataList = dbb.get_notification();
+				adapter = new Element_notification(getActivity(),
+						modelsDataList);
+
+				list_home.setAdapter(adapter);
+
+			}
+
+		});
+
+		/*
+		 * receiver = new BroadcastReceiver() {
+		 * 
+		 * @Override public void onReceive(Context context, Intent intent) {
+		 * 
+		 * if(intent != null) { String action = intent.getAction();
+		 * notificationMessage=intent.getStringExtra("Message");
+		 * Toast.makeText(getActivity(), "received"+notificationMessage,
+		 * Toast.LENGTH_SHORT).show(); if (action != null &&
+		 * action.equalsIgnoreCase(BROADCAST_ACTION)) { ContentValues cv = new
+		 * ContentValues(); eventDataWrite=eventsData.getWritableDatabase();
+		 * if(notificationMessage!=null && notificationMessage.length()>0) {
+		 * cv.put("NotificationMessage",notificationMessage);
+		 * eventDataWrite.insert("NotificationMessage",null, cv); }
+		 * 
+		 * } }
+		 * 
+		 * } };
+		 */
 
 		return view;
 	}
@@ -88,24 +245,20 @@ public class notification_fragement extends android.support.v4.app.Fragment {
 		String result;
 		JSONObject jArray = null;
 		String data;
-		Element_notification adapter;
-		
 
 		@Override
 		protected void onPreExecute() {
 			dialog.setMessage("Loading.......please wait");
 			dialog.setCancelable(false);
-			dialog.show();
-			url = "http://54.191.67.152/playdate/admin_push_msg.php";// ?g_id=46;
-																		// get
-																		// event
+			dialog.show(); // event
 		}
 
 		@Override
 		protected String doInBackground(String... arg0) {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpContext localContext = new BasicHttpContext();
-			HttpPost httpPost = new HttpPost(url);
+			HttpPost httpPost = new HttpPost(
+					"http://54.191.67.152/playdate/admin_push_msg.php");
 			ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 			nameValuePairs
 					.add(new BasicNameValuePair("g_id", user_guardian_id));
@@ -152,28 +305,25 @@ public class notification_fragement extends android.support.v4.app.Fragment {
 				e.printStackTrace();
 			}
 			try {
+				modelsDataList.clear();
 				JSONObject json = new JSONObject(sResponse);
 
 				JSONArray jarray = json.getJSONArray("data");
-				//String[] stringarray = new String[jarray.length()];
-				
+				// String[] stringarray = new String[jarray.length()];
+
 				for (int i = 0; i < jarray.length(); i++) {
-					NotificationModels nn=new NotificationModels();
-					String aa= jarray.getString(i);
-					
+					NotificationModels nn = new NotificationModels();
+					String aa = jarray.getString(i);
+
 					nn.setNotificationData(aa);
 					modelsDataList.add(nn);
-					Log.e(aa, ""+modelsDataList.size());
-					
+					Log.e(aa, "" + modelsDataList.size());
+
 				}
-				
-//				ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-//						android.R.layout.simple_list_item_1, stringarray);
-//				list.setAdapter(adapter);
+
 			}
 
 			catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -185,27 +335,28 @@ public class notification_fragement extends android.support.v4.app.Fragment {
 			adapter = new Element_notification(getActivity(), modelsDataList);
 
 			list_home.setAdapter(adapter);
-			//ArrayAdapter<String> ad=new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, stringarray);
+			// ArrayAdapter<String> ad=new ArrayAdapter<String>(this,
+			// android.R.layout.simple_list_item_1, stringarray);
 			dialog.dismiss();
 
 		}
 	}
 
-	class Element_notification extends BaseAdapter{
+	class Element_notification extends BaseAdapter {
 		private Activity activity;
 		private ArrayList<NotificationModels> _items;
 		private LayoutInflater inflater = null;
-		
-		
-		public Element_notification(Activity activity, ArrayList<NotificationModels> parentItems) {
+
+		public Element_notification(Activity activity,
+				ArrayList<NotificationModels> parentItems) {
 
 			// this.imageLoader.clearCache();
 			this.activity = activity;
 			this._items = parentItems;
-			inflater = (LayoutInflater) getActivity()
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			inflater = (LayoutInflater) getActivity().getSystemService(
+					Context.LAYOUT_INFLATER_SERVICE);
 		}
-		
+
 		@Override
 		public int getCount() {
 			// TODO Auto-generated method stub
@@ -227,6 +378,7 @@ public class notification_fragement extends android.support.v4.app.Fragment {
 		class ViewHolder {
 			public TextView Notification;
 		}
+
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			// TODO Auto-generated method stub
@@ -239,24 +391,23 @@ public class notification_fragement extends android.support.v4.app.Fragment {
 
 				_holder.Notification = (TextView) convertView
 						.findViewById(R.id.txtView1);
-				
+
 				// _holder.event_date = (TextView) convertView
 				// .findViewById(R.id.event_date);
 				convertView.setTag(_holder);
 			} else {
 				_holder = (ViewHolder) convertView.getTag();
 			}
-			String notification_value=_items.get(position).getNotificationData();
-			Log.e(notification_value, ""+notification_value);
+			String notification_value = _items.get(position)
+					.getNotificationData();
+			Log.e(notification_value, "" + notification_value);
 			_holder.Notification.setText(notification_value);
-		//	_holder.Notification.setBackgroundColor(getResources().getColor(R.color.bg_color));
+			// _holder.Notification.setBackgroundColor(getResources().getColor(R.color.bg_color));
 			convertView.setBackgroundColor(Color.parseColor("#ffffff"));
-			
-				
+
 			return convertView;
 		}
-		
+
 	}
-	
 
 }

@@ -82,34 +82,70 @@ public class Friend_profile extends android.support.v4.app.Fragment{
 				e.printStackTrace();
 			}//String reportDate = df.format(today);
 			// birthDay=sdf.format(date_of_birth);
-			 DateFormat destDf = new SimpleDateFormat("dd-MM-yyyy");
+			 DateFormat destDf = new SimpleDateFormat("dd/MM/yy");
 			
-			               
+			 String dob_formated = null;
 		
-			             // format the date into another format
+			   try {
+				    dob_formated = destDf.format(date_of_birth);
+			} catch (Exception e) {
+				// TODO: handle exception
+			}          // format the date into another format
 			
-			 String dob_formated = destDf.format(date_of_birth);
+			
 			 
 			 
 			 
-			 
-			 txt_name.setText(name.toUpperCase());
-		        parentlocation.setText(location.toUpperCase());
+			 try {
+				 txt_name.setText(name.toUpperCase());
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			 try {
+				  parentlocation.setText(location.toUpperCase());
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			
+		      
 		        parentdob.setText(dob_formated);
 		      //  parentfreetime.setText(freetime.toUpperCase());
 		
 	       
 	        
-	        if(guardiantype.equalsIgnoreCase("f")){
-	        	guardiantype="FATHER";
-	        }
-	        if(guardiantype.equalsIgnoreCase("m")){
-	        	guardiantype="MOTHER";
-	        }
+		        try {
+		        	if (guardiantype.equalsIgnoreCase("f")||guardiantype.equalsIgnoreCase("male")) {
+		        		guardiantype = "FATHER";
+		        	}else if(guardiantype.equalsIgnoreCase("m")||guardiantype.equalsIgnoreCase("female")) {
+		        		guardiantype = "MOTHER";
+		        	}else if(guardiantype.equalsIgnoreCase("b")) {
+		        		guardiantype = "BROTHER";
+		        	}
+		        	else if(guardiantype.equalsIgnoreCase("s")) {
+		        		guardiantype = "SISTER";
+		        	}
+		        	else if(guardiantype.equalsIgnoreCase("n")) {
+		        		guardiantype = "NANNY";
+		        	}
+		        	else if(guardiantype.equalsIgnoreCase("gm")) {
+		        		guardiantype = "GRAND MOTHER";
+		        	}
+		        	else if(guardiantype.equalsIgnoreCase("GF")) {
+		        		guardiantype = "GRAND FATHER";
+		        	}
+		        	else if(guardiantype.equalsIgnoreCase("T")) {
+		        		guardiantype = "TEACHER";
+		        	}
+		        	else if(guardiantype.equalsIgnoreCase("o")) {
+		        		guardiantype = "OTHER";
+		        	}
+		        } catch (Exception e) {
+		        	// TODO: handle exception
+		        }
 	       
 	        parenttype.setText(guardiantype.toUpperCase());
 	        parentdob.setEnabled(false);
-	     parentlocation.setEnabled(false);
+	        parentlocation.setEnabled(false);
 	      //  parentfreetime.setEnabled(false);
 	        txt_name.setEnabled(false);
 	        phoneNo.setEnabled(false);
@@ -179,7 +215,28 @@ public class Friend_profile extends android.support.v4.app.Fragment{
 				      String parent_type=parenttype.getText().toString();  
 				      String parent_location=parentlocation.getText().toString();  
 				    //  String parent_freetime=parentfreetime.getText().toString();  
-				     
+				      if (parent_type.equals("") || parent_type.equals(null)) {
+							parent_type = "";
+						}else if(parent_type.equalsIgnoreCase("FATHER")){
+							guardiantype="f";
+						}else if(parent_type.equalsIgnoreCase("MOTHER")){
+							guardiantype="m";
+						}else if(parent_type.equalsIgnoreCase("BROTHER")){
+							parent_type="b";
+						}else if(guardiantype.equalsIgnoreCase("SISTER")){
+							parent_type="s";
+						}else if(guardiantype.equalsIgnoreCase("NANNY")){
+							parent_type="n";
+						}else if(guardiantype.equalsIgnoreCase("GRAND FATHER")){
+							parent_type="gf";
+						}else if(guardiantype.equalsIgnoreCase("GRAND MOTHER")){
+							parent_type="gm";
+						}
+						else if(guardiantype.equalsIgnoreCase("TEACHER")){
+							parent_type="t";
+						}else if(guardiantype.equalsIgnoreCase("OTHER")){
+							parent_type="o";
+						}
 				      
 				      
 				      
@@ -229,9 +286,14 @@ public class Friend_profile extends android.support.v4.app.Fragment{
 					
 					  android.support.v4.app.Fragment  fragment=new Child_Friend_profile();
 	                  fragment.setArguments(bundle);
-					android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+	                  android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+	  				android.support.v4.app.FragmentTransaction fragmentTransaction= fragmentManager.beginTransaction();
+	  				fragmentTransaction.replace(R.id.content_frame, fragment);
+	  				fragmentTransaction.addToBackStack("first6");
+	  				fragmentTransaction.commit();
+					/*android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
 					fragmentManager.beginTransaction()
-					        .replace(R.id.content_frame, fragment).commit();
+					        .replace(R.id.content_frame, fragment).commit();*/
 				}
 			});
 			  

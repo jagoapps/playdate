@@ -37,7 +37,7 @@ public class ImageLoader {
      
    
 
-	final int stub_id=R.drawable.placeholder_small;
+	final int stub_id=R.drawable.placeholder_large;
     public  Bitmap DisplayImage(String url, ImageView imageView)
     {
     	imageViews.put(imageView, url);

@@ -3,12 +3,10 @@ package com.iapptechnologies.time;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,19 +26,26 @@ import org.apache.http.protocol.HttpContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -59,8 +64,11 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
+import android.widget.NumberPicker.OnValueChangeListener;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -72,7 +80,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 	Float x1, y1, x2, y2;
 
 	EditText childname, dateofbirth, freetime, allergies, hobbies,
-			school, youthclub;
+			school;//youthclub
 	Button btn_submit, addmore_freetime;
 	EditText edit, edit1;
 	ImageView img_child;
@@ -98,17 +106,18 @@ public class Add_Child extends android.support.v4.app.Fragment {
 
 	
 	// for checking checkboxes clicking allergies
-	int i = 1, i2 = 1, i3 = 1, i4 = 1, i5 = 1, i6 = 1, i7 = 1, i8 = 1, i9 = 1,i10 = 1, i11 = 1, i12 = 1, i13 = 1, i14 = 1, i15 = 1;
-	String nutMilk = "", egg = "", wheat = "", soyfish = "", corn = "",gelate = "", seed = "", spices = "", grass = "", banana = "",dairy = "", hay = "", insect = "", stings = "", celiacGluten = "",
+	int i_none=1,i = 1, i2 = 1, i3 = 1, i4 = 1, i5 = 1, i6 = 1, i7 = 1, i8 = 1, i9 = 1,i10 = 1, i11 = 1, i12 = 1, i13 = 1, i14 = 1, i15 = 1;
+	String none="",nutMilk = "", egg = "", wheat = "", soyfish = "", corn = "",gelate = "", seed = "", spices = "", grass = "", banana = "",dairy = "", hay = "", insect = "", stings = "", celiacGluten = "",
 			other = "";
 	
-	String cooking = "", dance = "", drama = "", drawing = "", lego = "",buildingMagicModel = "", painting = "", puzzles = "",scrapbooking = "", sewing = "", singing = "", videogaming = "",
+	String none_hobbies="",cooking = "", dance = "", drama = "", drawing = "", lego = "",buildingMagicModel = "", painting = "", puzzles = "",scrapbooking = "", sewing = "", singing = "", videogaming = "",
 			woodworking = "", writing = "", skating = "", otherhobbies = "",skiingSurfing = "", snowboarding = "", swimmingWater = "",football = "", baseball = "", basketball = "", climbing = "",
 			cricket = "", cycling = "", judo = "", running = "", table = "",lawnTennis = "", reading = "";
 	// for checkbox clicking hobbies
-	int ii = 1, ii2 = 1, ii3 = 1, ii4 = 1, ii5 = 1, ii6 = 1, ii7 = 1, ii8 = 1,ii9 = 1, ii10 = 1, ii11 = 1, ii12 = 1, ii13 = 1, ii14 = 1,ii15 = 1, ii16 = 1, ii17 = 1, ii18 = 1, ii19 = 1, ii20 = 1,
+	int ii_none=1,ii = 1, ii2 = 1, ii3 = 1, ii4 = 1, ii5 = 1, ii6 = 1, ii7 = 1, ii8 = 1,ii9 = 1, ii10 = 1, ii11 = 1, ii12 = 1, ii13 = 1, ii14 = 1,ii15 = 1, ii16 = 1, ii17 = 1, ii18 = 1, ii19 = 1, ii20 = 1,
          ii21 = 1, ii22 = 1, ii23 = 1, ii24 = 1, ii25 = 1, ii26 = 1,ii27 = 1, ii28 = 1, ii29 = 1;
-
+	 String picker_days="";
+	 String picker_hr_from="", picker_min_from="", picker_hr_to="", picker_min_to="",free_time_picker="";
 	
 	int count_alert=0;
 	public Add_Child() {
@@ -124,7 +133,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 		final Home home = new Home();
 		Calendar c = Calendar.getInstance();
 		System.out.println("Current time => " + c.getTime());
-
+		 Home.menu.setVisibility(View.GONE);
 		SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
 		 date_comparision = df.format(c.getTime());
 		addmore_freetime = (Button) view.findViewById(R.id.button1_add_moredays);
@@ -135,7 +144,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 		allergies = (EditText) view.findViewById(R.id.edit_childallergies);
 		hobbies = (EditText) view.findViewById(R.id.edit_childhobbies);
 		school = (EditText) view.findViewById(R.id.edit_childschool);
-		youthclub = (EditText) view.findViewById(R.id.edit_childyouthclub);
+		//youthclub = (EditText) view.findViewById(R.id.edit_childyouthclub);
 		btn_submit = (Button) view.findViewById(R.id.button1_childsubmit);
 		allergies.setFocusable(false);
 		allergies.setClickable(true);
@@ -148,8 +157,8 @@ public class Add_Child extends android.support.v4.app.Fragment {
 
 		if (GlobalVariable.parent_picute_update == 3) {
 			GlobalVariable.parent_picute_update = 0;
-			Bitmap bitmap = getArguments().getParcelable("bitmap");
-			img_child.setImageBitmap(bitmap);
+			imageData = getArguments().getParcelable("bitmap");
+			img_child.setImageBitmap(imageData);
 			setsizeofimage();
 		}
 		name_get = getArguments().getString("name");
@@ -163,11 +172,14 @@ public class Add_Child extends android.support.v4.app.Fragment {
 		guardiantype = getArguments().getString("guardiantype");
 		phone_number = getArguments().getString("phone");
 		user_guardian_id = getArguments().getString("user_guardian_id");
+		
+		
 		addmore_freetime.setOnClickListener(new OnClickListener() {
-
+			
+			@SuppressLint("NewApi")
 			@Override
 			public void onClick(View v) {
-				hours = new Time(System.currentTimeMillis()).getHours();
+				/*hours = new Time(System.currentTimeMillis()).getHours();
 				minutes = new Time(System.currentTimeMillis()).getMinutes();
 				LinearLayout viewGroup = (LinearLayout) getActivity().findViewById(R.id.weekdays_selection);
 				View layout = inflater.inflate(R.layout.weekdays, viewGroup);
@@ -192,6 +204,16 @@ public class Add_Child extends android.support.v4.app.Fragment {
 						TimePickerDialog tiPickerDialog = new TimePickerDialog(getActivity(), mTimesetlistenermon, hours,minutes, true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+						 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), mTimesetlistenermonto, 
+				                    Calendar.getInstance().get(Calendar.HOUR), 
+				                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+				        timePickerDialog.setTitle("TO");
+				        timePickerDialog.show();
+				        CustomTimePickerDialog timePickerDialog_1 = new CustomTimePickerDialog(getActivity(), mTimesetlistenermon, 
+			                    Calendar.getInstance().get(Calendar.HOUR), 
+			                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+			        timePickerDialog_1.setTitle("FROM");
+			        timePickerDialog_1.show();
 						popup.dismiss();
 					}
 				});
@@ -207,6 +229,16 @@ public class Add_Child extends android.support.v4.app.Fragment {
 						TimePickerDialog tiPickerDialog = new TimePickerDialog(getActivity(), mTimesetlistenertue, hours,minutes, true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+						 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), mTimesetlistenertueto, 
+				                    Calendar.getInstance().get(Calendar.HOUR), 
+				                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+				        timePickerDialog.setTitle("TO");
+				        timePickerDialog.show();
+				        CustomTimePickerDialog timePickerDialog_1 = new CustomTimePickerDialog(getActivity(), mTimesetlistenertue, 
+			                    Calendar.getInstance().get(Calendar.HOUR), 
+			                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+			        timePickerDialog_1.setTitle("FROM");
+			        timePickerDialog_1.show();
 						popup.dismiss();
 					}
 				});
@@ -221,6 +253,16 @@ public class Add_Child extends android.support.v4.app.Fragment {
 						TimePickerDialog tiPickerDialog = new TimePickerDialog(getActivity(), mTimesetlistenerwed, hours,minutes, true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+						 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), mTimesetlistenerwedto, 
+				                    Calendar.getInstance().get(Calendar.HOUR), 
+				                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+				        timePickerDialog.setTitle("TO");
+				        timePickerDialog.show();
+				        CustomTimePickerDialog timePickerDialog_1 = new CustomTimePickerDialog(getActivity(), mTimesetlistenerwed, 
+			                    Calendar.getInstance().get(Calendar.HOUR), 
+			                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+			        timePickerDialog_1.setTitle("FROM");
+			        timePickerDialog_1.show();
 						popup.dismiss();
 					}
 				});
@@ -235,6 +277,16 @@ public class Add_Child extends android.support.v4.app.Fragment {
 						TimePickerDialog tiPickerDialog = new TimePickerDialog(getActivity(), mTimesetlistenerthu, hours,minutes, true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+						 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), mTimesetlistenerthuto, 
+				                    Calendar.getInstance().get(Calendar.HOUR), 
+				                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+				        timePickerDialog.setTitle("TO");
+				        timePickerDialog.show();
+				        CustomTimePickerDialog timePickerDialog_1 = new CustomTimePickerDialog(getActivity(), mTimesetlistenerthu, 
+			                    Calendar.getInstance().get(Calendar.HOUR), 
+			                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+			        timePickerDialog_1.setTitle("FROM");
+			        timePickerDialog_1.show();
 						popup.dismiss();
 					}
 				});
@@ -249,6 +301,16 @@ public class Add_Child extends android.support.v4.app.Fragment {
 						TimePickerDialog tiPickerDialog = new TimePickerDialog(getActivity(), mTimesetlistenerfri, hours,minutes, true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+						 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), mTimesetlistenerfrito, 
+				                    Calendar.getInstance().get(Calendar.HOUR), 
+				                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+				        timePickerDialog.setTitle("TO");
+				        timePickerDialog.show();
+				        CustomTimePickerDialog timePickerDialog_1 = new CustomTimePickerDialog(getActivity(), mTimesetlistenerfri, 
+			                    Calendar.getInstance().get(Calendar.HOUR), 
+			                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+			        timePickerDialog_1.setTitle("FROM");
+			        timePickerDialog_1.show();
 						popup.dismiss();
 					}
 				});
@@ -264,6 +326,16 @@ public class Add_Child extends android.support.v4.app.Fragment {
 						TimePickerDialog tiPickerDialog = new TimePickerDialog(getActivity(), mTimesetlistenersat, hours,minutes, true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+						CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), mTimesetlistenersatto, 
+			                    Calendar.getInstance().get(Calendar.HOUR), 
+			                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+			        timePickerDialog.setTitle("TO");
+			        timePickerDialog.show();
+			        CustomTimePickerDialog timePickerDialog_1 = new CustomTimePickerDialog(getActivity(), mTimesetlistenersat, 
+		                    Calendar.getInstance().get(Calendar.HOUR), 
+		                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+		        timePickerDialog_1.setTitle("FROM");
+		        timePickerDialog_1.show();
 						popup.dismiss();
 					}
 				});
@@ -279,19 +351,243 @@ public class Add_Child extends android.support.v4.app.Fragment {
 						TimePickerDialog tiPickerDialog = new TimePickerDialog(getActivity(), mTimesetlistenersun, hours,minutes, true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+						 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), mTimesetlistenersunto, 
+				                    Calendar.getInstance().get(Calendar.HOUR), 
+				                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+				        timePickerDialog.setTitle("TO");
+				        timePickerDialog.show();
+				        CustomTimePickerDialog timePickerDialog_1 = new CustomTimePickerDialog(getActivity(), mTimesetlistenersun, 
+			                    Calendar.getInstance().get(Calendar.HOUR), 
+			                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+			        timePickerDialog_1.setTitle("FROM");
+			        timePickerDialog_1.show();
 						popup.dismiss();
 					}
 				});
+*/
+				picker_days="";picker_hr_from="";picker_hr_to="";picker_min_from="";picker_min_to="";
+				LinearLayout viewGroup = (LinearLayout) getActivity().findViewById(R.id.numberpicker);
+				View layout = inflater.inflate(R.layout.number_picker, viewGroup);
+				final PopupWindow popup = new PopupWindow(getActivity());
+				popup.setContentView(layout);
+				popup.setWidth(WindowManager.LayoutParams.MATCH_PARENT);
+				popup.setHeight(WindowManager.LayoutParams.MATCH_PARENT);
+				popup.setFocusable(true);
+				int OFFSET_X = 0;
+				int OFFSET_Y = 0;
+				popup.setBackgroundDrawable(new BitmapDrawable());
+				popup.showAtLocation(getView(), Gravity.NO_GRAVITY, OFFSET_X,OFFSET_Y);
+				
+				NumberPicker npdays_=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_days);
+				NumberPicker np_hr_from=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_hr_from);
+				NumberPicker np_min_from=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_min_from);
+				NumberPicker np_hr_to=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_hr_to);
+				NumberPicker np_min_to=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_min_to);
+				
+				TextView btn_done_picker=(TextView) layout.findViewById(R.id.done_numberpicker);
+				TextView btn_cancel_picker=(TextView) layout.findViewById(R.id.cancel_numberpicker);
+				final TextView time_display=(TextView) layout.findViewById(R.id.time_numberpicker);
+				btn_cancel_picker.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+						popup.dismiss();
+					}
+				});
+				
+				btn_done_picker.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+						if(picker_hr_from.equals("") || picker_hr_to.equals("") ){
+							Toast.makeText(getActivity(),"Please select time", 2000).show();
+						}else{
+							if(picker_days.equals("")){
+								picker_days="Monday";
+							}
+							
+							if(picker_min_from.equals("")){
+								picker_min_from="00";
+							}
+							if(picker_min_to.equals("")){
+								picker_min_to="00";
+							}
+							    int hr_picker_from=Integer.parseInt(picker_hr_from);
+						     	int min_picker_from=Integer.parseInt(picker_min_from);
+						     	int hr_picker_to=Integer.parseInt(picker_hr_to);
+						     	int min_picker_to=Integer.parseInt(picker_min_to);
+						     	
+						     	if(hr_picker_from<hr_picker_to){
+						     		 free_time_picker=free_time_picker +" "+picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to;
+						     		freetime.setText(free_time_picker);
+						     		popup.dismiss();
+						     	}else if(hr_picker_from==hr_picker_to){
+						     		if(min_picker_from<min_picker_to){
+						     			 free_time_picker=free_time_picker +" "+picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to;
+						     			freetime.setText(free_time_picker);
+						     			popup.dismiss();
+						     		}
+						     		else{
+						     			Toast.makeText(getActivity(), "Time from can't greater or equal to time to", 2000).show();
+						     		}
+						     	}else{
+						     		Toast.makeText(getActivity(), "Time from can't greater or equal to time to", 2000).show();
+						     	}
+						}
+					}
+				});
+				
+				String[] values=new String[7];
+				values[0]="Monday";
+				values[1]="Tuesday";
+				values[2]="Wednesday";
+				values[3]="Thursday";
+				values[4]="Friday";
+				values[5]="Saturday";
+				values[6]="Sunday";
+				npdays_.setMaxValue(values.length-1);
+				npdays_.setMinValue(0);
+				npdays_.setDisplayedValues(values);
+				
+				npdays_.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						 picker_days=values_picked[newVal];
+						 time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
 
+					}
+				});
+				
+				String[] values_hr=new String[24];
+				values_hr[0]="01";
+				values_hr[1]="02";
+				values_hr[2]="03";
+				values_hr[3]="04";
+				values_hr[4]="05";
+				values_hr[5]="06";
+				values_hr[6]="07";
+				values_hr[7]="08";
+				values_hr[8]="09";
+				values_hr[9]="10";
+				values_hr[10]="11";
+				values_hr[11]="12";
+				values_hr[12]="13";
+				values_hr[13]="14";
+				values_hr[14]="15";
+				values_hr[15]="16";
+				values_hr[16]="17";
+				values_hr[17]="18";
+				values_hr[18]="19";
+				values_hr[19]="20";
+				values_hr[20]="21";
+				values_hr[21]="22";
+				values_hr[22]="23";
+				values_hr[23]="24";
+				
+				np_hr_from.setMaxValue(values_hr.length-1);
+				np_hr_from.setMinValue(0);
+				np_hr_from.setDisplayedValues(values_hr);
+				
+				np_hr_from.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_hr_from=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
+
+				np_hr_to.setMaxValue(values_hr.length-1);
+				np_hr_to.setMinValue(0);
+				np_hr_to.setDisplayedValues(values_hr);
+				
+				np_hr_to.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_hr_to=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
+				
+				String[] values_min=new String[4];
+				values_min[0]="00";
+				values_min[1]="15";
+				values_min[2]="30";
+				values_min[3]="45";
+				
+				np_min_from.setMaxValue(values_min.length-1);
+				np_min_from.setMinValue(0);
+				np_min_from.setDisplayedValues(values_min);
+				
+				np_min_from.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_min_from=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
+				
+				np_min_to.setMaxValue(values_min.length-1);
+				np_min_to.setMinValue(0);
+				np_min_to.setDisplayedValues(values_min);
+				
+				np_min_to.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_min_to=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
+				
 			}
 		});
 
 		freetime.setOnClickListener(new OnClickListener() {
-
+			@SuppressLint("NewApi")
 			@Override
 			public void onClick(View v) {
 
-				hours = new Time(System.currentTimeMillis()).getHours();
+				/*hours = new Time(System.currentTimeMillis()).getHours();
 				minutes = new Time(System.currentTimeMillis()).getMinutes();
 				LinearLayout viewGroup = (LinearLayout) getActivity().findViewById(R.id.weekdays_selection);
 				View layout = inflater.inflate(R.layout.weekdays, viewGroup);
@@ -319,6 +615,16 @@ public class Add_Child extends android.support.v4.app.Fragment {
 						TimePickerDialog tiPickerDialog = new TimePickerDialog(getActivity(), mTimesetlistenermon, hours,minutes, true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+						 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), mTimesetlistenermonto, 
+				                    Calendar.getInstance().get(Calendar.HOUR), 
+				                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+				        timePickerDialog.setTitle("TO");
+				        timePickerDialog.show();
+				        CustomTimePickerDialog timePickerDialog_1 = new CustomTimePickerDialog(getActivity(), mTimesetlistenermon, 
+			                    Calendar.getInstance().get(Calendar.HOUR), 
+			                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+			        timePickerDialog_1.setTitle("FROM");
+			        timePickerDialog_1.show();
 						popup.dismiss();
 					}
 				});
@@ -336,6 +642,16 @@ public class Add_Child extends android.support.v4.app.Fragment {
 						TimePickerDialog tiPickerDialog = new TimePickerDialog(getActivity(), mTimesetlistenertue, hours,minutes, true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+						 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), mTimesetlistenertueto, 
+				                    Calendar.getInstance().get(Calendar.HOUR), 
+				                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+				        timePickerDialog.setTitle("TO");
+				        timePickerDialog.show();
+				        CustomTimePickerDialog timePickerDialog_1 = new CustomTimePickerDialog(getActivity(), mTimesetlistenertue, 
+			                    Calendar.getInstance().get(Calendar.HOUR), 
+			                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+			        timePickerDialog_1.setTitle("FROM");
+			        timePickerDialog_1.show();
 						popup.dismiss();
 					}
 				});
@@ -353,6 +669,16 @@ public class Add_Child extends android.support.v4.app.Fragment {
 						TimePickerDialog tiPickerDialog = new TimePickerDialog(getActivity(), mTimesetlistenerwed, hours,minutes, true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+						 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), mTimesetlistenerwedto, 
+				                    Calendar.getInstance().get(Calendar.HOUR), 
+				                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+				        timePickerDialog.setTitle("TO");
+				        timePickerDialog.show();
+				        CustomTimePickerDialog timePickerDialog_1 = new CustomTimePickerDialog(getActivity(), mTimesetlistenerwed, 
+			                    Calendar.getInstance().get(Calendar.HOUR), 
+			                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+			        timePickerDialog_1.setTitle("FROM");
+			        timePickerDialog_1.show();
 						popup.dismiss();
 					}
 				});
@@ -370,6 +696,16 @@ public class Add_Child extends android.support.v4.app.Fragment {
 						TimePickerDialog tiPickerDialog = new TimePickerDialog(getActivity(), mTimesetlistenerthu, hours,minutes, true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+						 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), mTimesetlistenerthuto, 
+				                    Calendar.getInstance().get(Calendar.HOUR), 
+				                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+				        timePickerDialog.setTitle("TO");
+				        timePickerDialog.show();
+				        CustomTimePickerDialog timePickerDialog_1 = new CustomTimePickerDialog(getActivity(), mTimesetlistenerthu, 
+			                    Calendar.getInstance().get(Calendar.HOUR), 
+			                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+			        timePickerDialog_1.setTitle("FROM");
+			        timePickerDialog_1.show();
 						popup.dismiss();
 					}
 				});
@@ -387,6 +723,16 @@ public class Add_Child extends android.support.v4.app.Fragment {
 						TimePickerDialog tiPickerDialog = new TimePickerDialog(getActivity(), mTimesetlistenerfri, hours,minutes, true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+						 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), mTimesetlistenerfrito, 
+				                    Calendar.getInstance().get(Calendar.HOUR), 
+				                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+				        timePickerDialog.setTitle("TO");
+				        timePickerDialog.show();
+				        CustomTimePickerDialog timePickerDialog_1 = new CustomTimePickerDialog(getActivity(), mTimesetlistenerfri, 
+			                    Calendar.getInstance().get(Calendar.HOUR), 
+			                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+			        timePickerDialog_1.setTitle("FROM");
+			        timePickerDialog_1.show();
 						popup.dismiss();
 					}
 				});
@@ -404,6 +750,16 @@ public class Add_Child extends android.support.v4.app.Fragment {
 						TimePickerDialog tiPickerDialog = new TimePickerDialog(getActivity(), mTimesetlistenersat, hours,minutes, true);
 						tiPickerDialog.setTitle("FROM");
 						tiPickerDialog.show();
+						 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), mTimesetlistenersatto, 
+				                    Calendar.getInstance().get(Calendar.HOUR), 
+				                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+				        timePickerDialog.setTitle("TO");
+				        timePickerDialog.show();
+				        CustomTimePickerDialog timePickerDialog_1 = new CustomTimePickerDialog(getActivity(), mTimesetlistenersat, 
+			                    Calendar.getInstance().get(Calendar.HOUR), 
+			                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+			        timePickerDialog_1.setTitle("FROM");
+			        timePickerDialog_1.show();
 						popup.dismiss();
 					}
 				});
@@ -420,11 +776,239 @@ public class Add_Child extends android.support.v4.app.Fragment {
 						tiiPickerDialog.show();
 						TimePickerDialog tiPickerDialog = new TimePickerDialog(getActivity(), mTimesetlistenersun, hours,minutes, true);
 						tiPickerDialog.setTitle("FROM");
-						tiPickerDialog.show();
+						//tiPickerDialog.show();
+						
+						 CustomTimePickerDialog timePickerDialog = new CustomTimePickerDialog(getActivity(), mTimesetlistenersunto, 
+				                    Calendar.getInstance().get(Calendar.HOUR), 
+				                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+				        timePickerDialog.setTitle("TO");
+				        timePickerDialog.show();
+				        CustomTimePickerDialog timePickerDialog_1 = new CustomTimePickerDialog(getActivity(), mTimesetlistenersun, 
+			                    Calendar.getInstance().get(Calendar.HOUR), 
+			                    CustomTimePickerDialog.getRoundedMinute(Calendar.getInstance().get(Calendar.MINUTE) + CustomTimePickerDialog.TIME_PICKER_INTERVAL), true);
+			        timePickerDialog_1.setTitle("FROM");
+			        timePickerDialog_1.show();
 						popup.dismiss();
 					}
 				});
 
+				*/
+				free_time_picker="";picker_days="";picker_hr_from="";picker_hr_to="";picker_min_from="";picker_min_to="";
+				LinearLayout viewGroup = (LinearLayout) getActivity().findViewById(R.id.numberpicker);
+				View layout = inflater.inflate(R.layout.number_picker, viewGroup);
+				final PopupWindow popup = new PopupWindow(getActivity());
+				popup.setContentView(layout);
+				popup.setWidth(WindowManager.LayoutParams.MATCH_PARENT);
+				popup.setHeight(WindowManager.LayoutParams.MATCH_PARENT);
+				popup.setFocusable(true);
+				int OFFSET_X = 0;
+				int OFFSET_Y = 0;
+				popup.setBackgroundDrawable(new BitmapDrawable());
+				popup.showAtLocation(getView(), Gravity.NO_GRAVITY, OFFSET_X,OFFSET_Y);
+				
+				
+				
+				NumberPicker npdays_=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_days);
+				NumberPicker np_hr_from=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_hr_from);
+				NumberPicker np_min_from=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_min_from);
+				NumberPicker np_hr_to=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_hr_to);
+				NumberPicker np_min_to=
+						   (NumberPicker) layout.findViewById(R.id.numberPicker_min_to);
+				
+				TextView btn_done_picker=(TextView) layout.findViewById(R.id.done_numberpicker);
+				TextView btn_cancel_picker=(TextView) layout.findViewById(R.id.cancel_numberpicker);
+				final TextView time_display=(TextView) layout.findViewById(R.id.time_numberpicker);
+				btn_cancel_picker.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+						popup.dismiss();
+					}
+				});
+				
+				btn_done_picker.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+						if(picker_hr_from.equals("") || picker_hr_to.equals("") ){
+							Toast.makeText(getActivity(),"Please select time", 2000).show();
+						}else{
+							if(picker_days.equals("")){
+								picker_days="Monday";
+							}
+							
+							if(picker_min_from.equals("")){
+								picker_min_from="00";
+							}
+							if(picker_min_to.equals("")){
+								picker_min_to="00";
+							}
+							  int hr_picker_from=Integer.parseInt(picker_hr_from);
+						     	int min_picker_from=Integer.parseInt(picker_min_from);
+						     	int hr_picker_to=Integer.parseInt(picker_hr_to);
+						     	int min_picker_to=Integer.parseInt(picker_min_to);
+						     	
+						     	if(hr_picker_from<hr_picker_to){
+						     		free_time_picker=picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to;
+						     		freetime.setText(free_time_picker);
+						     		popup.dismiss();
+						     	}else if(hr_picker_from==hr_picker_to){
+						     		if(min_picker_from<min_picker_to){
+						     			free_time_picker=picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to;
+						     			freetime.setText(free_time_picker);
+						     			popup.dismiss();
+						     		}
+						     		else{
+						     			Toast.makeText(getActivity(), "Time from can't greater or equal to time to", 2000).show();
+						     		}
+						     	}else{
+						     		Toast.makeText(getActivity(), "Time from can't greater or equal to time to", 2000).show();
+						     	}
+						}
+					}
+				});
+				
+				String[] values=new String[7];
+				values[0]="Monday";
+				values[1]="Tuesday";
+				values[2]="Wednesday";
+				values[3]="Thursday";
+				values[4]="Friday";
+				values[5]="Saturday";
+				values[6]="Sunday";
+				npdays_.setMaxValue(values.length-1);
+				npdays_.setMinValue(0);
+				npdays_.setDisplayedValues(values);
+				
+				npdays_.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_days=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
+				
+				String[] values_hr=new String[24];
+				values_hr[0]="01";
+				values_hr[1]="02";
+				values_hr[2]="03";
+				values_hr[3]="04";
+				values_hr[4]="05";
+				values_hr[5]="06";
+				values_hr[6]="07";
+				values_hr[7]="08";
+				values_hr[8]="09";
+				values_hr[9]="10";
+				values_hr[10]="11";
+				values_hr[11]="12";
+				values_hr[12]="13";
+				values_hr[13]="14";
+				values_hr[14]="15";
+				values_hr[15]="16";
+				values_hr[16]="17";
+				values_hr[17]="18";
+				values_hr[18]="19";
+				values_hr[19]="20";
+				values_hr[20]="21";
+				values_hr[21]="22";
+				values_hr[22]="23";
+				values_hr[23]="24";
+				
+				
+				np_hr_from.setMaxValue(values_hr.length-1);
+				np_hr_from.setMinValue(0);
+				np_hr_from.setDisplayedValues(values_hr);
+				
+				np_hr_from.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_hr_from=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
+
+				np_hr_to.setMaxValue(values_hr.length-1);
+				np_hr_to.setMinValue(0);
+				np_hr_to.setDisplayedValues(values_hr);
+				
+				np_hr_to.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_hr_to=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
+				
+				String[] values_min=new String[4];
+				values_min[0]="00";
+				values_min[1]="15";
+				values_min[2]="30";
+				values_min[3]="45";
+				
+				np_min_from.setMaxValue(values_min.length-1);
+				np_min_from.setMinValue(0);
+				np_min_from.setDisplayedValues(values_min);
+				
+				np_min_from.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_min_from=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
+				
+				np_min_to.setMaxValue(values_min.length-1);
+				np_min_to.setMinValue(0);
+				np_min_to.setDisplayedValues(values_min);
+				
+				np_min_to.setOnValueChangedListener(new OnValueChangeListener() {
+					
+					@Override
+					public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+						// TODO Auto-generated method stub
+						
+						
+						String[] values_picked=picker.getDisplayedValues();
+						
+						picker_min_to=values_picked[newVal];
+						time_display.setText(picker_days.toUpperCase()+" "+picker_hr_from+":"+picker_min_from+" - "+picker_hr_to+":"+picker_min_to);
+
+					}
+				});
 				
 
 			}
@@ -440,7 +1024,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				aLLergies = allergies.getText().toString();
 				hoBBies = hobbies.getText().toString();
 				scHool = school.getText().toString();
-				youthClub = youthclub.getText().toString();
+			//	youthClub = youthclub.getText().toString();
 				if (name.length() > 0 && dob.length() > 0) {
 
 					if (free_time.equals(null) || free_time.equals("")) {
@@ -455,9 +1039,9 @@ public class Add_Child extends android.support.v4.app.Fragment {
 					if (scHool.equals(null) || scHool.equals("")) {
 						scHool = "";
 					}
-					if (youthClub.equals(null) || youthClub.equals("")) {
+					/*if (youthClub.equals(null) || youthClub.equals("")) {
 						youthClub = "";
-					}
+					}*/
 					if (dob.equals(null) || dob.equals("")) {
 						dob = "";
 					}
@@ -607,9 +1191,13 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				popup.setBackgroundDrawable(new BitmapDrawable());
 				popup.showAtLocation(getView(), Gravity.NO_GRAVITY, OFFSET_X,
 						OFFSET_Y);
+				
+				
+				
+				
 				RelativeLayout nutmilk = (RelativeLayout) layout
 						.findViewById(R.id.Nutmilk);
-				CheckBox chk = (CheckBox) nutmilk
+				final CheckBox chk = (CheckBox) nutmilk
 						.findViewById(R.id.checkBox1_1);
 				chk.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -633,7 +1221,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				
 				RelativeLayout egg1 = (RelativeLayout) layout
 						.findViewById(R.id.egg);
-				CheckBox chk2 = (CheckBox) egg1.findViewById(R.id.checkBox1_2);
+				final CheckBox chk2 = (CheckBox) egg1.findViewById(R.id.checkBox1_2);
 				chk2.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
 					@Override
@@ -656,7 +1244,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// Add bp Records pop layout
 				RelativeLayout wheat1 = (RelativeLayout) layout
 						.findViewById(R.id.wheat);
-				CheckBox chk3 = (CheckBox) wheat1
+				final CheckBox chk3 = (CheckBox) wheat1
 						.findViewById(R.id.checkBox1_3);
 				chk3.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -679,7 +1267,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // bp Records reading pop layout
 				RelativeLayout soyfish1 = (RelativeLayout) layout
 						.findViewById(R.id.SoyFish);
-				CheckBox chk4 = (CheckBox) soyfish1
+				final CheckBox chk4 = (CheckBox) soyfish1
 						.findViewById(R.id.checkBox1_4);
 				chk4.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -701,7 +1289,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Corn = (RelativeLayout) layout
 						.findViewById(R.id.Corn);
-				CheckBox chk5 = (CheckBox) Corn.findViewById(R.id.checkBox1_5);
+				final CheckBox chk5 = (CheckBox) Corn.findViewById(R.id.checkBox1_5);
 				chk5.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
 					@Override
@@ -723,7 +1311,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // body weight reading pop layout
 				RelativeLayout GelatinMeat = (RelativeLayout) layout
 						.findViewById(R.id.GelatinMeat);
-				CheckBox chk6 = (CheckBox) GelatinMeat
+				final CheckBox chk6 = (CheckBox) GelatinMeat
 						.findViewById(R.id.checkBox1_6);
 				chk6.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -746,7 +1334,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// Add bp Records pop layout
 				RelativeLayout Seeds = (RelativeLayout) layout
 						.findViewById(R.id.Seeds);
-				CheckBox chk7 = (CheckBox) Seeds.findViewById(R.id.checkBox1_7);
+				final CheckBox chk7 = (CheckBox) Seeds.findViewById(R.id.checkBox1_7);
 				chk7.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
 					@Override
@@ -769,7 +1357,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // bp Records reading pop layout
 				RelativeLayout Spices = (RelativeLayout) layout
 						.findViewById(R.id.Spices);
-				CheckBox chk8 = (CheckBox) Spices
+				final CheckBox chk8 = (CheckBox) Spices
 						.findViewById(R.id.checkBox1_8);
 				chk8.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -791,7 +1379,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Grass = (RelativeLayout) layout
 						.findViewById(R.id.Grass);
-				CheckBox chk9 = (CheckBox) Grass.findViewById(R.id.checkBox1_9);
+				final CheckBox chk9 = (CheckBox) Grass.findViewById(R.id.checkBox1_9);
 				chk9.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
 					@Override
@@ -813,7 +1401,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // body weight reading pop layout
 				RelativeLayout Banana = (RelativeLayout) layout
 						.findViewById(R.id.Banana);
-				CheckBox chk10 = (CheckBox) Banana
+				final CheckBox chk10 = (CheckBox) Banana
 						.findViewById(R.id.checkBox1_10);
 				chk10.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -837,7 +1425,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// Add bp Records pop layout
 				RelativeLayout DairyAnaphylaxis = (RelativeLayout) layout
 						.findViewById(R.id.DairyAnaphylaxis);
-				CheckBox chk11 = (CheckBox) DairyAnaphylaxis
+				final CheckBox chk11 = (CheckBox) DairyAnaphylaxis
 						.findViewById(R.id.checkBox1_11);
 				chk11.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -861,7 +1449,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // bp Records reading pop layout
 				RelativeLayout HayfeaverInsect = (RelativeLayout) layout
 						.findViewById(R.id.HayfeaverInsect);
-				CheckBox chk12 = (CheckBox) HayfeaverInsect
+				final CheckBox chk12 = (CheckBox) HayfeaverInsect
 						.findViewById(R.id.checkBox1_12);
 				chk12.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -883,7 +1471,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Insect = (RelativeLayout) layout
 						.findViewById(R.id.Insect);
-				CheckBox chk13 = (CheckBox) Insect
+				final CheckBox chk13 = (CheckBox) Insect
 						.findViewById(R.id.checkBox1_13);
 				chk13.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -907,7 +1495,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // body weight reading pop layout
 				RelativeLayout StingsLactose = (RelativeLayout) layout
 						.findViewById(R.id.StingsLactose);
-				CheckBox chk14 = (CheckBox) StingsLactose
+				final CheckBox chk14 = (CheckBox) StingsLactose
 						.findViewById(R.id.checkBox1_14);
 				chk14.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -930,7 +1518,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// Add bp Records pop layout
 				RelativeLayout CeliacGluten = (RelativeLayout) layout
 						.findViewById(R.id.CeliacGluten);
-				CheckBox chk15 = (CheckBox) CeliacGluten
+				final CheckBox chk15 = (CheckBox) CeliacGluten
 						.findViewById(R.id.checkBox1_15);
 				chk15.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -952,6 +1540,85 @@ public class Add_Child extends android.support.v4.app.Fragment {
 						}
 					}
 				});
+				RelativeLayout none_layout = (RelativeLayout) layout
+						.findViewById(R.id.None);
+				CheckBox chk_none = (CheckBox) none_layout
+						.findViewById(R.id.checkBox1_1_none);
+				chk_none.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView,
+							boolean isChecked) {
+						// TODO Auto-generated method stub
+
+						if (i_none % 2 == 0) {
+							none = "";
+							System.out.println("even" + nutMilk);
+							i_none++;
+							nutMilk = "";egg = "";wheat = "";soyfish = "";corn = "";gelate = "";seed = "";spices = "";grass = "";banana = "";dairy = "";hay = "";
+							insect = "";stings = "";celiacGluten = "";other = "";
+							 i = 1; i2 = 1; i3 = 1; i4 = 1; i5 = 1; i6 = 1; i7 = 1; i8 = 1; i9 = 1;i10 = 1; i11 = 1; i12 = 1; i13 = 1; i14 = 1; i15 = 1;
+							    
+							    chk15.setVisibility(View.VISIBLE);
+								chk14.setVisibility(View.VISIBLE);
+								chk13.setVisibility(View.VISIBLE);
+								chk12.setVisibility(View.VISIBLE);
+								chk11.setVisibility(View.VISIBLE);
+								chk10.setVisibility(View.VISIBLE);
+								chk9.setVisibility(View.VISIBLE);
+								chk8.setVisibility(View.VISIBLE);
+								chk7.setVisibility(View.VISIBLE);
+								chk6.setVisibility(View.VISIBLE);
+								chk5.setVisibility(View.VISIBLE);
+								chk4.setVisibility(View.VISIBLE);
+								chk3.setVisibility(View.VISIBLE);
+								chk2.setVisibility(View.VISIBLE);
+								chk.setVisibility(View.VISIBLE);
+						
+							
+						} else {
+							
+							none = "None";
+							System.out.println("odd" + nutMilk);
+							i_none++;
+							nutMilk = "";egg = "";wheat = "";soyfish = "";corn = "";gelate = "";seed = "";spices = "";grass = "";banana = "";dairy = "";hay = "";
+							insect = "";stings = "";celiacGluten = "";other = "";
+							 i = 1; i2 = 1; i3 = 1; i4 = 1; i5 = 1; i6 = 1; i7 = 1; i8 = 1; i9 = 1;i10 = 1; i11 = 1; i12 = 1; i13 = 1; i14 = 1; i15 = 1;
+								chk15.setVisibility(View.INVISIBLE);
+								chk14.setVisibility(View.INVISIBLE);
+								chk13.setVisibility(View.INVISIBLE);
+								chk12.setVisibility(View.INVISIBLE);
+								chk11.setVisibility(View.INVISIBLE);
+								chk10.setVisibility(View.INVISIBLE);
+								chk9.setVisibility(View.INVISIBLE);
+								chk8.setVisibility(View.INVISIBLE);
+								chk7.setVisibility(View.INVISIBLE);
+								chk6.setVisibility(View.INVISIBLE);
+								chk5.setVisibility(View.INVISIBLE);
+								chk4.setVisibility(View.INVISIBLE);
+								chk3.setVisibility(View.INVISIBLE);
+								chk2.setVisibility(View.INVISIBLE);
+								chk.setVisibility(View.INVISIBLE);
+								chk15.setChecked(false);
+								chk14.setChecked(false);
+								chk13.setChecked(false);
+								chk12.setChecked(false);
+								chk11.setChecked(false);
+								chk10.setChecked(false);
+								chk9.setChecked(false);
+								chk8.setChecked(false);
+								chk7.setChecked(false);
+								chk.setChecked(false);
+								chk6.setChecked(false);
+								chk5.setChecked(false);
+								chk4.setChecked(false);
+								chk3.setChecked(false);
+								chk2.setChecked(false);
+							
+						}
+					}
+				});
+				
 				RelativeLayout edittext = (RelativeLayout) layout
 						.findViewById(R.id.edit_allergies);
 				edit = (EditText) edittext
@@ -968,159 +1635,166 @@ public class Add_Child extends android.support.v4.app.Fragment {
 					public void onClick(View v) {
 						// TODO Auto-generated method stub
 						String allergies_selected = "";
-						other = edit.getText().toString();
-						if (other.equals("") || other.equals(null)) {
+						if(none.equals("")){
+							other = edit.getText().toString();
+							if (other.equals("") || other.equals(null)) {
 
-						} else {
+							} else {
 
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = other;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ other;
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = other;
+								} else {
+									allergies_selected = allergies_selected + ","
+											+ other;
+								}
 							}
-						}
-						// nutMilk="",egg="",wheat="",soyfish="",corn="",gelate="",seed="",spices="",grass="",banana="",dairy="",hay="",insect="",stings="",celiacGluten=""
-						if (!nutMilk.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = nutMilk;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ nutMilk;
+							if (!nutMilk.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = nutMilk;
+								} else {
+									allergies_selected = allergies_selected + ","
+											+ nutMilk;
+								}
 							}
-						}
-						if (!egg.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = egg;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ egg;
+							if (!egg.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = egg;
+								} else {
+									allergies_selected = allergies_selected + ","
+											+ egg;
+								}
 							}
-						}
-						if (!wheat.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = wheat;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ wheat;
+							if (!wheat.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = wheat;
+								} else {
+									allergies_selected = allergies_selected + ","
+											+ wheat;
+								}
 							}
-						}
-						if (!soyfish.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = soyfish;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ soyfish;
+							if (!soyfish.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = soyfish;
+								} else {
+									allergies_selected = allergies_selected + ","
+											+ soyfish;
+								}
 							}
-						}
-						if (!corn.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = corn;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ corn;
+							if (!corn.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = corn;
+								} else {
+									allergies_selected = allergies_selected + ","
+											+ corn;
+								}
 							}
-						}
-						if (!gelate.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = gelate;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ gelate;
+							if (!gelate.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = gelate;
+								} else {
+									allergies_selected = allergies_selected + ","
+											+ gelate;
+								}
 							}
-						}
-						if (!seed.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = seed;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ seed;
+							if (!seed.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = seed;
+								} else {
+									allergies_selected = allergies_selected + ","
+											+ seed;
+								}
 							}
-						}
-						if (!spices.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = spices;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ spices;
+							if (!spices.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = spices;
+								} else {
+									allergies_selected = allergies_selected + ","
+											+ spices;
+								}
 							}
-						}
-						if (!grass.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = grass;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ grass;
+							if (!grass.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = grass;
+								} else {
+									allergies_selected = allergies_selected + ","
+											+ grass;
+								}
 							}
-						}
-						if (!banana.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = banana;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ banana;
+							if (!banana.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = banana;
+								} else {
+									allergies_selected = allergies_selected + ","
+											+ banana;
+								}
 							}
-						}
-						if (!dairy.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = dairy;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ dairy;
+							if (!dairy.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = dairy;
+								} else {
+									allergies_selected = allergies_selected + ","
+											+ dairy;
+								}
 							}
-						}
-						if (!hay.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = hay;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ hay;
+							if (!hay.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = hay;
+								} else {
+									allergies_selected = allergies_selected + ","
+											+ hay;
+								}
 							}
-						}
-						if (!insect.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = insect;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ insect;
+							if (!insect.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = insect;
+								} else {
+									allergies_selected = allergies_selected + ","
+											+ insect;
+								}
 							}
-						}
-						if (!stings.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = stings;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ stings;
+							if (!stings.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = stings;
+								} else {
+									allergies_selected = allergies_selected + ","
+											+ stings;
+								}
 							}
-						}
-						if (!celiacGluten.equals("")) {
-							if (allergies_selected.equals("")
-									|| allergies_selected.equals(null)) {
-								allergies_selected = celiacGluten;
-							} else {
-								allergies_selected = allergies_selected + ","
-										+ celiacGluten;
+							if (!celiacGluten.equals("")) {
+								if (allergies_selected.equals("")
+										|| allergies_selected.equals(null)) {
+									allergies_selected = celiacGluten;
+								} else {
+									allergies_selected = allergies_selected + ","
+											+ celiacGluten;
+								}
 							}
+						}else{
+							allergies_selected="NONE";
 						}
+						
+						
 						System.out.println(allergies_selected);
 						allergies.setText(allergies_selected.toUpperCase());
-						nutMilk = "";egg = "";wheat = "";soyfish = "";corn = "";gelate = "";seed = "";spices = "";grass = "";banana = "";dairy = "";hay = "";
+						none="";nutMilk = "";egg = "";wheat = "";soyfish = "";corn = "";gelate = "";seed = "";spices = "";grass = "";banana = "";dairy = "";hay = "";
 						insect = "";stings = "";celiacGluten = "";other = "";
+						i_none=1;i = 1; i2 = 1; i3 = 1; i4 = 1; i5 = 1; i6 = 1; i7 = 1; i8 = 1; i9 = 1;i10 = 1; i11 = 1; i12 = 1; i13 = 1; i14 = 1; i15 = 1;
+						
 						popup.dismiss();
 					}
 
@@ -1154,7 +1828,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 
 				RelativeLayout cooKing = (RelativeLayout) layout
 						.findViewById(R.id.Cooking);
-				CheckBox chk = (CheckBox) cooKing
+				final CheckBox chk = (CheckBox) cooKing
 						.findViewById(R.id.checkBox11_1);
 				chk.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1178,7 +1852,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				
 				RelativeLayout Dance = (RelativeLayout) layout
 						.findViewById(R.id.Dance);
-				CheckBox chk2 = (CheckBox) Dance
+				final CheckBox chk2 = (CheckBox) Dance
 						.findViewById(R.id.checkBox11_2);
 				chk2.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1202,7 +1876,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// Add bp Records pop layout
 				RelativeLayout Drama = (RelativeLayout) layout
 						.findViewById(R.id.Drama);
-				CheckBox chk3 = (CheckBox) Drama
+				final CheckBox chk3 = (CheckBox) Drama
 						.findViewById(R.id.checkBox11_3);
 				chk3.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1225,7 +1899,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // bp Records reading pop layout
 				RelativeLayout Drawing = (RelativeLayout) layout
 						.findViewById(R.id.Drawing);
-				CheckBox chk4 = (CheckBox) Drawing
+				final CheckBox chk4 = (CheckBox) Drawing
 						.findViewById(R.id.checkBox11_4);
 				chk4.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1247,7 +1921,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Lego = (RelativeLayout) layout
 						.findViewById(R.id.Lego);
-				CheckBox chk5 = (CheckBox) Lego.findViewById(R.id.checkBox11_5);
+				final CheckBox chk5 = (CheckBox) Lego.findViewById(R.id.checkBox11_5);
 				chk5.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
 					@Override
@@ -1269,7 +1943,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // body weight reading pop layout
 				RelativeLayout BuildingMagicModel = (RelativeLayout) layout
 						.findViewById(R.id.BuildingMagicModel);
-				CheckBox chk6 = (CheckBox) BuildingMagicModel
+				final CheckBox chk6 = (CheckBox) BuildingMagicModel
 						.findViewById(R.id.checkBox11_6);
 				chk6.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1292,7 +1966,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// Add bp Records pop layout
 				RelativeLayout Painting = (RelativeLayout) layout
 						.findViewById(R.id.Painting);
-				CheckBox chk7 = (CheckBox) Painting
+				final CheckBox chk7 = (CheckBox) Painting
 						.findViewById(R.id.checkBox11_7);
 				chk7.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1316,7 +1990,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // bp Records reading pop layout
 				RelativeLayout Puzzles = (RelativeLayout) layout
 						.findViewById(R.id.Puzzles);
-				CheckBox chk8 = (CheckBox) Puzzles
+				final CheckBox chk8 = (CheckBox) Puzzles
 						.findViewById(R.id.checkBox11_8);
 				chk8.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1338,7 +2012,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Scrapbooking = (RelativeLayout) layout
 						.findViewById(R.id.Scrapbooking);
-				CheckBox chk9 = (CheckBox) Scrapbooking
+				final CheckBox chk9 = (CheckBox) Scrapbooking
 						.findViewById(R.id.checkBox11_9);
 				chk9.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1361,7 +2035,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // body weight reading pop layout
 				RelativeLayout Sewing = (RelativeLayout) layout
 						.findViewById(R.id.Sewing);
-				CheckBox chk10 = (CheckBox) Sewing
+				final CheckBox chk10 = (CheckBox) Sewing
 						.findViewById(R.id.checkBox11_10);
 				chk10.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1385,7 +2059,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// Add bp Records pop layout
 				RelativeLayout Singing = (RelativeLayout) layout
 						.findViewById(R.id.Singing);
-				CheckBox chk11 = (CheckBox) Singing
+				final CheckBox chk11 = (CheckBox) Singing
 						.findViewById(R.id.checkBox11_11);
 				chk11.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1409,7 +2083,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // bp Records reading pop layout
 				RelativeLayout Videogaming = (RelativeLayout) layout
 						.findViewById(R.id.Videogaming);
-				CheckBox chk12 = (CheckBox) Videogaming
+				final CheckBox chk12 = (CheckBox) Videogaming
 						.findViewById(R.id.checkBox11_12);
 				chk12.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1431,7 +2105,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Woodworking = (RelativeLayout) layout
 						.findViewById(R.id.Woodworking);
-				CheckBox chk13 = (CheckBox) Woodworking
+				final CheckBox chk13 = (CheckBox) Woodworking
 						.findViewById(R.id.checkBox11_13);
 				chk13.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1455,7 +2129,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // body weight reading pop layout
 				RelativeLayout Writing = (RelativeLayout) layout
 						.findViewById(R.id.Writing);
-				CheckBox chk14 = (CheckBox) Writing
+				final CheckBox chk14 = (CheckBox) Writing
 						.findViewById(R.id.checkBox11_14);
 				chk14.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1479,7 +2153,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// Add bp Records pop layout
 				RelativeLayout Skating = (RelativeLayout) layout
 						.findViewById(R.id.Skating);
-				CheckBox chk15 = (CheckBox) Skating
+				final CheckBox chk15 = (CheckBox) Skating
 						.findViewById(R.id.checkBox11_15);
 				chk15.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1503,7 +2177,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout SkiingSurfing = (RelativeLayout) layout
 						.findViewById(R.id.SkiingSurfing);
-				CheckBox chk16 = (CheckBox) SkiingSurfing
+				final CheckBox chk16 = (CheckBox) SkiingSurfing
 						.findViewById(R.id.checkBox11_16);
 				chk16.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1526,7 +2200,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // bp Records reading pop layout
 				RelativeLayout Snowboarding = (RelativeLayout) layout
 						.findViewById(R.id.Snowboarding);
-				CheckBox chk17 = (CheckBox) Snowboarding
+				final CheckBox chk17 = (CheckBox) Snowboarding
 						.findViewById(R.id.checkBox11_17);
 				chk17.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1548,7 +2222,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout SwimmingWater = (RelativeLayout) layout
 						.findViewById(R.id.SwimmingWater);
-				CheckBox chk18 = (CheckBox) SwimmingWater
+				final CheckBox chk18 = (CheckBox) SwimmingWater
 						.findViewById(R.id.checkBox11_18);
 				chk18.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1571,7 +2245,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // body weight reading pop layout
 				RelativeLayout Football = (RelativeLayout) layout
 						.findViewById(R.id.Football);
-				CheckBox chk19 = (CheckBox) Football
+				final CheckBox chk19 = (CheckBox) Football
 						.findViewById(R.id.checkBox11_19);
 				chk19.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1594,7 +2268,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// Add bp Records pop layout
 				RelativeLayout Baseball = (RelativeLayout) layout
 						.findViewById(R.id.Baseball);
-				CheckBox chk20 = (CheckBox) Baseball
+				final CheckBox chk20 = (CheckBox) Baseball
 						.findViewById(R.id.checkBox11_20);
 				chk20.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1618,7 +2292,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // bp Records reading pop layout
 				RelativeLayout Basketball = (RelativeLayout) layout
 						.findViewById(R.id.Basketball);
-				CheckBox chk21 = (CheckBox) Basketball
+				final CheckBox chk21 = (CheckBox) Basketball
 						.findViewById(R.id.checkBox11_21);
 				chk21.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1640,7 +2314,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Climbing = (RelativeLayout) layout
 						.findViewById(R.id.Climbing);
-				CheckBox chk22 = (CheckBox) Climbing
+				final CheckBox chk22 = (CheckBox) Climbing
 						.findViewById(R.id.checkBox11_22);
 				chk22.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1663,7 +2337,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // body weight reading pop layout
 				RelativeLayout Cricket = (RelativeLayout) layout
 						.findViewById(R.id.Cricket);
-				CheckBox chk23 = (CheckBox) Cricket
+				final CheckBox chk23 = (CheckBox) Cricket
 						.findViewById(R.id.checkBox11_23);
 				chk23.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1687,7 +2361,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// Add bp Records pop layout
 				RelativeLayout Cycling = (RelativeLayout) layout
 						.findViewById(R.id.Cycling);
-				CheckBox chk24 = (CheckBox) Cycling
+				final CheckBox chk24 = (CheckBox) Cycling
 						.findViewById(R.id.checkBox11_24);
 				chk24.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1711,7 +2385,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // bp Records reading pop layout
 				RelativeLayout Judo = (RelativeLayout) layout
 						.findViewById(R.id.Judo);
-				CheckBox chk25 = (CheckBox) Judo
+				final CheckBox chk25 = (CheckBox) Judo
 						.findViewById(R.id.checkBox11_25);
 				chk25.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1733,7 +2407,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Running = (RelativeLayout) layout
 						.findViewById(R.id.Running);
-				CheckBox chk26 = (CheckBox) Running
+				final CheckBox chk26 = (CheckBox) Running
 						.findViewById(R.id.checkBox11_26);
 				chk26.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1757,7 +2431,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				// // body weight reading pop layout
 				RelativeLayout Table = (RelativeLayout) layout
 						.findViewById(R.id.Table);
-				CheckBox chk27 = (CheckBox) Table
+				final CheckBox chk27 = (CheckBox) Table
 						.findViewById(R.id.checkBox11_27);
 				chk27.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1779,7 +2453,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout LawnTennis = (RelativeLayout) layout
 						.findViewById(R.id.LawnTennis);
-				CheckBox chk28 = (CheckBox) LawnTennis
+				final CheckBox chk28 = (CheckBox) LawnTennis
 						.findViewById(R.id.checkBox11_28);
 				chk28.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1801,7 +2475,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				});
 				RelativeLayout Reading = (RelativeLayout) layout
 						.findViewById(R.id.Reading);
-				CheckBox chk29 = (CheckBox) Reading
+				final CheckBox chk29 = (CheckBox) Reading
 						.findViewById(R.id.checkBox11_29);
 				chk29.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -1818,6 +2492,170 @@ public class Add_Child extends android.support.v4.app.Fragment {
 							reading = "Reading";
 							System.out.println("odd" + reading);
 							ii29++;
+						}
+					}
+				});
+				RelativeLayout none_layout = (RelativeLayout) layout
+						.findViewById(R.id.None);
+			final	CheckBox chk_none = (CheckBox) none_layout
+						.findViewById(R.id.checkBox1_1_none);
+				chk_none.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView,
+							boolean isChecked) {
+						// TODO Auto-generated method stub
+
+						if (ii_none % 2 == 0) {
+							none_hobbies = "";
+							System.out.println("even" + nutMilk);
+							ii_none++;
+							otherhobbies="";
+							cooking = ""; dance = ""; drama = ""; drawing = ""; lego = "";
+									buildingMagicModel = ""; painting = ""; puzzles = "";
+									scrapbooking = ""; sewing = ""; singing = ""; videogaming = "";
+									woodworking = ""; writing = ""; skating = ""; otherhobbies = "";
+									skiingSurfing = ""; snowboarding = ""; swimmingWater = "";
+									football = ""; baseball = ""; basketball = ""; climbing = "";
+									cricket = ""; cycling = ""; judo = ""; running = ""; table = "";
+									lawnTennis = ""; reading = "";
+							ii = 1;ii16=1;ii17=1;ii18=1;ii19=1;ii20=1;ii21=1;ii22=1;ii23=1;ii24=1;ii25=1;ii26=1;ii27=1;ii28=1;ii29=1;
+							ii2 = 1;
+							ii3 = 1;
+							ii4 = 1;
+							ii5 = 1;
+							ii6 = 1;
+							ii7 = 1;
+							ii8 = 1;
+							ii9 = 1;
+							ii10 = 1;
+							ii11 = 1;
+							ii12 = 1;
+							ii13 = 1;
+							ii14 = 1;
+							ii15 = 1;
+
+							chk29.setVisibility(View.VISIBLE);
+							chk28.setVisibility(View.VISIBLE);
+							chk27.setVisibility(View.VISIBLE);
+							chk26.setVisibility(View.VISIBLE);
+							chk25.setVisibility(View.VISIBLE);
+							chk24.setVisibility(View.VISIBLE);
+							chk23.setVisibility(View.VISIBLE);
+							chk22.setVisibility(View.VISIBLE);
+							chk21.setVisibility(View.VISIBLE);
+							chk20.setVisibility(View.VISIBLE);
+							chk19.setVisibility(View.VISIBLE);
+							chk18.setVisibility(View.VISIBLE);
+							chk17.setVisibility(View.VISIBLE);
+							chk16.setVisibility(View.VISIBLE);
+							chk15.setVisibility(View.VISIBLE);
+							chk14.setVisibility(View.VISIBLE);
+							chk13.setVisibility(View.VISIBLE);
+							chk12.setVisibility(View.VISIBLE);
+							chk11.setVisibility(View.VISIBLE);
+							chk10.setVisibility(View.VISIBLE);
+							chk9.setVisibility(View.VISIBLE);
+							chk8.setVisibility(View.VISIBLE);
+							chk7.setVisibility(View.VISIBLE);
+							chk6.setVisibility(View.VISIBLE);
+							chk5.setVisibility(View.VISIBLE);
+							chk4.setVisibility(View.VISIBLE);
+							chk3.setVisibility(View.VISIBLE);
+							chk2.setVisibility(View.VISIBLE);
+							chk.setVisibility(View.VISIBLE);
+
+						} else {
+
+							none_hobbies = "None";
+							System.out.println("odd" + nutMilk);
+							ii_none++;
+							otherhobbies="";
+							cooking = ""; dance = ""; drama = ""; drawing = ""; lego = "";
+							buildingMagicModel = ""; painting = ""; puzzles = "";
+							scrapbooking = ""; sewing = ""; singing = ""; videogaming = "";
+							woodworking = ""; writing = ""; skating = ""; otherhobbies = "";
+							skiingSurfing = ""; snowboarding = ""; swimmingWater = "";
+							football = ""; baseball = ""; basketball = ""; climbing = "";
+							cricket = ""; cycling = ""; judo = ""; running = ""; table = "";
+							lawnTennis = ""; reading = "";
+							i = 1;ii16=1;ii17=1;ii18=1;ii19=1;ii20=1;ii21=1;ii22=1;ii23=1;ii24=1;ii25=1;ii26=1;ii27=1;ii28=1;ii29=1;
+							i2 = 1;
+							i3 = 1;
+							i4 = 1;
+							i5 = 1;
+							i6 = 1;
+							i7 = 1;
+							i8 = 1;
+							i9 = 1;
+							i10 = 1;
+							i11 = 1;
+							i12 = 1;
+							i13 = 1;
+							i14 = 1;
+							i15 = 1;
+							
+							chk29.setVisibility(View.INVISIBLE);
+							chk28.setVisibility(View.INVISIBLE);
+							chk27.setVisibility(View.INVISIBLE);
+							chk26.setVisibility(View.INVISIBLE);
+							chk25.setVisibility(View.INVISIBLE);
+							chk24.setVisibility(View.INVISIBLE);
+							chk23.setVisibility(View.INVISIBLE);
+							chk22.setVisibility(View.INVISIBLE);
+							chk21.setVisibility(View.INVISIBLE);
+							chk20.setVisibility(View.INVISIBLE);
+							chk19.setVisibility(View.INVISIBLE);
+							chk18.setVisibility(View.INVISIBLE);
+							chk17.setVisibility(View.INVISIBLE);
+							chk16.setVisibility(View.INVISIBLE);
+							chk15.setVisibility(View.INVISIBLE);
+							chk14.setVisibility(View.INVISIBLE);
+							chk13.setVisibility(View.INVISIBLE);
+							chk12.setVisibility(View.INVISIBLE);
+							chk11.setVisibility(View.INVISIBLE);
+							chk10.setVisibility(View.INVISIBLE);
+							chk9.setVisibility(View.INVISIBLE);
+							chk8.setVisibility(View.INVISIBLE);
+							chk7.setVisibility(View.INVISIBLE);
+							chk6.setVisibility(View.INVISIBLE);
+							chk5.setVisibility(View.INVISIBLE);
+							chk4.setVisibility(View.INVISIBLE);
+							chk3.setVisibility(View.INVISIBLE);
+							chk2.setVisibility(View.INVISIBLE);
+							chk.setVisibility(View.INVISIBLE);
+							
+							chk29.setChecked(false);
+							chk28.setChecked(false);
+							chk27.setChecked(false);
+							chk26.setChecked(false);
+							chk25.setChecked(false);
+							chk24.setChecked(false);
+							chk23.setChecked(false);
+							chk22.setChecked(false);
+							chk21.setChecked(false);
+							chk20.setChecked(false);
+							chk19.setChecked(false);
+							chk18.setChecked(false);
+							chk17.setChecked(false);
+							chk16.setChecked(false);
+							
+							chk15.setChecked(false);
+							chk14.setChecked(false);
+							chk13.setChecked(false);
+							chk12.setChecked(false);
+							chk11.setChecked(false);
+							chk10.setChecked(false);
+							chk9.setChecked(false);
+							chk8.setChecked(false);
+							chk7.setChecked(false);
+							chk.setChecked(false);
+							chk6.setChecked(false);
+							chk5.setChecked(false);
+							chk4.setChecked(false);
+							chk3.setChecked(false);
+							chk2.setChecked(false);
+
 						}
 					}
 				});
@@ -1838,6 +2676,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 					public void onClick(View v) {
 						// TODO Auto-generated method stub
 						String hobbies_selected = "";
+						if(none_hobbies.equals("")){
 						otherhobbies = edit1.getText().toString();
 						if (otherhobbies.equals("")
 								|| otherhobbies.equals(null)) {
@@ -1951,15 +2790,15 @@ public class Add_Child extends android.support.v4.app.Fragment {
 										+ sewing;
 							}
 						}
-						if (!singing.equals("")) {
+						if (!lawnTennis.equals("")) {
 							if (hobbies_selected.equals("")
 									|| hobbies_selected.equals(null)) {
-								hobbies_selected = singing;
+								hobbies_selected = lawnTennis;
 							} else {
 								hobbies_selected = hobbies_selected + ","
-										+ singing;
-							}
-						}
+										+ lawnTennis;
+						}	}
+						
 						if (!videogaming.equals("")) {
 							if (hobbies_selected.equals("")
 									|| hobbies_selected.equals(null)) {
@@ -2115,15 +2954,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 										+ table;
 							}
 						}
-						if (!writing.equals("")) {
-							if (hobbies_selected.equals("")
-									|| hobbies_selected.equals(null)) {
-								hobbies_selected = writing;
-							} else {
-								hobbies_selected = hobbies_selected + ","
-										+ writing;
-							}
-						}
+						
 						if (!reading.equals("")) {
 							if (hobbies_selected.equals("")
 									|| hobbies_selected.equals(null)) {
@@ -2133,7 +2964,38 @@ public class Add_Child extends android.support.v4.app.Fragment {
 										+ reading;
 							}
 						}
+						}else {
+							hobbies_selected = "None";
+						}
 						System.out.println(hobbies_selected);
+						hobbies.setText(hobbies_selected.toUpperCase());
+						
+						ii_none=1;
+						none_hobbies="";
+						cooking = ""; dance = ""; drama = ""; drawing = ""; lego = "";
+						buildingMagicModel = ""; painting = ""; puzzles = "";
+						scrapbooking = ""; sewing = ""; singing = ""; videogaming = "";
+						woodworking = ""; writing = ""; skating = ""; otherhobbies = "";
+						skiingSurfing = ""; snowboarding = ""; swimmingWater = "";
+						football = ""; baseball = ""; basketball = ""; climbing = "";
+						cricket = ""; cycling = ""; judo = ""; running = ""; table = "";
+						lawnTennis = ""; reading = "";
+				ii = 1;ii16=1;ii17=1;ii18=1;ii19=1;ii20=1;ii21=1;ii22=1;ii23=1;ii24=1;ii25=1;ii26=1;ii27=1;ii28=1;ii29=1;
+				ii2 = 1;
+				ii3 = 1;
+				ii4 = 1;
+				ii5 = 1;
+				ii6 = 1;
+				ii7 = 1;
+				ii8 = 1;
+				ii9 = 1;
+				ii10 = 1;
+				ii11 = 1;
+				ii12 = 1;
+				ii13 = 1;
+				ii14 = 1;
+				ii15 = 1;
+						/*System.out.println(hobbies_selected);
 						hobbies.setText(hobbies_selected.toUpperCase());
 						cooking = "";
 						dance = "";
@@ -2165,8 +3027,9 @@ public class Add_Child extends android.support.v4.app.Fragment {
 						table = "";
 						lawnTennis = "";
 						reading = "";
-
-						hobbies_selected = null;
+						ii = 1; ii2 = 1; ii3 = 1; ii4 = 1; ii5 = 1; ii6 = 1; ii7 = 1; ii8 = 1;ii9 = 1; ii10 = 1; ii11 = 1; ii12 = 1; ii13 = 1; ii14 = 1;ii15 = 1; ii16 = 1; ii17 = 1; ii18 = 1; ii19 = 1; ii20 = 1;
+						         ii21 = 1; ii22 = 1; ii23 = 1; ii24 = 1; ii25 = 1; ii26 = 1;ii27 = 1; ii28 = 1; ii29 = 1;
+						hobbies_selected = null;*/
 						popup.dismiss();
 					}
 
@@ -2222,31 +3085,117 @@ public class Add_Child extends android.support.v4.app.Fragment {
 		if (requestCode == RESULT_LOAD_IMAGE && resultCode == -1
 				&& !(data == null)) {
 
-			InputStream is = null;
+			/*InputStream is = null;
 			try {
 				is = getActivity().getContentResolver().openInputStream(
 						data.getData());
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}*/
 			/*
 			 * BitmapFactory.Options bounds = new BitmapFactory.Options();
 			 * bounds.inSampleSize = 4;
 			 */
-			imageData = BitmapFactory.decodeStream(is, null, null);
-			imageData = Bitmap.createScaledBitmap(imageData, 100, 100, true);
 			try {
-				is.close();
+				
+			
+			Uri selectedImageURI = data.getData();
+			File imageFile = new File(getRealPathFromURI(selectedImageURI));
+			String path_get=imageFile.getAbsolutePath();
+			
+			
+			
+			 try {
+			       
+			        ExifInterface exif = new ExifInterface(path_get);
+			        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
+			        int angle = 0;
+
+			        if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
+			            angle = 90;
+			        } 
+			        else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
+			            angle = 180;
+			        } 
+			        else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+			            angle = 270;
+			        }
+
+			        Matrix mat = new Matrix();
+			        mat.postRotate(angle);
+
+			        Bitmap bmp = BitmapFactory.decodeStream(new FileInputStream(imageFile), null, null);
+			        Bitmap correctBmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), mat, true);                 
+			        imageData=correctBmp;
+			 }
+			 
+			 
+			 
+			    catch (IOException e) {
+			        Log.w("TAG", "-- Error in setting image");
+			    }   
+			    catch(OutOfMemoryError oom) {
+			        Log.w("TAG", "-- OOM Error in setting image");
+			    }
+			 try {
+				
+			
+			
+			 Bitmap dstBmp;
+			 if (imageData.getWidth() >= imageData.getHeight()){
+
+				  dstBmp = Bitmap.createBitmap(
+						  imageData, 
+						  imageData.getWidth()/2 - imageData.getHeight()/2,
+				     0,
+				     imageData.getHeight(), 
+				     imageData.getHeight()
+				     );
+
+				}else{
+
+				  dstBmp = Bitmap.createBitmap(
+						  imageData,
+				     0, 
+				     imageData.getHeight()/2 - imageData.getWidth()/2,
+				     imageData.getWidth(),
+				     imageData.getWidth() 
+				     );
+				}
+			 imageData=dstBmp;
+			 } catch (Exception e) {
+					// TODO: handle exception
+				}
+			 
+			try {
+			//	is.close();
 
 				img_child.setImageBitmap(imageData);
 				setsizeofimage();
 
-			} catch (IOException e) {
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		} 
+		 } catch (Exception e) {
+			// TODO: handle exception
+		}
+		}
+	}
+	private String getRealPathFromURI(Uri contentURI) {
+	    String result;
+	    Cursor cursor = getActivity().getContentResolver().query(contentURI, null, null, null, null);
+	    if (cursor == null) { // Source is Dropbox or other similar local file path
+	        result = contentURI.getPath();
+	    } else { 
+	        cursor.moveToFirst(); 
+	        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA); 
+	        result = cursor.getString(idx);
+	        cursor.close();
+	    }
+	    return result;
 	}
 
 	public void setsizeofimage() {
@@ -2291,7 +3240,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 
 	}
 
-	TimePickerDialog.OnTimeSetListener mTimesetlistenermon = new TimePickerDialog.OnTimeSetListener() {
+	/*TimePickerDialog.OnTimeSetListener mTimesetlistenermon = new TimePickerDialog.OnTimeSetListener() {
 
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -2838,7 +3787,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 
 		}
 	};
-
+*/
 	public void alert() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
@@ -2982,7 +3931,7 @@ public class Add_Child extends android.support.v4.app.Fragment {
 			nameValuePairs.add(new BasicNameValuePair("allergies", aLLergies));
 			nameValuePairs.add(new BasicNameValuePair("hobbies", hoBBies));
 
-			nameValuePairs.add(new BasicNameValuePair("youth_club", youthClub));
+			nameValuePairs.add(new BasicNameValuePair("youth_club", ""));
 			nameValuePairs
 					.add(new BasicNameValuePair("g_id", user_guardian_id));
 			Log.d("nameValuePairs", "nameValuePairs" + nameValuePairs);
@@ -3068,8 +4017,18 @@ public class Add_Child extends android.support.v4.app.Fragment {
 			if (data.equals("1")) {
 				Toast.makeText(getActivity(), "Updation Successful", 2000)
 						.show();
-
-				childname.setText("");
+				Bundle bundle = new Bundle();
+				bundle.putString("user_guardian_id", user_guardian_id);
+			
+				
+				android.support.v4.app.Fragment fragment = new Home_fragment();
+				fragment.setArguments(bundle);
+				android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+				android.support.v4.app.FragmentTransaction fragmentTransaction= fragmentManager.beginTransaction();
+				fragmentTransaction.replace(R.id.content_frame, fragment);
+			
+				fragmentTransaction.commit();
+				/*childname.setText("");
 				dateofbirth.setText("");
 				freetime.setText("");
 				//conditions.setText("");
@@ -3078,11 +4037,199 @@ public class Add_Child extends android.support.v4.app.Fragment {
 				school.setText("");
 				youthclub.setText("");
 
-				img_child.setImageResource(R.drawable.placeholder_large);
+				img_child.setImageResource(R.drawable.placeholder_large);*/
 
 			}
 
 		}
 	}
+	public static class CustomTimePickerDialog extends TimePickerDialog{
+		 
+	    public static final int TIME_PICKER_INTERVAL=15;
+	    private boolean mIgnoreEvent=false;
 
+	    public CustomTimePickerDialog(Context context, OnTimeSetListener callBack, int hourOfDay, int minute, boolean is24HourView) {
+	    super(context, callBack, hourOfDay, minute, is24HourView);
+	    }
+
+	    @Override
+	    public void onTimeChanged(TimePicker timePicker, int hourOfDay, int minute) {
+	        super.onTimeChanged(timePicker, hourOfDay, minute);
+	        if (!mIgnoreEvent){
+	            minute = getRoundedMinute(minute);
+	            mIgnoreEvent=true;
+	            timePicker.setCurrentMinute(minute);
+	            mIgnoreEvent=false;
+	        }
+	    }
+
+	    public static  int getRoundedMinute(int minute){
+	         if(minute % TIME_PICKER_INTERVAL != 0){
+	            int minuteFloor = minute - (minute % TIME_PICKER_INTERVAL);
+	            minute = minuteFloor + (minute == minuteFloor + 1 ? TIME_PICKER_INTERVAL : 0);
+	            if (minute == 60)  minute=0;
+	         }
+
+	        return minute;
+	    }
+	}
+	
+	
+	/////////////////////////////////////////////////Showing popup for free time
+	
+	
+	public void show_popup(){
+		/*LinearLayout viewGroup = (LinearLayout) getActivity().findViewById(R.id.numberpicker);
+		View layout = inflater.inflate(R.layout.number_picker, viewGroup);
+		final PopupWindow popup = new PopupWindow(getActivity());
+		popup.setContentView(layout);
+		popup.setWidth(WindowManager.LayoutParams.MATCH_PARENT);
+		popup.setHeight(WindowManager.LayoutParams.MATCH_PARENT);
+		popup.setFocusable(true);
+		int OFFSET_X = 0;
+		int OFFSET_Y = 0;
+		popup.setBackgroundDrawable(new BitmapDrawable());
+		popup.showAtLocation(getView(), Gravity.NO_GRAVITY, OFFSET_X,OFFSET_Y);
+		
+		NumberPicker npdays_=
+				   (NumberPicker) layout.findViewById(R.id.numberPicker_days);
+		NumberPicker np_hr_from=
+				   (NumberPicker) layout.findViewById(R.id.numberPicker_hr_from);
+		NumberPicker np_min_from=
+				   (NumberPicker) layout.findViewById(R.id.numberPicker_min_from);
+		NumberPicker np_hr_to=
+				   (NumberPicker) layout.findViewById(R.id.numberPicker_hr_to);
+		NumberPicker np_min_to=
+				   (NumberPicker) layout.findViewById(R.id.numberPicker_min_to);
+		
+		String[] values=new String[7];
+		values[0]="Monday";
+		values[1]="Tuesday";
+		values[2]="Wednesday";
+		values[3]="Thursday";
+		values[4]="Friday";
+		values[5]="Saturday";
+		values[6]="Sunday";
+		npdays_.setMaxValue(values.length-1);
+		npdays_.setMinValue(0);
+		npdays_.setDisplayedValues(values);
+		
+		npdays_.setOnValueChangedListener(new OnValueChangeListener() {
+			
+			@Override
+			public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+				// TODO Auto-generated method stub
+				
+				
+				String[] values_picked=picker.getDisplayedValues();
+				
+				String days=values_picked[newVal];
+			}
+		});
+		
+		String[] values_hr=new String[24];
+		values[0]="01";
+		values[1]="02";
+		values[2]="03";
+		values[3]="04";
+		values[4]="05";
+		values[5]="06";
+		values[6]="07";
+		values[7]="08";
+		values[8]="09";
+		values[9]="10";
+		values[10]="11";
+		values[11]="12";
+		values[12]="13";
+		values[13]="14";
+		values[14]="15";
+		values[15]="16";
+		values[16]="17";
+		values[17]="18";
+		values[18]="19";
+		values[19]="20";
+		values[20]="21";
+		values[21]="22";
+		values[22]="23";
+		values[23]="24";
+		
+		
+		np_hr_from.setMaxValue(values_hr.length-1);
+		np_hr_from.setMinValue(0);
+		np_hr_from.setDisplayedValues(values_hr);
+		
+		np_hr_from.setOnValueChangedListener(new OnValueChangeListener() {
+			
+			@Override
+			public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+				// TODO Auto-generated method stub
+				
+				
+				String[] values_picked=picker.getDisplayedValues();
+				
+				String hr_from=values_picked[newVal];
+			}
+		});
+
+		np_hr_to.setMaxValue(values_hr.length-1);
+		np_hr_to.setMinValue(0);
+		np_hr_to.setDisplayedValues(values_hr);
+		
+		np_hr_to.setOnValueChangedListener(new OnValueChangeListener() {
+			
+			@Override
+			public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+				// TODO Auto-generated method stub
+				
+				
+				String[] values_picked=picker.getDisplayedValues();
+				
+				String hr_to=values_picked[newVal];
+			}
+		});
+		
+		String[] values_min=new String[4];
+		values[0]="00";
+		values[1]="15";
+		values[2]="30";
+		values[3]="45";
+		
+		np_min_from.setMaxValue(values_min.length-1);
+		np_min_from.setMinValue(0);
+		np_min_from.setDisplayedValues(values_min);
+		
+		np_min_from.setOnValueChangedListener(new OnValueChangeListener() {
+			
+			@Override
+			public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+				// TODO Auto-generated method stub
+				
+				
+				String[] values_picked=picker.getDisplayedValues();
+				
+				String min_from=values_picked[newVal];
+			}
+		});
+		
+		np_min_to.setMaxValue(values_min.length-1);
+		np_min_to.setMinValue(0);
+		np_min_to.setDisplayedValues(values_min);
+		
+		np_min_to.setOnValueChangedListener(new OnValueChangeListener() {
+			
+			@Override
+			public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+				// TODO Auto-generated method stub
+				
+				
+				String[] values_picked=picker.getDisplayedValues();
+				
+				String min_to=values_picked[newVal];
+			}
+		});
+		*/
+		
+		
+	}
+	
 }

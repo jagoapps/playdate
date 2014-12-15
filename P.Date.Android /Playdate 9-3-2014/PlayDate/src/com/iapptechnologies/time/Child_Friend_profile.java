@@ -6,14 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import com.google.android.gms.internal.bt;
-import com.iapp.playdate.R;
-
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -29,7 +22,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.iapp.playdate.R;
 
 
 public class Child_Friend_profile extends android.support.v4.app.Fragment {
@@ -68,7 +62,7 @@ LazyAdapter adapter;
 		allergies=(EditText)view.findViewById(R.id.textView_child_profile_allergies);
 		hobbies=(EditText)view.findViewById(R.id.textView_child_profile_hobbies);
 		school=(EditText)view.findViewById(R.id.textView_child_profile_school);
-		youthclub=(EditText)view.findViewById(R.id.textView_child_profile_youthclub);
+		//youthclub=(EditText)view.findViewById(R.id.textView_child_profile_youthclub);
 		name=(EditText)view.findViewById(R.id.child_profile_name);
 		child_image=(ImageView)view.findViewById(R.id.imageView_child_profile);
 		list_parent=(ListView)view.findViewById(R.id.listView_child_profile_child);
@@ -93,7 +87,7 @@ LazyAdapter adapter;
 		child_allergies = getArguments().getString("allergies"); 
 		child_conditions = getArguments().getString("conditions"); 
 		child_school = getArguments().getString("school"); 
-		child_youthclub = getArguments().getString("youthclub"); 
+	//	child_youthclub = getArguments().getString("youthclub"); 
 		guardian_id = getArguments().getString("Child_guardianId");
 		free_time_child = getArguments().getString("free_time");
 		
@@ -111,22 +105,41 @@ LazyAdapter adapter;
 			e.printStackTrace();
 		}//String reportDate = df.format(today);
 		// birthDay=sdf.format(date_of_birth);
-		 DateFormat destDf = new SimpleDateFormat("dd-MM-yyyy");
+		 DateFormat destDf = new SimpleDateFormat("dd/MM/yy");
 		
 		               
-	
-		             // format the date into another format
+		 String dob_formated=null;
+		     try {
+		    	 dob_formated = destDf.format(date_of_birth);
+			} catch (Exception e) {
+				// TODO: handle exception
+			}        // format the date into another format
 		
-		 String dob_formated = destDf.format(date_of_birth);
+		 
 		
 		dob.setText(dob_formated);
-		setfixedfree_time.setText(free_time_child.toUpperCase());
+		try {
+			setfixedfree_time.setText(free_time_child.toUpperCase());
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+try {
+	allergies.setText(child_allergies.toUpperCase());
+	hobbies.setText(child_hobbies.toUpperCase());
+	school.setText(child_school.toUpperCase());
+	//youthclub.setText(child_youthclub.toUpperCase());
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+try {
+	name.setText(child_name.toUpperCase());
+} catch (Exception e) {
+	// TODO: handle exception
+}
+		
 		//conditions.setText(child_conditions.toUpperCase());
-		allergies.setText(child_allergies.toUpperCase());
-		hobbies.setText(child_hobbies.toUpperCase());
-		school.setText(child_school.toUpperCase());
-		youthclub.setText(child_youthclub.toUpperCase());
-		name.setText(child_name.toUpperCase());
+		
+		
 		
 		
 		dob.setFocusable(false);
@@ -141,7 +154,7 @@ LazyAdapter adapter;
 	     school.setFocusable(false);
 	   
 	     
-	     youthclub.setFocusable(false);
+	   //  youthclub.setFocusable(false);
 	    
 	     name.setFocusable(false);
 	     dob.setEnabled(false);
@@ -156,7 +169,7 @@ LazyAdapter adapter;
 	     school.setEnabled(false);
 	   
 	     
-	     youthclub.setEnabled(false);
+	//     youthclub.setEnabled(false);
 	    
 	     name.setEnabled(false);
 	    
@@ -243,9 +256,14 @@ LazyAdapter adapter;
 				
 				android.support.v4.app.Fragment  fragment=new Friend_profile();
 		        fragment.setArguments(bundle);
-				android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+		        android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+				android.support.v4.app.FragmentTransaction fragmentTransaction= fragmentManager.beginTransaction();
+				fragmentTransaction.replace(R.id.content_frame, fragment);
+				fragmentTransaction.addToBackStack("first3");
+				fragmentTransaction.commit();
+				/*android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
 				fragmentManager.beginTransaction()
-				        .replace(R.id.content_frame, fragment).commit();
+				        .replace(R.id.content_frame, fragment).commit();*/
 				
 			}
 		});

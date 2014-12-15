@@ -5,4 +5,8 @@
 <color name="image_border_center">#e3e3e3</color>
 <color name="forspinner">#0097dc</color>
 <color name="bg_color">#e3e3e3</color>
+<color name="linecolour">#3f48cc</color>
+ <color name="roster_offline">#FFE0E0E0</color>
+    <color name="roster_offline_highlight">#FFD0D0D0</color>
+    <color name="actionbar_background">#FF1b1b1b</color>
 </resources>

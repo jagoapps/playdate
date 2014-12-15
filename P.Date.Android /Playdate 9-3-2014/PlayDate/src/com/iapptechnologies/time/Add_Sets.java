@@ -20,11 +20,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,6 +35,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -68,6 +71,7 @@ public class Add_Sets extends android.support.v4.app.Fragment {
 				container, false);
 		getActivity().getWindow().setSoftInputMode(
 				WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+		 Home.menu.setVisibility(View.GONE);
 		name_of_sets_edt = (EditText) view
 				.findViewById(R.id.editText_addsets_name);
 		list_friends = (ListView) view
@@ -133,37 +137,75 @@ public class Add_Sets extends android.support.v4.app.Fragment {
 			   cd=new ConnectionDetector(getActivity());
 				 isInternetPresent = cd.isConnectingToInternet();
 				 if (isInternetPresent) {
-					 
+				
 					 if(edit_create_sets.equals("0")){
-					 if(name_of_sets_edt.getText().toString().length()>0 && friends_id_for_setcreate.length()>0){
-						 name_of_set=name_of_sets_edt.getText().toString();
-						 url_sets = "http://54.191.67.152/playdate/set_friend.php";
-						 new create_sets().execute();
+						 if(name_of_sets_edt.getText().toString().length()==0)
+						 {
+						 Toast.makeText(getActivity(),"Please enter text",2000).show();  
+						 }else if(friends_id_for_setcreate.length()==0)
+						 {
+						 Toast.makeText(getActivity(),"Please select checkbox",2000).show();  
+						 }else
+						 {
+							 if(name_of_sets_edt.getText().toString().length()>0 && friends_id_for_setcreate.length()>0)
+							 {
+								 name_of_set=name_of_sets_edt.getText().toString();
+								 url_sets = "http://54.191.67.152/playdate/set_friend.php";
+								 new create_sets().execute();
+							 }else
+							 {
+								 Toast.makeText(getActivity(),"Please enter name of set",2000).show(); 
+							 }
+						 }
+					 	 }
+					 else
+					 {
+						 if(name_of_sets_edt.getText().toString().length()==0)
+						 {
+						 Toast.makeText(getActivity(),"Please enter text",1).show();  
+						 }else if(friends_id_for_setcreate.length()==0)
+						 {
+						 Toast.makeText(getActivity(),"Please select checkbox",1).show();  
+						 }else
+						 {
+							 if(name_of_sets_edt.getText().toString().length()>0 && friends_id_for_setcreate.length()>0)
+							 {
+								 url_sets = "http://54.191.67.152/playdate/edit_set.php";//?set_id=106&friend_id=107";
+								 new create_sets().execute();
+							 }else
+							 {
+							 Toast.makeText(getActivity(),"Please select child",2000).show();  
+							 }
+						 }
 					 }
-					
-						
-					 	 }else if(edit_create_sets.equals("1")){
-					 		 url_sets = "http://54.191.67.152/playdate/edit_set.php";//?set_id=106&friend_id=107";
-							 new create_sets().execute();
-					 }	
+					 
+//					 else if(edit_create_sets.equals("1")){
+//					 		 
+//					 		 if(name_of_sets_edt.getText().toString().length()>0 && friends_id_for_setcreate.length()>0)
+//					 		 {
+//					 			 url_sets = "http://54.191.67.152/playdate/edit_set.php";//?set_id=106&friend_id=107";
+//								 new create_sets().execute();
+//					 		 }
+//					 		else
+//							 {
+//								 Toast.makeText(getActivity(),"Please select child",2000).show();  
+//							 }
+//					 }	
 				 }
 				 else{
-					 Toast.makeText(getActivity(),"Please check internet connection",2000).show();
-					
+				 Toast.makeText(getActivity(),"Please check internet connection",2000).show();
 				 }
-				
-			
 			   }
 			  });
+		 
 		 
 		return view;
 	}
 
-	public class Get_Sets extends AsyncTask<String, Integer, String> {
+	    public class Get_Sets extends AsyncTask<String, Integer, String> {
 		ProgressDialog dialog = new ProgressDialog(getActivity());
-String friend_name,friend_id,friend_imageurl;
-ArrayList<arrayList>al=new ArrayList<Add_Sets.arrayList>();
-
+        String friend_name,friend_id,friend_imageurl;
+        ArrayList<arrayList>al=new ArrayList<Add_Sets.arrayList>();
 		@Override
 		protected void onPreExecute() {
 			
@@ -269,7 +311,7 @@ ArrayList<arrayList>al=new ArrayList<Add_Sets.arrayList>();
 
 			dialog.dismiss();
 			
-			dataAdapter = new MyCustomAdapter(getActivity(),R.layout.list_add_sets,al);
+			dataAdapter = new MyCustomAdapter(getActivity(), al);/*(getActivity(),R.layout.list_add_sets,al);*/
 		    
 		    list_friends.setAdapter(dataAdapter);
 		}
@@ -386,7 +428,7 @@ ArrayList<arrayList>al=new ArrayList<Add_Sets.arrayList>();
 
 			dialog.dismiss();
 			
-			dataAdapter = new MyCustomAdapter(getActivity(),R.layout.list_add_sets,al);
+			dataAdapter = new MyCustomAdapter(getActivity(), al);/*(getActivity(),R.layout.list_add_sets,al);*/
 		    
 		    list_friends.setAdapter(dataAdapter);
 		}
@@ -521,15 +563,59 @@ String success;
 		}
 	}
 	
-	private class MyCustomAdapter extends ArrayAdapter<arrayList> {
-
-		  private ArrayList<arrayList> al;
+	private class MyCustomAdapter extends BaseAdapter{ /*ArrayAdapter<arrayList> {
+*/
+		  /* private ArrayList<arrayList> al;
             ImageLoader imageLoader=new ImageLoader(getActivity());
-		  public MyCustomAdapter(Context context, int textViewResourceId,ArrayList<arrayList> al) {
+		   public MyCustomAdapter(Context context, int textViewResourceId,ArrayList<arrayList> al) {
 		   super(context, textViewResourceId, al);
 		   this.al = new ArrayList<arrayList>();
-		   this.al.addAll(al);
-		  }
+		   this.al.addAll(al);*/
+		private Activity activity;
+		private ArrayList<arrayList> al;
+		private LayoutInflater inflater = null;
+
+			public ImageLoader imageLoader=new ImageLoader(getActivity());
+
+		/*public MyCustomAdapter(FragmentActivity activity2,
+					ArrayList<arrayList> al2) {
+				// TODO Auto-generated constructor stub
+			}*/
+
+		public MyCustomAdapter(FragmentActivity activity,
+					ArrayList<arrayList> al) {
+				// TODO Auto-generated constructor stub
+			this.activity = activity;
+			 this.al = new ArrayList<arrayList>();
+			   this.al.addAll(al);
+			try {
+				inflater = (LayoutInflater) getActivity()
+						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			}
+
+		/*public void MyCustomAdapter(Activity activity, ArrayList<arrayList> parentItems) {
+
+			// this.imageLoader.clearCache();
+			
+			
+			//imageLoader = new ImageLoader(getActivity());
+		}*/
+
+		public int getCount() {
+			return al.size();
+		}
+
+		public Object getItem(int position) {
+			return position;
+		}
+
+		public long getItemId(int position) {
+			return position;
+		}
+		  
 
 		  private class ViewHolder {
 		   TextView code;
@@ -544,8 +630,8 @@ String success;
 		   Log.v("ConvertView", String.valueOf(position));
 
 		   if (convertView == null) {
-		    LayoutInflater vi = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		    convertView = vi.inflate(R.layout.list_add_sets, null);
+		   // LayoutInflater vi = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		    convertView = inflater.inflate(R.layout.list_add_sets, null);
 
 		    holder = new ViewHolder();
 		    holder.code = (TextView) convertView.findViewById(R.id.textView_list_addsets_name);

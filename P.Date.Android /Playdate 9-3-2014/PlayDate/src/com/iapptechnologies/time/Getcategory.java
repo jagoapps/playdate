@@ -17,6 +17,7 @@ public class Getcategory {
 	public String set_id;
 	public String set_name;
 	public String set_number;
+	public String guardian_identity;
 	
 	// for parent list
 }

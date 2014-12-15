@@ -28,8 +28,6 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
                     android:layout_gravity="center_horizontal"
-                    android:adjustViewBounds="true"
-                    android:scaleType="centerInside"
                     android:padding="1dp"
                    
                     />
@@ -268,7 +266,7 @@
                     android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
                     android:paddingLeft="15dp"
-                    android:text="USERS"
+                    android:text="RELATIONSHIP"
                     android:textColor="#0097dc"
                     android:textSize="13dp"
                     android:textStyle="bold"
@@ -283,7 +281,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginRight="15dp"
                     android:background="@android:color/transparent"
-                    android:hint="USER"
+                    android:hint="RELATION"
                     android:inputType="textCapCharacters"
                     android:textColor="#a1a1a1"
                     android:textSize="13dp"

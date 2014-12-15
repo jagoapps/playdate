@@ -31,9 +31,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
+import android.accounts.AccountAuthenticatorActivity;
+import android.app.AlertDialog;
+import android.app.DownloadManager.Request;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -42,22 +45,19 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Looper;
+import android.service.textservice.SpellCheckerService.Session;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.HttpMethod;
 import com.facebook.LoggingBehavior;
-import com.facebook.Request;
 import com.facebook.Response;
-import com.facebook.Session;
 import com.facebook.SessionLoginBehavior;
 import com.facebook.SessionState;
-import com.facebook.Settings;
 import com.facebook.android.Facebook;
 import com.facebook.model.GraphObject;
 import com.google.analytics.tracking.android.EasyTracker;
@@ -66,12 +66,12 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.iapp.playdate.R;
 
-public class FacebookLogin extends Activity {
+public class FacebookLogin extends AccountAuthenticatorActivity {
 
-	
-	private Session.StatusCallback statusCallback = new SessionStatusCallback();
-	 public static final String PREFS_NAME = "MyPrefsFile";
-	String token, url1;
+	JSONArray CustomMessageStr;
+	private com.facebook.Session.StatusCallback statusCallback = new SessionStatusCallback();
+	public static final String PREFS_NAME = "MyPrefsFile";
+	String token, url1, ejabber_username, ejabber_password;;
 	String fb_ids = "";
 	Response responsefriends;
 	String userfirstname, userlastname, userlocation, userdob, useremail,
@@ -92,15 +92,10 @@ public class FacebookLogin extends Activity {
 	private static final String PROPERTY_APP_VERSION = "appVersion";
 	private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
-	/**
-	 * Substitute you own sender ID here. This is the project number you got
-	 * from the API Console, as described in "Getting Started."
-	 */
+	
 	String SENDER_ID = "77923313167";
 
-	/**
-	 * Tag used on log messages.
-	 */
+	
 	static final String TAG = "GCMDemo";
 
 	GoogleCloudMessaging gcm;
@@ -110,13 +105,17 @@ public class FacebookLogin extends Activity {
 
 	String regid;
 
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.loginwithfacebook);
 		relativeLayout = (RelativeLayout) findViewById(R.id.relative_facebookMain);
 		settings = getSharedPreferences("MyPreferencesFile", 0);
-		bool = settings.getBoolean("check", check);// if Internet is not present then load from shared preferences
+		bool = settings.getBoolean("check", check);// if Internet is not present
+													// then load from shared
+													// preferences
 		System.out.println(check);
 		System.out.println("boo............" + bool);
 		cd = new ConnectionDetector(this);
@@ -128,8 +127,7 @@ public class FacebookLogin extends Activity {
 			PackageInfo packageInfo;
 			try {
 				packageInfo = getPackageManager().getPackageInfo(
-						"com.iapp.playdate",
-						PackageManager.GET_SIGNATURES);
+						"com.iapp.playdate", PackageManager.GET_SIGNATURES);
 				for (Signature signature : packageInfo.signatures) {
 					MessageDigest md = MessageDigest.getInstance("SHA");
 					md.update(signature.toByteArray());
@@ -148,48 +146,76 @@ public class FacebookLogin extends Activity {
 				Log.e("Exception", e.toString());
 			}
 
-			Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
-			Session session = Session.getActiveSession();
+			com.facebook.Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
+			com.facebook.Session session = com.facebook.Session.getActiveSession();
 			if (session == null) {
 				if (savedInstanceState != null) {
-					session = Session.restoreSession(this, null,
+					session = com.facebook.Session.restoreSession(this, null,
 							statusCallback, savedInstanceState);
 				}
 				if (session == null) {
-					session = new Session(this);
+					session = new com.facebook.Session(this);
 				}
-				Session.setActiveSession(session);
+				com.facebook.Session.setActiveSession(session);
 				if (session.getState()
 						.equals(SessionState.CREATED_TOKEN_LOADED)) {
+					
+					com.facebook.Session.getActiveSession().getExpirationDate();
+					
+					System.out.println("date......."+com.facebook.Session.getActiveSession().getExpirationDate());
 
-					System.out.println("main ");
-					session.openForRead(new Session.OpenRequest(this)
-							.setCallback(statusCallback));
-
+					Date expDate=com.facebook.Session.getActiveSession().getExpirationDate();
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+					String currentDateandTime = sdf.format(new Date());
+					Date date=null;
+					
+					try {
+						 
+						 date = sdf.parse(currentDateandTime);
+						System.out.println(date);
+						
+				 
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
+					if (expDate.getTime() > date.getTime()) {
+					   System.out.println("token Valid");
+					}else{
+						
+					}
+					
+					
+					
+					session.openForRead(new com.facebook.Session.OpenRequest(this)
+							.setCallback(statusCallback));                                                                     
+                                                                                                                    
 					System.out.println("already logined");
 					token = session.getAccessToken();
 					System.out.println("token" + token);
 					System.out.println(session);
-					 SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-				      SharedPreferences.Editor editor = settings.edit();
-				      editor.putString("FBToken", token);
+					SharedPreferences settings = getSharedPreferences(
+							PREFS_NAME, 0);
+					SharedPreferences.Editor editor = settings.edit();
+					editor.putString("FBToken", token);
 
-				      // Commit the edits!
-				      editor.commit();
+					// Commit the edits!
+					editor.commit();
 				}
-			}else{
-				System.out.println("else block............................oncreate method");
-				Session.openActiveSession(this, true, new Session.StatusCallback() {
+			} else {
+				System.out
+						.println("else block............................oncreate method");
+				com.facebook.Session.openActiveSession(this, true,
+						new com.facebook.Session.StatusCallback() {
 
-					@Override
-					public void call(final Session session, SessionState state,
-							Exception exception) {
+							@Override
+							public void call(final com.facebook.Session session,
+									SessionState state, Exception exception) {
 
-						if (session.isOpened()) {
+								if (session.isOpened()) {
 
-						}
-					}
-				});
+								}
+							}
+						});
 			}
 		} else {
 			Toast.makeText(this, "Please check internet connection", 2000)
@@ -219,8 +245,10 @@ public class FacebookLogin extends Activity {
 				it.putExtra("user_guardian_id", user_guardian_id);
 				it.putExtra("facebook_friends", fbfriends);
 				it.putExtra("phone", userphone_saved);
-				startActivity(it);
+				// it.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
+				startActivity(it);
+				finish();
 				System.out.println("entered into parent class");
 			}
 
@@ -232,25 +260,24 @@ public class FacebookLogin extends Activity {
 			@Override
 			public void onClick(View v) {
 
-				
 				try {
-					Session.OpenRequest request;
-					request = new Session.OpenRequest(FacebookLogin.this);
-					request.setPermissions(Arrays.asList("user_about_me", "email",
-							"user_birthday", "user_location", "user_hometown"));
+					com.facebook.Session.OpenRequest request;
+					request = new com.facebook.Session.OpenRequest(FacebookLogin.this);
+					request.setPermissions(Arrays.asList("user_about_me",
+							"email", "user_birthday", "user_location",
+							"user_hometown","user_friends","read_friendlists"));
 					request.setLoginBehavior(SessionLoginBehavior.SUPPRESS_SSO);
 					request.setCallback(statusCallback);
 
-					Session mFacebookSession = Session.getActiveSession();
+					com.facebook.Session mFacebookSession = com.facebook.Session.getActiveSession();
 					if (mFacebookSession == null || mFacebookSession.isClosed()) {
-						mFacebookSession = new Session(FacebookLogin.this);
+						mFacebookSession = new com.facebook.Session(FacebookLogin.this);
 					}
 					mFacebookSession.openForRead(request);
 				} catch (Exception e) {
 					// TODO: handle exception
-				
+
 				}
-				
 
 			}
 		});
@@ -259,34 +286,35 @@ public class FacebookLogin extends Activity {
 
 	}
 
-	  @Override
-	    protected void onResume() {
-	        super.onResume();
-	        checkPlayServices();
-	    }
+	@Override
+	protected void onResume() {
+		super.onResume();
+		com.facebook.AppEventsLogger.activateApp(this, "272047936334195");
+		checkPlayServices();
+	}
 
 	@Override
 	public void onStart() {
 		super.onStart();
 		try {
-			Session.getActiveSession().addCallback(statusCallback);
+			com.facebook.Session.getActiveSession().addCallback(statusCallback);
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		
-		 EasyTracker.getInstance(this).activityStart(this); 
+
+		EasyTracker.getInstance(this).activityStart(this);
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
 		try {
-			Session.getActiveSession().removeCallback(statusCallback);
+			com.facebook.Session.getActiveSession().removeCallback(statusCallback);
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		
-		 EasyTracker.getInstance(this).activityStop(this); 
+
+		EasyTracker.getInstance(this).activityStop(this);
 	}
 
 	@Override
@@ -296,22 +324,22 @@ public class FacebookLogin extends Activity {
 
 		// this.facebookConnector.getFacebook().authorizeCallback(requestCode,
 		// resultCode, data);
-		if (Session.getActiveSession() != null)
-			Session.getActiveSession().onActivityResult(this, requestCode,
+		if (com.facebook.Session.getActiveSession() != null)
+			com.facebook.Session.getActiveSession().onActivityResult(this, requestCode,
 					resultCode, data);
 
-		Session currentSession = Session.getActiveSession();
+		com.facebook.Session currentSession = com.facebook.Session.getActiveSession();
 		if (currentSession == null || currentSession.getState().isClosed()) {
-			Session session = new Session.Builder(FacebookLogin.this).build();
-			Session.setActiveSession(session);
+			com.facebook.Session session = new com.facebook.Session.Builder(FacebookLogin.this).build();
+			com.facebook.Session.setActiveSession(session);
 			currentSession = session;
 		}
 
 		if (currentSession.isOpened()) {
-			Session.openActiveSession(this, true, new Session.StatusCallback() {
+			com.facebook.Session.openActiveSession(this, true, new com.facebook.Session.StatusCallback() {
 
 				@Override
-				public void call(final Session session, SessionState state,
+				public void call(final com.facebook.Session session, SessionState state,
 						Exception exception) {
 
 					if (session.isOpened()) {
@@ -325,13 +353,13 @@ public class FacebookLogin extends Activity {
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		Session session = Session.getActiveSession();
-		Session.saveSession(session, outState);
+		com.facebook.Session session = com.facebook.Session.getActiveSession();
+		com.facebook.Session.saveSession(session, outState);
 	}
 
-	private class SessionStatusCallback implements Session.StatusCallback {
+	private class SessionStatusCallback implements com.facebook.Session.StatusCallback {
 		@Override
-		public void call(Session session, SessionState state,
+		public void call(com.facebook.Session session, SessionState state,
 				Exception exception) {
 			if (session.isOpened()) {
 
@@ -341,8 +369,8 @@ public class FacebookLogin extends Activity {
 
 				System.out.println("session is opened");
 
-				new Request(session, "/me/friends", null, HttpMethod.GET,
-						new Request.Callback() {
+				new com.facebook.Request(session, "/me/friends", null, HttpMethod.GET,
+						new com.facebook.Request.Callback() {
 
 							@Override
 							public void onCompleted(Response response) {
@@ -377,16 +405,23 @@ public class FacebookLogin extends Activity {
 		String picurl;
 		String emailID, birthDay, hometown;
 		// ProgressDialog dialog = new ProgressDialog(FacebookLogin.this);
-		String  userlastname, userlocation, userdob, useremail,
-				userphone, usergender, userguardiantype, userfreetime;
+		String userlastname, userlocation, userdob, useremail, userphone,
+				usergender, userguardiantype, userfreetime;
+		boolean check_response = false;
 
 		@Override
 		protected void onPreExecute() {
 			// Toast.makeText(Login.this,"asynch task",Toast.LENGTH_LONG).show();
-			/*
-			 * dialog.setMessage("Loading....please wait ");
-			 * dialog.setCancelable(false); dialog.show();
-			 */
+			if (check_response) {
+				try {
+					dialog.setMessage("Loading....please wait ");
+					dialog.setCancelable(false);
+					dialog.show();
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+			}
+
 		}
 
 		@Override
@@ -395,41 +430,43 @@ public class FacebookLogin extends Activity {
 			// "https://graph.facebook.com/v1.0/me?fields=id,name,picture,friends,email&access_token"+token;
 
 			GraphObject go = responsefriends.getGraphObject();
-			JSONObject json=null;
+			JSONObject json = null;
 			try {
-				 json = go.getInnerJSONObject();
+				json = go.getInnerJSONObject();
 			} catch (Exception e) {
 				// TODO: handle exception
 			}
-			
+
 			JSONArray jsonarray = null;
 			try {
-				if(json!=null){
-				jsonarray = json.getJSONArray("data");
-				
-				for (int i = 0; i < jsonarray.length(); i++) {
-					try {
-						JSONObject c = jsonarray.getJSONObject(i);
+				if (json != null) {
+					jsonarray = json.getJSONArray("data");
 
-						if (fb_ids.equals("")) {
-							fb_ids = "'" + c.getString("id") + "'";
-						} else {
-							fb_ids = fb_ids + ",'" + c.getString("id") + "'";
+					for (int i = 0; i < jsonarray.length(); i++) {
+						try {
+							JSONObject c = jsonarray.getJSONObject(i);
+
+							if (fb_ids.equals("")) {
+								fb_ids = "'" + c.getString("id") + "'";
+							} else {
+								fb_ids = fb_ids + ",'" + c.getString("id")
+										+ "'";
+							}
+
+						} catch (JSONException e) {
+
+							e.printStackTrace();
+						}catch(Exception e){
+							
 						}
-
-					} catch (JSONException e) {
-
-						e.printStackTrace();
 					}
-				}
 				}
 			} catch (JSONException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
+			}catch(Exception e){
+				
 			}
-			
-
-			
 
 			try {
 				System.out.println("Asynch task started");
@@ -440,6 +477,7 @@ public class FacebookLogin extends Activity {
 				HttpEntity entity = response.getEntity();
 				is = entity.getContent();
 			} catch (Exception e) {
+				check_response = true;
 				Log.e("ERROR", "Error in http connection " + e.toString());
 			}
 			// convert response to string
@@ -464,6 +502,8 @@ public class FacebookLogin extends Activity {
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			}catch(Exception e){
+				
 			}
 
 			try {
@@ -471,58 +511,64 @@ public class FacebookLogin extends Activity {
 				iD = json1.getString("id");
 
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
+			}catch(Exception e){
+				
 			}
-				
-				GlobalVariable.facebook_ID = iD;
-				try {
-					emailID = json1.getString("email");
-				} catch (Exception e) {
-					// TODO: handle exception
-				}
-				try {
-					birthDay = json1.getString("birthday");
-				} catch (Exception e) {
-					// TODO: handle exception
-				}
-				try {
-					firstname = json1.getString("first_name");
-				} catch (Exception e) {
-					// TODO: handle exception
-				}
-				try {
-					lastname = json1.getString("last_name");
-				} catch (Exception e) {
-					// TODO: handle exception
-				}
-				try {
-					gender = json1.getString("gender");
-				} catch (Exception e) {
-					// TODO: handle exception
-				}
-				
-				try {
+
+			GlobalVariable.facebook_ID = iD;
+			try {
+				emailID = json1.getString("email");
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			try {
+				birthDay = json1.getString("birthday");
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			try {
+				firstname = json1.getString("first_name");
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			try {
+				lastname = json1.getString("last_name");
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			try {
+				gender = json1.getString("gender");
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+
+			try {
 				JSONObject jsonOb = json1.getJSONObject("picture");
 				JSONObject jsonpicture = jsonOb.getJSONObject("data");
 
 				picurl = jsonpicture.getString("url");
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				try{
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}catch(Exception e){
 				
+			}
+			try {
+
 				JSONObject home = json1.getJSONObject("hometown");
 
 				hometown = home.getString("name");
 
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				try{
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}catch(Exception e){
 				
+			}
+			try {
+
 				DateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 				Date date_of_birth = null;
 				try {
@@ -530,6 +576,8 @@ public class FacebookLogin extends Activity {
 				} catch (ParseException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				}catch(Exception e){
+					
 				}// String reportDate = df.format(today);
 					// birthDay=sdf.format(date_of_birth);
 				DateFormat destDf = new SimpleDateFormat("yyyy-MM-dd");
@@ -571,14 +619,17 @@ public class FacebookLogin extends Activity {
 
 			ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 
-			nameValuePairs.add(new BasicNameValuePair("firstname", firstname+ " " + lastname));
+			nameValuePairs.add(new BasicNameValuePair("firstname", firstname
+					+ " " + lastname));
 			nameValuePairs.add(new BasicNameValuePair("lastname", ""));
 			nameValuePairs.add(new BasicNameValuePair("email", emailID));
 			nameValuePairs.add(new BasicNameValuePair("facebook_id", iD));
-			nameValuePairs.add(new BasicNameValuePair("guardian_type",guardiantype));
+			nameValuePairs.add(new BasicNameValuePair("guardian_type",
+					guardiantype));
 			nameValuePairs.add(new BasicNameValuePair("dob", birthDay));
 			nameValuePairs.add(new BasicNameValuePair("location", hometown));
-			nameValuePairs.add(new BasicNameValuePair("set_fixed_freetime", ""));
+			nameValuePairs
+					.add(new BasicNameValuePair("set_fixed_freetime", ""));
 			nameValuePairs.add(new BasicNameValuePair("gender", gender));
 			nameValuePairs.add(new BasicNameValuePair("phone", ""));
 			nameValuePairs.add(new BasicNameValuePair("profile_image", picurl));
@@ -607,16 +658,22 @@ public class FacebookLogin extends Activity {
 			} catch (UnsupportedEncodingException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
+			}catch(Exception e){
+				
 			}
 
 			HttpResponse response = null;
 			try {
 				response = httpclient.execute(httppost);
 			} catch (ClientProtocolException e) {
+				check_response = true;
 				e.printStackTrace();
-			} catch (IOException e) {
 
+			} catch (IOException e) {
+				check_response = true;
 				e.printStackTrace();
+			}catch(Exception e){
+				
 			}
 			if (response != null) {
 
@@ -627,6 +684,8 @@ public class FacebookLogin extends Activity {
 					e.printStackTrace();
 				} catch (IOException e) {
 					e.printStackTrace();
+				}catch(Exception e){
+					
 				}
 
 			}
@@ -641,8 +700,9 @@ public class FacebookLogin extends Activity {
 				} catch (UnsupportedEncodingException e) {
 
 					e.printStackTrace();
+				}catch(Exception e){
+					
 				}
-
 
 				sb = new StringBuilder();
 				try {
@@ -650,6 +710,8 @@ public class FacebookLogin extends Activity {
 				} catch (IOException e) {
 
 					e.printStackTrace();
+				}catch(Exception e){
+					
 				}
 
 				String line = "0";
@@ -661,6 +723,8 @@ public class FacebookLogin extends Activity {
 				} catch (IOException e) {
 
 					e.printStackTrace();
+				}catch(Exception e){
+					
 				}
 
 				try {
@@ -668,12 +732,27 @@ public class FacebookLogin extends Activity {
 				} catch (IOException e) {
 
 					e.printStackTrace();
+				}catch(Exception e){
+					
 				}
 				result = sb.toString();
+				Log.e("Resultt==", "" + result);
 			}
 
 			try {
 				JSONObject userdetail = new JSONObject(result);
+				/*
+				 * JSONArray ejabberid=userdetail.getJSONArray("ejabber_data");
+				 * ejabber_username=ejabberid.getString(0);
+				 * ejabber_password=ejabberid.getString(1);
+				 * 
+				 * System.out.println("ejabber_username"+ejabber_username);
+				 * System.out.println("ejabber_password"+ejabber_password);
+				 */
+
+				CustomMessageStr = userdetail.getJSONArray("custom_message");
+				Log.e("CustomMessageDtr==", "" + CustomMessageStr);
+
 				JSONObject detailReturned = userdetail
 						.getJSONObject("userinfo");
 
@@ -706,10 +785,12 @@ public class FacebookLogin extends Activity {
 				try {
 					date_of_birth = sdf.parse(userdob);
 				} catch (ParseException e) {
-					
+
 					e.printStackTrace();
+				}catch(Exception e){
+					
 				}
-				DateFormat destDf = new SimpleDateFormat("dd-MM-yyyy");
+				DateFormat destDf = new SimpleDateFormat("dd/MM/yy");
 
 				// format the date into another format
 
@@ -724,7 +805,6 @@ public class FacebookLogin extends Activity {
 				System.out.println(usergender);
 				System.out.println(userguardiantype);
 				System.out.println(userfreetime);
-				
 
 				SharedPreferences.Editor editor = settings.edit(); // Opening
 																	// editor
@@ -749,6 +829,8 @@ public class FacebookLogin extends Activity {
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			}catch(Exception e){
+				
 			}
 
 			return null;
@@ -757,42 +839,117 @@ public class FacebookLogin extends Activity {
 		public void onPostExecute(String resultt)
 
 		{
-			
-			// ImageView imageview = null;
-			// new DownloadImageTask(imageview).execute(picurl);
+			if (check_response) {
+				dialog.dismiss();
+				if (isInternetPresent) {
+					new AlertDialog.Builder(FacebookLogin.this)
+							.setTitle("Server Error")
+							.setMessage("Would you like to retry?")
+							.setPositiveButton("Yes",
+									new DialogInterface.OnClickListener() {
+										public void onClick(
+												DialogInterface dialog,
+												int which) {
+											new Login_webservice().execute();
+										}
+									})
+							.setNegativeButton("No",
+									new DialogInterface.OnClickListener() {
+										public void onClick(
+												DialogInterface dialog,
+												int which) {
 
-			if (checkPlayServices()) {
-				gcm = GoogleCloudMessaging.getInstance(FacebookLogin.this);
-				regid = getRegistrationId(context);
-
-				if (regid.isEmpty()) {
-					registerInBackground();
+											return;
+										}
+									})
+							.setIcon(android.R.drawable.ic_dialog_alert).show();
 				} else {
-					dialog.dismiss();
-					System.out.println("Registration Id+" + regid);
-					Intent it = new Intent(FacebookLogin.this, Home.class);
-					it.putExtra("url", userprofilepic);
-					it.putExtra("name", userfirstname);
-					it.putExtra("firstname", userfirstname);
-					it.putExtra("iD", iD);
-					it.putExtra("location", userlocation);
-					it.putExtra("dob", date_of_birthparsed);
-					it.putExtra("guardiantype", userguardiantype);
-					it.putExtra("freetime", userfreetime);
-					it.putExtra("user_guardian_id", user_guardian_id);
-					it.putExtra("facebook_friends", fbfriends);
-					it.putExtra("phone", userphone);
-					GlobalVariable.guardian_Id = user_guardian_id;
-					startActivity(it);
-				}
-			} else {
-				Log.i(TAG, "No valid Google Play Services APK found.");
-			}
+					new AlertDialog.Builder(FacebookLogin.this)
+							.setTitle("Network Error")
+							.setMessage("Would you like to retry?")
+							.setPositiveButton("Yes",
+									new DialogInterface.OnClickListener() {
+										public void onClick(
+												DialogInterface dialog,
+												int which) {
+											new Login_webservice().execute();
+										}
+									})
+							.setNegativeButton("No",
+									new DialogInterface.OnClickListener() {
+										public void onClick(
+												DialogInterface dialog,
+												int which) {
 
+											return;
+										}
+									})
+							.setIcon(android.R.drawable.ic_dialog_alert).show();
+				}
+
+			} else {
+
+				if (checkPlayServices()) {
+					gcm = GoogleCloudMessaging.getInstance(FacebookLogin.this);
+					regid = getRegistrationId(context);
+
+					if (regid.isEmpty()) {
+						registerInBackground();
+					} else {
+						dialog.dismiss();
+						System.out.println("Registration Id+" + regid);
+						Intent it = new Intent(FacebookLogin.this, Home.class);
+						it.putExtra("url", userprofilepic);
+						it.putExtra("name", userfirstname);
+						it.putExtra("firstname", userfirstname);
+						it.putExtra("iD", iD);
+						it.putExtra("location", userlocation);
+						it.putExtra("dob", date_of_birthparsed);
+						it.putExtra("guardiantype", userguardiantype);
+						it.putExtra("freetime", userfreetime);
+						it.putExtra("user_guardian_id", user_guardian_id);
+						it.putExtra("facebook_friends", fbfriends);
+						it.putExtra("phone", userphone);
+						GlobalVariable.guardian_Id = user_guardian_id;
+						GlobalVariable.global_name = userfirstname;
+						GlobalVariable.custom_Jsonarray = CustomMessageStr;
+						startActivity(it);
+						finish();
+						// AlertDialog alertDialog = new
+						// AlertDialog.Builder(context).create();
+						// alertDialog.setTitle("Alert");
+						// alertDialog.setMessage(CustomMessageStr);
+						// alertDialog.setButton("OK", new
+						// DialogInterface.OnClickListener() {
+						// public void onClick(DialogInterface dialog, int
+						// which) {
+						// System.out.println("Registration Id+" + regid);
+						// Intent it = new Intent(FacebookLogin.this,
+						// Home.class);
+						// it.putExtra("url", userprofilepic);
+						// it.putExtra("name", userfirstname);
+						// it.putExtra("firstname", userfirstname);
+						// it.putExtra("iD", iD);
+						// it.putExtra("location", userlocation);
+						// it.putExtra("dob", date_of_birthparsed);
+						// it.putExtra("guardiantype", userguardiantype);
+						// it.putExtra("freetime", userfreetime);
+						// it.putExtra("user_guardian_id", user_guardian_id);
+						// it.putExtra("facebook_friends", fbfriends);
+						// it.putExtra("phone", userphone);
+						// GlobalVariable.guardian_Id = user_guardian_id;
+						// startActivity(it);
+						// }
+						// });
+						// alertDialog.show();
+
+					}
+				} else {
+					Log.i(TAG, "No valid Google Play Services APK found.");
+				}
+			}
 		}
 	}
-
-	
 
 	/**
 	 * Check the device to make sure it has the Google Play Services APK. If it
@@ -859,7 +1016,7 @@ public class FacebookLogin extends Activity {
 
 	private void registerInBackground() {
 		new AsyncTask() {
-
+                                                                      
 			@Override
 			protected Object doInBackground(Object... params) {
 				String msg = "";
@@ -870,16 +1027,14 @@ public class FacebookLogin extends Activity {
 					regid = gcm.register(SENDER_ID);
 					msg = "Device registered, registration ID=" + regid;
 					System.out.println(msg);
-					
+
 					storeRegistrationId(context, regid);
-					
+
 					sendRegistrationIdToBackend();
 
-				
-					
 				} catch (IOException ex) {
 					msg = "Error :" + ex.getMessage();
-					
+
 				}
 				return msg;
 			}
@@ -889,7 +1044,6 @@ public class FacebookLogin extends Activity {
 
 	private void sendRegistrationIdToBackend() {
 		// Your implementation here.
-
 		new Send_registration_id().execute();
 
 	}
@@ -900,20 +1054,21 @@ public class FacebookLogin extends Activity {
 		Log.i(TAG, "Saving regId on app version " + appVersion);
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putString(PROPERTY_REG_ID, regId);
-		editor.putInt(PROPERTY_APP_VERSION, appVersion);
+		editor.putInt(PROPERTY_APP_VERSION, appVersion);                       
 		editor.commit();
 	}
 
-	public class Send_registration_id extends AsyncTask<String, Integer, String> {
-	
-		String url_registration;
+	public class Send_registration_id extends
+			AsyncTask<String, Integer, String> {
+
+		String url_registration;                                                                                                         
 
 		@Override
 		protected void onPreExecute() {
-          
-			
+
 			url_registration = "http://54.191.67.152/playdate/devicetoken.php";
-			// url  http://54.191.67.152/playdate/devicetoken.php?g_id=100001122279977&device_token=43654262456yuigiuhgihghkjhgjhgjhg12345&type=1
+			// url
+			// http://54.191.67.152/playdate/devicetoken.php?g_id=100001122279977&device_token=43654262456yuigiuhgihghkjhgjhgjhg12345&type=1
 		}
 
 		@Override
@@ -925,10 +1080,10 @@ public class FacebookLogin extends Activity {
 
 			ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 			nameValuePairs.add(new BasicNameValuePair("device_token", regid));
-			nameValuePairs.add(new BasicNameValuePair("g_id", user_guardian_id));
+			nameValuePairs
+					.add(new BasicNameValuePair("g_id", user_guardian_id));
 			nameValuePairs.add(new BasicNameValuePair("type", "1"));
 
-			
 			StringBuilder sbb = new StringBuilder();
 			sbb.append("http://54.191.67.152/playdate/devicetoken.php?");
 			sbb.append(nameValuePairs.get(0) + "&");
@@ -986,6 +1141,7 @@ public class FacebookLogin extends Activity {
 
 			dialog.dismiss();
 			Intent it = new Intent(FacebookLogin.this, Home.class);
+
 			it.putExtra("url", userprofilepic);
 			it.putExtra("name", userfirstname);
 			it.putExtra("firstname", userfirstname);
@@ -997,10 +1153,17 @@ public class FacebookLogin extends Activity {
 			it.putExtra("user_guardian_id", user_guardian_id);
 			it.putExtra("facebook_friends", fbfriends);
 			it.putExtra("phone", userphone);
+			/*
+			 * if(CustomMessageStr!=null && CustomMessageStr.length()>0) {
+			 * it.putExtra("CustomMessage", CustomMessageStr); }
+			 */
 			GlobalVariable.guardian_Id = user_guardian_id;
+			GlobalVariable.custom_Jsonarray = CustomMessageStr;
+			GlobalVariable.global_name = userfirstname;
+
 			startActivity(it);
 			finish();
-		    
+
 		}
 	}
 

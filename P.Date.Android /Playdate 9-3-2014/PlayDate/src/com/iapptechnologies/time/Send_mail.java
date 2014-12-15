@@ -48,21 +48,27 @@ public class Send_mail extends android.support.v4.app.Fragment {
 			  String subject = "Playdate Feedback";
 			  String message = textMessage.getText().toString();
               String to="jagoapps@gmail.com";
-			  Intent email = new Intent(Intent.ACTION_SEND);
-			  email.putExtra(Intent.EXTRA_EMAIL, new String[]{ to});
-			  //email.putExtra(Intent.EXTRA_CC, new String[]{ to});
-			  //email.putExtra(Intent.EXTRA_BCC, new String[]{to});
-			  email.putExtra(Intent.EXTRA_SUBJECT, subject);
-			  email.putExtra(Intent.EXTRA_TEXT, message);
- 
-			  //need this to prompts email client only
-			  email.setType("message/rfc822");
- 
-			  startActivity(Intent.createChooser(email, "Choose an Email client :"));
-			  
-			  
+              
+              if(message.equals("")||message.equals(null)){
+            	  
+              }else{
+            	  Intent email = new Intent(Intent.ACTION_SEND);
+    			  email.putExtra(Intent.EXTRA_EMAIL, new String[]{ to});
+    			  //email.putExtra(Intent.EXTRA_CC, new String[]{ to});
+    			  //email.putExtra(Intent.EXTRA_BCC, new String[]{to});
+    			  email.putExtra(Intent.EXTRA_SUBJECT, subject);
+    			  email.putExtra(Intent.EXTRA_TEXT, message);
+     
+    			  //need this to prompts email client only
+    			  email.setType("message/rfc822");
+     
+    			  startActivity(Intent.createChooser(email, "Choose an Email client :"));
+    			  
+    			  
+    			 
+    			  textMessage.setText(""); 
+              }
 			 
-			  textMessage.setText("");
 			  
 			  
  

@@ -78,26 +78,33 @@ public class ImageLoaderParent {
 
         //from SD cache
         Bitmap b = decodeFile(f,size);
+        
         if(b!=null)
-            return b;
+        {
+        	 return b;
 
-        //from web
-        try {
-            Bitmap bitmap=null;
-            URL imageUrl = new URL(url);
-            HttpURLConnection conn = (HttpURLConnection)imageUrl.openConnection();
-            conn.setConnectTimeout(30000);
-            conn.setReadTimeout(30000);
-            InputStream is=conn.getInputStream();
-            OutputStream os = new FileOutputStream(f);
-            Utils.CopyStream(is, os);
-            os.close();
-            bitmap = decodeFile(f,size);
-            return bitmap;
-        } catch (Exception ex){
-           ex.printStackTrace();
-           return null;
+        }else
+        {
+            try {
+                Bitmap bitmap=null;
+                URL imageUrl = new URL(url);
+                HttpURLConnection conn = (HttpURLConnection)imageUrl.openConnection();
+                conn.setConnectTimeout(30000);
+                conn.setReadTimeout(30000);
+                InputStream is=conn.getInputStream();
+                OutputStream os = new FileOutputStream(f);
+                Utils.CopyStream(is, os);
+                os.close();
+                bitmap = decodeFile(f,size);
+                return bitmap;
+            } catch (Exception ex){
+               ex.printStackTrace();
+               return null;
+            }
         }
+           
+      
+    
     }//Lalit
 
     //decodes image and scales it to reduce memory consumption

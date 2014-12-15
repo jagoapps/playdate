@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
      android:background="#e3e3e3" >
 <ScrollView
             android:id="@+id/scrollView1"
@@ -76,7 +75,17 @@
               android:layout_gravity="center_horizontal"
              android:gravity="center_horizontal"
              android:layout_below="@+id/textView1_child_name_event"
-             android:text="wants play \n   with" />
+             android:text="wants play" />
+          <TextView
+             android:id="@+id/textView2_11"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:textSize="13dp"
+              android:textColor="#a1a1a1"
+              android:layout_gravity="center_horizontal"
+             android:gravity="center_horizontal"
+             android:layout_below="@+id/textView2"
+             android:text="with" />
 
          <TextView
              android:id="@+id/textView3_child_friend_name_event"
@@ -122,14 +131,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical" 
-        android:layout_marginTop="25dp">
+        android:layout_marginTop="10dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/feedback_strip" >
 
             <TextView
@@ -170,7 +179,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/feedback_strip" 
             >
 
@@ -217,7 +226,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/feedback_strip" 
             android:visibility="gone">
 
@@ -263,7 +272,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/feedback_strip"
             android:visibility="gone" >
 
@@ -306,7 +315,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/feedback_strip" 
             android:visibility="gone">
 
@@ -348,7 +357,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/feedback_strip"
 android:visibility="gone">
 
@@ -390,7 +399,7 @@ android:visibility="gone">
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/feedback_strip" 
             android:visibility="gone">
 
@@ -434,7 +443,7 @@ android:visibility="gone">
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/feedback_strip" 
             android:visibility="gone">
 
@@ -477,7 +486,7 @@ android:visibility="gone">
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/feedback_strip" 
             android:visibility="gone">
 
@@ -519,7 +528,7 @@ android:visibility="gone">
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/feedback_strip" 
             android:visibility="gone">
 
@@ -562,7 +571,7 @@ android:visibility="gone">
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/feedback_strip"
             android:visibility="gone" >
 
@@ -605,7 +614,7 @@ android:visibility="gone">
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/feedback_strip" 
             android:visibility="gone">
 
@@ -663,7 +672,7 @@ android:visibility="gone">
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/feedback_strip" >
 
             <TextView
@@ -703,7 +712,7 @@ android:visibility="gone">
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/feedback_strip" >
 
             <TextView
@@ -751,37 +760,59 @@ android:visibility="gone">
                android:background="@drawable/accept_btn"
                 android:layout_weight="1"
                 android:layout_marginLeft="15dp"
-                android:layout_marginRight="5dp"/>
-
+                android:layout_marginRight="10dp"/>
+     <Button
+                android:id="@+id/button3_edit_event"
+               
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/edit_btn"
+               android:layout_marginRight="5dp"
+                android:layout_weight="1"/>
             <Button
                 android:id="@+id/button2_reject_event"
                 android:layout_width="wrap_content"
                 android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
+                android:layout_marginRight="15dp"
                 android:layout_height="wrap_content"
-               android:background="@drawable/reject_btn"
+                android:background="@drawable/reject_btn"
                 android:layout_weight="1"/>
 
-            <Button
-                android:id="@+id/button3_edit_event"
-                android:layout_marginLeft="5dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/edit_btn"
-               android:layout_marginRight="15dp"
-                android:layout_weight="1"/>
+       
 
         </LinearLayout>
+        
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
 <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="25dp" 
+            android:layout_marginTop="20dp" 
           
-            
+            android:paddingBottom="3dp"
  			android:gravity="center_horizontal|center"
             
             >
-
+      
+            <Button
+                android:id="@+id/button3_cancle"
+                android:layout_marginLeft="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:background="@drawable/cancel_btn"
+               android:layout_marginRight="15dp"
+                android:layout_weight="1"/>
             <Button
                 android:id="@+id/button1_sendback"
                 android:layout_width="wrap_content"
@@ -793,21 +824,12 @@ android:visibility="gone">
                 
                 />
 
-           
-            <Button
-                android:id="@+id/button3_cancle"
-                android:layout_marginLeft="5dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                android:background="@drawable/cancel_btn"
-               android:layout_marginRight="15dp"
-                android:layout_weight="1"/>
+     
 
-        </LinearLayout>
+        </LinearLayout> 
          </LinearLayout>
             </LinearLayout>
         </ScrollView>
         
    
-</LinearLayout>
+</RelativeLayout>

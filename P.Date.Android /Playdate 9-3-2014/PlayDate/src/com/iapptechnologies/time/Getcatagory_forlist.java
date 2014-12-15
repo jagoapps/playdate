@@ -33,4 +33,20 @@ public class Getcatagory_forlist {
 	public String date_of_event3;
 	public String start_time_of_event3;
 	public String end_time_of_event3;
+	
+	//child details
+	public String child_dob;
+	public String child_allergies;
+	public String child_hobbies;
+	public String child_freetime;
+	public String child_school;
+	public String child_youthclub;
+	
+	// friends details
+	public String child_friends_dob;
+	public String child_friends_allergies;
+	public String child_friends_hobbies;
+	public String child_friends_freetime;
+	public String child_friends_school;
+	public String child_friends_youthclub;
 }

@@ -64,7 +64,7 @@ public class Sets extends android.support.v4.app.Fragment {
 	@Override
 	public View onCreateView(final LayoutInflater inflater,
 			ViewGroup container, Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
+	
 		ViewGroup view = (ViewGroup) inflater.inflate(R.layout.sets, container,
 				false);
 		getActivity().getWindow().setSoftInputMode(
@@ -103,9 +103,14 @@ public class Sets extends android.support.v4.app.Fragment {
 				bundle.putString("facebook_friends", facebook_friends);
 				android.support.v4.app.Fragment fragment = new Add_Sets();
 				fragment.setArguments(bundle);
-				android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+				/*android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
 				fragmentManager.beginTransaction()
-						.replace(R.id.content_frame, fragment).commit();
+						.replace(R.id.content_frame, fragment).commit();*/
+				  android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+					android.support.v4.app.FragmentTransaction fragmentTransaction= fragmentManager.beginTransaction();
+					fragmentTransaction.replace(R.id.content_frame, fragment);
+					fragmentTransaction.addToBackStack("first19");
+					fragmentTransaction.commit();
 			}
 		});
 
@@ -122,9 +127,13 @@ public class Sets extends android.support.v4.app.Fragment {
 					bundle.putString("facebook_friends", facebook_friends);
 					android.support.v4.app.Fragment fragment = new Sets_friendlist();
 					fragment.setArguments(bundle);
-					android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
-					fragmentManager.beginTransaction()
-							.replace(R.id.content_frame, fragment).commit();
+					/*android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+					fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();*/
+					  android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+						android.support.v4.app.FragmentTransaction fragmentTransaction= fragmentManager.beginTransaction();
+						fragmentTransaction.replace(R.id.content_frame, fragment);
+						fragmentTransaction.addToBackStack("first20");
+						fragmentTransaction.commit();
 				}
 			}
 		});
@@ -212,6 +221,7 @@ public class Sets extends android.support.v4.app.Fragment {
 				}
 
 				try {
+					count_friend=0;
 					JSONArray jArray = json.getJSONArray("data");
 					Log.d("fdgn", "dsgfbkj" + jArray);
 					size = jArray.length();
@@ -333,12 +343,17 @@ public class Sets extends android.support.v4.app.Fragment {
 				System.out.println("0000000000000+++++++" + size);
 				for (int i = 0; i < jArray.length(); i++) {
 					JSONObject getdetail = jArray.getJSONObject(i);
+					if(getdetail.getString("total_count").equals("0")){
+						
+					}else{
+					
 					Getcategory grtcat = new Getcategory();
 					grtcat.set_id = getdetail.getString("set_id");
 					grtcat.set_number = getdetail.getString("total_count");
 					grtcat.child_id = getdetail.getString("g_id");
 					grtcat.set_name = getdetail.getString("set_name");
 					sets_detail.add(grtcat);
+					}
 				}
 
 			} catch (JSONException e) {
@@ -374,8 +389,13 @@ public class Sets extends android.support.v4.app.Fragment {
 
 			this.activity = activity;
 			this._items = getcat_for_sets;
-			inflater = (LayoutInflater) getActivity().getSystemService(
-					Context.LAYOUT_INFLATER_SERVICE);
+			try {
+				inflater = (LayoutInflater) getActivity().getSystemService(
+						Context.LAYOUT_INFLATER_SERVICE);
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			
 			imageLoader = new ImageLoader(getActivity());
 			this.mListView = list_sets;
 		}
@@ -484,10 +504,14 @@ public class Sets extends android.support.v4.app.Fragment {
 				bundle.putString("set_id", setid);
 				android.support.v4.app.Fragment fragment = new Sets_friendlist();
 				fragment.setArguments(bundle);
-				android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
-				fragmentManager.beginTransaction()
-						.replace(R.id.content_frame, fragment).commit();
-
+				  android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+					android.support.v4.app.FragmentTransaction fragmentTransaction= fragmentManager.beginTransaction();
+					fragmentTransaction.replace(R.id.content_frame, fragment);
+					fragmentTransaction.addToBackStack("first121");
+					fragmentTransaction.commit();
+				/*android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+				fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+*/
 			}
 		};
 		private OnClickListener editlistener = new OnClickListener() {
@@ -506,9 +530,14 @@ public class Sets extends android.support.v4.app.Fragment {
 				bundle.putString("facebook_friends", facebook_friends);
 				android.support.v4.app.Fragment fragment = new Add_Sets();
 				fragment.setArguments(bundle);
-				android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+				  android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+					android.support.v4.app.FragmentTransaction fragmentTransaction= fragmentManager.beginTransaction();
+					fragmentTransaction.replace(R.id.content_frame, fragment);
+					fragmentTransaction.addToBackStack("first122");
+					fragmentTransaction.commit();
+				/*android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
 				fragmentManager.beginTransaction()
-						.replace(R.id.content_frame, fragment).commit();
+						.replace(R.id.content_frame, fragment).commit();*/
 
 			}
 		};

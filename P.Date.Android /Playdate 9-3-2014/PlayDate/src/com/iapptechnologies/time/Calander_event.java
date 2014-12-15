@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -22,9 +24,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -36,7 +42,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.CalendarContract;
+import android.provider.CalendarContract.Calendars;
 import android.provider.CalendarContract.Events;
+import android.provider.CalendarContract.Instances;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -54,6 +62,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.iapp.playdate.R;
+
 
 public class Calander_event extends android.support.v4.app.Fragment {
 
@@ -74,13 +83,15 @@ public class Calander_event extends android.support.v4.app.Fragment {
 	String data_json;
 	boolean check_event = false;
 	DB_Helper db;
-
+	ArrayList<Getcatagory_forlist> searchList;
+	Boolean check_list_click=false;
+	ProgressDialog dialog;// = new ProgressDialog(getActivity(),android.R.style.Theme_Black);
 	@Override
 	public View onCreateView(final LayoutInflater inflater,
 			ViewGroup container, Bundle savedInstanceState) {
 		ViewGroup view = (ViewGroup) inflater.inflate(R.layout.calendar,
 				container, false);
-
+		 dialog = new ProgressDialog(getActivity(),android.R.style.Theme_Black);
 		user_guardian_id = getArguments().getString("user_guardian_id");
 		list_event = (ListView) view.findViewById(R.id.listView_calander_event);
 		month = Calendar.getInstance();
@@ -147,6 +158,7 @@ public class Calander_event extends android.support.v4.app.Fragment {
 		gridview.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View v,
 					int position, long id) {
+				check_list_click=true;
 				TextView date = (TextView) v.findViewById(R.id.date);
 				if (date instanceof TextView && !date.getText().equals("")) {
 					// v.setBackgroundResource(R.drawable.item_background_focused);
@@ -155,21 +167,14 @@ public class Calander_event extends android.support.v4.app.Fragment {
 					if (day.length() == 1) {
 						day = "0" + day;
 					}
-					String date_for_gridviewshown = android.text.format.DateFormat
+				String date_for_gridviewshown = android.text.format.DateFormat
 							.format("yyyy-MM", month) + "-" + day;
-					String system_event_gridviewdate = android.text.format.DateFormat
+				String system_event_gridviewdate = android.text.format.DateFormat
 							.format("MM", month) + "-" + day;
-					// return chosen date as string format
-					// intent.putExtra("date",
-					// android.text.format.DateFormat.format("yyyy-MM",
-					// month)+"-"+day);
-					// setResult(RESULT_OK, intent);
-					// finish();
-					// int i=0;
-					// params=new ArrayList<Getcatagory_forlist>();
+				
 					try {
 
-						ArrayList<Getcatagory_forlist> searchList = new ArrayList<Getcatagory_forlist>();
+						 searchList = new ArrayList<Getcatagory_forlist>();
 						String search = "a";
 						int searchListLength = params.size();
 						for (int i = 0; i < searchListLength; i++) {
@@ -182,11 +187,11 @@ public class Calander_event extends android.support.v4.app.Fragment {
 								String date_forcalander = dateArr[2];
 								String datecomparasion = month_forcalander
 										+ "-" + date_forcalander;
-								System.out
-										.println("gridviewdate for comparision"
-												+ datecomparasion);
-								System.out.println("compare to"
-										+ system_event_gridviewdate);
+								//System.out
+								//		.println("gridviewdate for comparision"
+									//			+ datecomparasion);
+							//	System.out.println("compare to"
+								//		+ system_event_gridviewdate);
 								if (system_event_gridviewdate
 										.equals(datecomparasion)) {
 
@@ -200,9 +205,9 @@ public class Calander_event extends android.support.v4.app.Fragment {
 									// Do whatever you want here
 									Getcatagory_forlist getcat = new Getcatagory_forlist();
 									String child_name = params.get(i).child_name;
-									System.out
-											.println("child_namechild_namechild_name"
-													+ child_name);
+								//	System.out
+								//			.println("child_namechild_namechild_name"
+												//	+ child_name);
 									String Child_id = params.get(i).child_id;
 									String Child_profilepic = params.get(i).child_profile_image;
 									String Child_friend_name = params.get(i).childfriend_name;
@@ -220,6 +225,20 @@ public class Calander_event extends android.support.v4.app.Fragment {
 									// String
 									String  receiver_id=params.get(i).receiverid;
 									String status_of_event_ = params.get(i).status_ofevent;
+									
+									String child_dob=params.get(i).child_dob;
+									String child_hobbies=params.get(i).child_hobbies;
+									String child_allergies=params.get(i).child_allergies;
+									String child_freetime=params.get(i).child_freetime;
+									String child_school=params.get(i).child_school;
+									String child_youthclub=params.get(i).child_youthclub;
+									String child_friends_dob=params.get(i).child_friends_dob;
+									String child_friends_allergies=params.get(i).child_friends_allergies;
+									String child_friends_hobbies=params.get(i).child_friends_hobbies;
+									String child_friends_freetime=params.get(i).child_friends_freetime;
+									String child_friends_school=params.get(i).child_friends_school;
+									String child_friends_youthclub=params.get(i).child_friends_youthclub;
+									
 
 									getcat.child_id = Child_id;
 									getcat.child_name = child_name;
@@ -239,18 +258,41 @@ public class Calander_event extends android.support.v4.app.Fragment {
 									getcat.start_time_of_event = event_start;
 									getcat.status_ofevent = "ACCEPTED";
 									getcat.eventid = event_id;
+									
+									 getcat.child_dob=child_dob;
+									 getcat.child_allergies=child_allergies;
+									 getcat.child_freetime=child_freetime;
+									 getcat.child_hobbies=child_hobbies;
+									 getcat.child_school=child_school;
+									 getcat.child_youthclub=child_youthclub;
+									 getcat.child_friends_allergies=child_friends_allergies;
+									 getcat.child_friends_dob=child_friends_dob;
+									 getcat.child_friends_freetime=child_friends_freetime;
+									 getcat.child_friends_school=child_friends_school;
+									 getcat.child_friends_hobbies=child_friends_hobbies;
+									 getcat.child_friends_youthclub=child_friends_youthclub;
+									
 									searchList.add(getcat);
 								}
 							}
 						}
+						
+						if(searchList!=null && searchList.size()>0)
+						{
+							adapter1 = new LazyAdapter(getActivity(), searchList);
 
-						adapter1 = new LazyAdapter(getActivity(), searchList);
+							list_event.setAdapter(adapter1);
+							adapter1.notifyDataSetChanged();
+						}else
+						{
+							adapter1 = new LazyAdapter(getActivity(), searchList);
 
-						list_event.setAdapter(adapter1);
+							list_event.setAdapter(null);
+							adapter1.notifyDataSetChanged();
+						Toast.makeText(getActivity(),"No event", 1).show();
+						}
 					} catch (Exception e) {
-						// TODO: handle exception
 					}
-
 				}
 
 			}
@@ -262,7 +304,13 @@ public class Calander_event extends android.support.v4.app.Fragment {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
 				ArrayList<Getcatagory_forlist> _items;
-				_items = params;
+				
+				if(check_list_click){
+					_items = searchList;
+				}else{
+					_items = params;
+				}
+				
 				String event_id = _items.get(arg2).eventid;
 				if (event_id.equals("-1")) {
 					String child_name = _items.get(arg2).child_name;
@@ -299,7 +347,35 @@ public class Calander_event extends android.support.v4.app.Fragment {
 				    String receiver_id=_items.get(arg2).receiverid;
 					String status_of_event_ = _items.get(arg2).status_ofevent;
 
+					String child_dob=_items.get(arg2).child_dob;
+					String child_hobbies=_items.get(arg2).child_hobbies;
+					String child_allergies=_items.get(arg2).child_allergies;
+					String child_freetime=_items.get(arg2).child_freetime;
+					String child_school=_items.get(arg2).child_school;
+					String child_youthclub=_items.get(arg2).child_youthclub;
+					String child_friends_dob=_items.get(arg2).child_friends_dob;
+					String child_friends_allergies=_items.get(arg2).child_friends_allergies;
+					String child_friends_hobbies=_items.get(arg2).child_friends_hobbies;
+					String child_friends_freetime=_items.get(arg2).child_friends_freetime;
+					String child_friends_school=_items.get(arg2).child_friends_school;
+					String child_friends_youthclub=_items.get(arg2).child_friends_youthclub;
+					
+					
 					Bundle bundle = new Bundle();
+					
+					bundle.putString("child_dob", child_dob);
+					bundle.putString("child_hobbies", child_hobbies);
+					bundle.putString("child_allergies", child_allergies);
+					bundle.putString("child_freetime", child_freetime);
+					bundle.putString("child_school", child_school);
+					bundle.putString("child_youthclub", child_youthclub);
+					bundle.putString("child_friends_dob", child_friends_dob);
+					bundle.putString("child_friends_allergies", child_friends_allergies);
+					bundle.putString("child_friends_hobbies", child_friends_hobbies);
+					bundle.putString("child_friends_freetime", child_friends_freetime);
+					bundle.putString("child_friends_school", child_friends_school);
+					bundle.putString("child_friends_youthclub", child_friends_youthclub);
+					
 					bundle.putString("child_name", child_name);
 					bundle.putString("Child_id", Child_id);
 					bundle.putString("Child_profilepic", Child_profilepic);
@@ -313,15 +389,22 @@ public class Calander_event extends android.support.v4.app.Fragment {
 					bundle.putString("event_end_time", event_end_time);
 					bundle.putString("notes", notes);
 					bundle.putString("sender_id", sender_id);
-				   bundle.putString("receiver_id", receiver_id);
+				    bundle.putString("receiver_id", receiver_id);
 					bundle.putString("status", status_of_event_);
 					bundle.putString("location_ofevent", location_ofevent);
+					
+					bundle.putString("CalenderScreen", "calenderscreen");
 
 					android.support.v4.app.Fragment fragment = new Event_accept_reject_edit();
 					fragment.setArguments(bundle);
+				//	android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
 					android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
-					fragmentManager.beginTransaction()
-							.replace(R.id.content_frame, fragment).commit();
+					android.support.v4.app.FragmentTransaction fragmentTransaction= fragmentManager.beginTransaction();
+					fragmentTransaction.replace(R.id.content_frame, fragment);
+					fragmentTransaction.addToBackStack("first2");
+					fragmentTransaction.commit();
+					/*fragmentManager.beginTransaction()
+							.replace(R.id.content_frame, fragment).commit();*/
 				}
 			}
 		});
@@ -330,7 +413,7 @@ public class Calander_event extends android.support.v4.app.Fragment {
 	}
 
 	public void refreshCalendar() {
-
+		check_list_click=false;
 		adapter.refreshDays();
 		adapter.notifyDataSetChanged();
 		handler.post(calendarUpdater); // generate some random calendar items
@@ -351,7 +434,7 @@ public class Calander_event extends android.support.v4.app.Fragment {
 		 */
 
 		Calendar c = Calendar.getInstance();
-		System.out.println("Current time => " + c.getTime());
+		//System.out.println("Current time => " + c.getTime());
 
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		String formattedDate = df.format(c.getTime());
@@ -368,6 +451,24 @@ public class Calander_event extends android.support.v4.app.Fragment {
 		public void run() {
 			items.clear();
 			_date.clear();
+			Calendar c = Calendar.getInstance();
+			//System.out.println("Current time => " + c.getTime());
+			ProgressDialog dialog_progress=null;
+try {
+
+	 dialog_progress=new ProgressDialog(getActivity());
+	dialog_progress.setMessage("Loading events");
+	dialog_progress.setCancelable(false);
+	dialog_progress.show();
+} catch (Exception e) {
+	// TODO: handle exception
+}
+			
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+			String formattedDate = df.format(c.getTime());
+			String[] dateArr1 = formattedDate.split("-"); // date format is
+				String year_for_comparision=dateArr1[0];											// yyyy-mm-dd
+			
 			// format random values. You can implement a dedicated class to
 			// provide real values
 			/*
@@ -376,10 +477,10 @@ public class Calander_event extends android.support.v4.app.Fragment {
 			 * if(r.nextInt(10)>6) { items.add(Integer.toString(i));
 			 * System.out.println("================"+Integer.toString(i)); } }
 			 */
-			ProgressDialog dialog = new ProgressDialog(getActivity());
-			dialog.setTitle("Loading, Please wait...");
-			dialog.setCancelable(false);
-			dialog.show();
+
+		//	dialog.setTitle("Loading, Please wait...");
+		//	dialog.setCancelable(false);
+			//dialog.show();
 			if (check_event == true) {
 				try {
 					String month_for_parsing = android.text.format.DateFormat
@@ -387,7 +488,7 @@ public class Calander_event extends android.support.v4.app.Fragment {
 					params = new ArrayList<Getcatagory_forlist>();
 					params_systems_event = new ArrayList<Getcatagory_forlist>();
 					String uriString = "content://com.android.calendar//events";
-					Log.i("INFO", "Reading content from " + uriString);
+					//Log.i("INFO", "Reading content from " + uriString);
 					readContent(uriString);
 					int i = 0;
 					for (Getcatagory_forlist temp : params_systems_event) {
@@ -410,8 +511,8 @@ public class Calander_event extends android.support.v4.app.Fragment {
 					// TODO: handle exception
 
 				}
-
-				dialog.dismiss();
+				dialog_progress.dismiss();
+				//dialog.dismiss();
 				adapter1 = new LazyAdapter(getActivity(), params);
 
 				list_event.setAdapter(adapter1);
@@ -434,8 +535,8 @@ public class Calander_event extends android.support.v4.app.Fragment {
 						.format("MM", month).toString();
 				int monthsforparsing = Integer.parseInt(month_for_parsing);
 
-				System.out.println("month_for_parsingmonth_for_parsing"
-						+ month_for_parsing);
+			//	System.out.println("month_for_parsingmonth_for_parsing"
+			//			+ month_for_parsing);
 				try {
 
 					JSONObject jsondata = json.getJSONObject("data");
@@ -444,26 +545,40 @@ public class Calander_event extends android.support.v4.app.Fragment {
 							.valueOf(monthsforparsing));
 
 					// JSONArray jArray=json.getJSONArray("data");
-					Log.d("fdgn", "dsgfbkj" + jarray);
+					//Log.d("fdgn", "dsgfbkj" + jarray);
 					for (int i = 0; i < jarray.length(); i++) {
-						JSONObject c = jarray.getJSONObject(i);
+						JSONObject c1 = jarray.getJSONObject(i);
 						Getcatagory_forlist getcat = new Getcatagory_forlist();
-						String eventid = c.getString("event_id");
-						String childname = c.getString("child_name");
-						String childid = c.getString("child_id");
-						String childpicurl = c.getString("profile_image");
-						String friendname = c.getString("friendname");
-						String friendid = c.getString("friend_childid");
-						String friendpicurl = c.getString("friend_profile_image");
+						String eventid = c1.getString("event_id");
+						String childname = c1.getString("child_name");
+						String childid = c1.getString("child_id");
+						String childpicurl = c1.getString("profile_image");
+						String friendname = c1.getString("friendname");
+						String friendid = c1.getString("friend_childid");
+						String friendpicurl = c1.getString("friend_profile_image");
 						// String parentname=c.getString("name");
-						String senderid = c.getString("senderid");
-					    String receiverid=c.getString("receiver_id");
-						String parentpic = c.getString("parent_profile_image");
-						String date = c.getString("date");
-						String starttime = c.getString("starttime");
-						String endtime = c.getString("endtime");
-						String location = c.getString("location");
-						String notes = c.getString("notes");
+						String senderid = c1.getString("senderid");
+					    String receiverid=c1.getString("receiver_id");
+						String parentpic = c1.getString("parent_profile_image");
+						String date = c1.getString("date");
+						String starttime = c1.getString("starttime");
+						String endtime = c1.getString("endtime");
+						String location = c1.getString("location");
+						String notes = c1.getString("notes");
+						//
+						 String child_dob=c1.getString("child_dob");
+						 String child_c_set_fixed_freetime=c1.getString("child_c_set_fixed_freetime");
+						 String child_school=c1.getString("child_school");
+						 String child_allergies=c1.getString("child_allergies");
+						 String child_hobbies=c1.getString("child_hobbies");
+						 String child_youth_club=c1.getString("child_youth_club");
+						 String friend_dob=c1.getString("friend_dob");
+						 String friend_c_set_fixed_freetime=c1.getString("friend_c_set_fixed_freetime");
+						 String friend_school=c1.getString("friend_school");
+						 String friend_allergies=c1.getString("friend_allergies");
+						 String friend_hobbies=c1.getString("friend_hobbies");
+						 String friend_youth_club=c1.getString("friend_youth_club");
+						 
 						// String status_ofevent=c.getString("status");
 						getcat.child_id = childid;
 						getcat.child_name = childname;
@@ -483,6 +598,21 @@ public class Calander_event extends android.support.v4.app.Fragment {
 						getcat.start_time_of_event = starttime;
 						getcat.status_ofevent = "ACCEPTED";
 						getcat.eventid = eventid;
+						
+						 getcat.child_dob=child_dob;
+						 getcat.child_allergies=child_allergies;
+						 getcat.child_freetime=child_c_set_fixed_freetime;
+						 getcat.child_hobbies=child_hobbies;
+						 getcat.child_school=child_school;
+						 getcat.child_youthclub=child_youth_club;
+						 getcat.child_friends_allergies=friend_allergies;
+						 getcat.child_friends_dob=friend_dob;
+						 getcat.child_friends_freetime=friend_c_set_fixed_freetime;
+						 getcat.child_friends_school=friend_school;
+						 getcat.child_friends_hobbies=friend_hobbies;
+						 getcat.child_friends_youthclub=friend_youth_club;
+						 
+						 
 
 						String[] dateArr = date.split("-"); // date format is
 															// yyyy-mm-dd
@@ -509,16 +639,19 @@ public class Calander_event extends android.support.v4.app.Fragment {
 					 */
 					params_systems_event = new ArrayList<Getcatagory_forlist>();
 					String uriString = "content://com.android.calendar//events";
-					Log.i("INFO", "Reading content from " + uriString);
-					readContent(uriString);
+				//	Log.i("INFO", "Reading content from " + uriString);
+					calander_getdate();
+				//	readContent(uriString);
 					int i = 0;
 					for (Getcatagory_forlist temp : params_systems_event) {
 						String monts_for_comparasion = params_systems_event
 								.get(i).date_ofevent;
 						String[] dateArr = monts_for_comparasion.split("-"); // date
+						String year_of_event=dateArr[0];
 						String date_forcalander = dateArr[1];
+					//	if(date_for_parsing.equals(year_of_event)){
 						if (date_forcalander.equals(month_for_parsing)) {
-							System.out.println(i);
+						//	System.out.println(i);
 							Getcatagory_forlist getcat = params_systems_event
 									.get(i);
 							params.add(getcat);
@@ -527,20 +660,29 @@ public class Calander_event extends android.support.v4.app.Fragment {
 							items.add(Integer.toString(date_int));
 						}
 						i++;
-					}
+						}
+					//}
 				} catch (Exception e) {
 					// TODO: handle exception
 					e.printStackTrace();
 
 				}
 
-				dialog.dismiss();
+				
 				adapter1 = new LazyAdapter(getActivity(), params);
 
 				list_event.setAdapter(adapter1);
 
 				adapter.setItems(items);
 				adapter.notifyDataSetChanged();
+			//	dialog.dismiss();
+				try {
+					dialog_progress.dismiss();
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+				
+				
 
 			}
 		}
@@ -573,7 +715,7 @@ public class Calander_event extends android.support.v4.app.Fragment {
 			try {
 				httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
-				System.out.println(httpPost);
+			//	System.out.println(httpPost);
 			} catch (UnsupportedEncodingException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -624,9 +766,9 @@ public class Calander_event extends android.support.v4.app.Fragment {
 							e1.printStackTrace();
 						}
 					}
-					System.out
-							.println("response.................................."
-									+ sResponse);
+				//	System.out
+				//			.println("response.................................."
+				//					+ sResponse);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -637,8 +779,10 @@ public class Calander_event extends android.support.v4.app.Fragment {
 		}
 
 		protected void onPostExecute(String resultt) {
-
-			dialog.dismiss();
+if(dialog!=null && dialog.isShowing())
+{
+	dialog.dismiss();
+}
 			handler = new Handler();
 			handler.post(calendarUpdater);
 		}
@@ -658,8 +802,13 @@ public class Calander_event extends android.support.v4.app.Fragment {
 			// this.imageLoader.clearCache();
 			this.activity = activity;
 			this._items = parentItems;
-			inflater = (LayoutInflater) getActivity().getSystemService(
-					Context.LAYOUT_INFLATER_SERVICE);
+			try {
+				inflater = (LayoutInflater) getActivity().getSystemService(
+						Context.LAYOUT_INFLATER_SERVICE);
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			
 			imageLoader = new ImageLoader(getActivity());
 		}
 
@@ -716,10 +865,28 @@ public class Calander_event extends android.support.v4.app.Fragment {
 			if (start_time.equals("") || start_time.equals(null)) {
 				_holder.time.setText("");
 			} else {
-				_holder.time.setText(start_time + " -> " + endString);
+				_holder.time.setText(start_time + " - " + endString);
 			}
 			_holder.guardian_name.setText(name_of_child_caps);
-			_holder.date_of_event_list.setText(date_ofevent);
+			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+			Date date_start_time = null; 
+			try {
+				//date_start_time = convertDate(date_ofevent, "yyyy-MM-dd");
+				date_start_time=sdf.parse(date_ofevent);
+				
+
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			String date_of_event1=null;
+			try {
+				SimpleDateFormat destDf = new SimpleDateFormat("dd/MM/yy");
+				 date_of_event1 = destDf.format(date_start_time);
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			
+			_holder.date_of_event_list.setText(date_of_event1);
 
 			url = _items.get(position).friendprofile_image;
 
@@ -763,7 +930,20 @@ public class Calander_event extends android.support.v4.app.Fragment {
 	}
 
 	private void readContent(String uriString) {
+		Calendar c = Calendar.getInstance();
+		//System.out.println("Current time => " + c.getTime());
 
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		String formattedDate = df.format(c.getTime());
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date current = null;
+		try {
+			current = sdf.parse(formattedDate);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		Uri uri = Uri.parse(uriString);
 
 		Cursor cursor = getActivity().getContentResolver().query(uri, null,
@@ -780,9 +960,7 @@ public class Calander_event extends android.support.v4.app.Fragment {
 				String date_start_time = null, date_end_time = null;
 				try {
 					date_start_time = convertDate(dd_startevent, "yyyy-MM-dd");
-					System.out.println(date_start_time);
-					System.out.println(event_title);
-					System.out.println(date_end_time);
+					
 					date_end_time = convertDate(dd_end_event, "yyyy-MM-dd");
 
 				} catch (Exception e) {
@@ -798,11 +976,41 @@ public class Calander_event extends android.support.v4.app.Fragment {
 				getcat.end_date_of_event = date_end_time;
 				getcat.child_name = event_title;
 				getcat.eventid = event_id;
-				if (event_title.equalsIgnoreCase("PLAYDATE EVENT")) {
+				
+				//params_systems_event.add(getcat);
+				
+				
+				SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+				Date date_of_event = null;
+				try {
+					date_of_event = sdf1.parse(date_start_time);
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if (event_title.equalsIgnoreCase("PLAYDATE EVENT")||event_title.contains("Playdate")) {
 
 				} else {
 					params_systems_event.add(getcat);
 				}
+				
+
+				/*if(date_of_event.before(current)){
+				    //Do Something
+					if (event_title.equalsIgnoreCase("PLAYDATE EVENT")) {
+
+					} else {
+						params_systems_event.add(getcat);
+					}
+				}else{
+					
+				}
+
+				*/
+				
+				
+				
+				
 
 			} while (cursor.moveToNext());
 
@@ -816,6 +1024,109 @@ public class Calander_event extends android.support.v4.app.Fragment {
 				.format(dateFormat, Long.parseLong(dateInMilliseconds))
 				.toString();
 	}
+	
+	@SuppressLint("InlinedApi")
+	public static final String[] INSTANCE_PROJECTION = new String[] {
+	    Instances.END,      // 0
+	    Instances.BEGIN,         // 1
+	    Instances.TITLE          // 2
+	  };
+	
+	public void calander_getdate(){
+	final String DEBUG_TAG = "MyActivity";
+	
+	  System.out.println("calender............................................");
+	// The indices for the projection array above.
+	  final int PROJECTION_ID_INDEX = 0;
+	  final int PROJECTION_BEGIN_INDEX = 1;
+	  final int PROJECTION_TITLE_INDEX = 2;
+	String month_details=android.text.format.DateFormat.format("MM", month).toString();
+	String year_details=android.text.format.DateFormat.format("yyyy", month).toString();
+
+	// Specify the date range you want to search for recurring
+	// event instances
+	Calendar beginTime = Calendar.getInstance();
+	beginTime.set(Integer.parseInt(year_details), Integer.parseInt(month_details)-1, 1, 8, 0);
+	
+	long startMillis = beginTime.getTimeInMillis();
+	Calendar endTime = Calendar.getInstance();
+	endTime.set(Integer.parseInt(year_details), Integer.parseInt(month_details)-1, 31, 8, 0);
+	long endMillis = endTime.getTimeInMillis();
+	  
+	Cursor cur = null;
+	ContentResolver cr = getActivity().getContentResolver();
+
+	// The ID of the recurring event whose instances you are searching
+	// for in the Instances table
+	//String selection = Instances.EVENT_ID + " = ?";
+	//String[] selectionArgs = new String[] {"207"};
+
+	// Construct the query with the desired date range.
+	Uri.Builder builder = Instances.CONTENT_URI.buildUpon();
+	ContentUris.appendId(builder, startMillis);
+	ContentUris.appendId(builder, endMillis);
+
+	// Submit the query
+	cur =  cr.query(builder.build(), 
+	    INSTANCE_PROJECTION, 
+	    null, 
+	    null, 
+	    null);
+	   
+	while (cur.moveToNext()) {
+	    String title = null;
+	    long endVal = 0;
+	    long beginVal = 0;    
+	    
+	    // Get the field values
+	    endVal = cur.getLong(PROJECTION_ID_INDEX);
+	    beginVal = cur.getLong(PROJECTION_BEGIN_INDEX);
+	    title = cur.getString(PROJECTION_TITLE_INDEX);
+	       System.out.println(title);       
+	    // Do something with the values. 
+	    Log.i(DEBUG_TAG, "Event:  " + title); 
+	    Calendar calendar = Calendar.getInstance();
+	    calendar.setTimeInMillis(beginVal);  
+	    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+	    Log.i(DEBUG_TAG, "Date: " + formatter.format(calendar.getTime()));  
+	    Calendar calendar_end = Calendar.getInstance();
+	    calendar_end.setTimeInMillis(endVal);
+	    Getcatagory_forlist getcat = new Getcatagory_forlist();
+		// System.out.println(date_start_time);
+	    String event_id = "-1";
+		getcat.start_time_of_event = "";
+		getcat.end_time_of_event = "";
+		getcat.date_ofevent = formatter.format(calendar.getTime());
+		getcat.end_date_of_event = formatter.format(calendar_end.getTime());
+		getcat.child_name = title;
+		getcat.eventid = event_id;
+		
+		//params_systems_event.add(getcat);
+		
+		
+		/*SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+		Date date_of_event = null;
+		try {
+			date_of_event = sdf1.parse(date_start_time);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+		if (title.equalsIgnoreCase("PLAYDATE EVENT")||title.contains("Playdate")) {
+
+		} else {
+			params_systems_event.add(getcat);
+		}
+	    }
+	 }
+
+}
+	
+	
+	
+	
+	
+	
 
 	/*
 	 * public void insert_event_intocalander(){ Calendar cal =
@@ -898,4 +1209,4 @@ public class Calander_event extends android.support.v4.app.Fragment {
 	 * }
 	 */
 
-}
+

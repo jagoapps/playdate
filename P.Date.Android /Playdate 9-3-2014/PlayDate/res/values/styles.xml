@@ -22,4 +22,10 @@
     <item name="android:background">@drawable/image_boader</item>
     <item name="android:scaleType">fitCenter</item>
 </style>
+
+
+<style name="AndroDev" parent="@android:style/Theme.Light.NoTitleBar">
+    <item name="android:background">#ffffff</item>
+</style>
+
 </resources>

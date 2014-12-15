@@ -1,4 +1,4 @@
-package com.iapptechnologies.time;
+/*package com.iapptechnologies.time;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -75,16 +75,16 @@ public class MainActivity_login extends Activity {
 			Session.setActiveSession(session);
 			if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
 
-				/*
+				
 				 * session.openForRead(new Session.OpenRequest(this)
 				 * .setPermissions(Arrays.asList("email")).setCallback(
 				 * statusCallback));
-				 */
+				 
 				
-				/*  session.openForRead(new
+				  session.openForRead(new
 				  Session.OpenRequest(this).setPermissions( Arrays.asList("id",
 				  "email", "firstname", "lastname","friends"))
-				  .setCallback(statusCallback));*/
+				  .setCallback(statusCallback));
 				 
 				session.openForRead(new Session.OpenRequest(this)
 						.setCallback(statusCallback));
@@ -122,9 +122,9 @@ public class MainActivity_login extends Activity {
 		if (!session.isOpened() && !session.isClosed()) {
 
 			
-			 /* session.openForRead(new Session.OpenRequest(this).setPermissions(
+			  session.openForRead(new Session.OpenRequest(this).setPermissions(
 			  Arrays.asList("id", "email", "firstname", "lastname","friends"))
-			  .setCallback(statusCallback));*/
+			  .setCallback(statusCallback));
 			 
 
 			session.openForRead(new Session.OpenRequest(this)
@@ -186,7 +186,7 @@ public class MainActivity_login extends Activity {
 		}
 		// handle the result
 
-		/*
+		
 		 * new Request(session, "/me", null, HttpMethod.GET, new
 		 * Request.Callback() { public void onCompleted(Response response) { //
 		 * handle the result
@@ -212,7 +212,7 @@ public class MainActivity_login extends Activity {
 		 * GetemailandFBId().execute();
 		 * 
 		 * } }).executeAsync(); } }).executeAsync();
-		 */
+		 
 
 		// // make the API call
 		System.out.println("session--------" + session);
@@ -220,11 +220,11 @@ public class MainActivity_login extends Activity {
 	}
 
 	// for logout
-	/*
+	
 	 * private void onClickLogout() { Session session =
 	 * Session.getActiveSession(); if (!session.isClosed()) {
 	 * session.closeAndClearTokenInformation(); } }
-	 */
+	 
 
 	class GetemailandFBId extends AsyncTask<Context, Void, Void> {
 		ProgressDialog dialog = new ProgressDialog(MainActivity_login.this);
@@ -431,7 +431,7 @@ try {
 
 			}
 
-			/*
+			
 			 * JSONParser jParser=new JSONParser(); JSONObject jsonme=
 			 * jParser.getJSONFromUrl(url); // JSONObject json= new
 			 * JSONObject(responseuser); try { JSONArray
@@ -453,9 +453,9 @@ try {
 			 * 
 			 * } catch (JSONException e) { // TODO Auto-generated catch block
 			 * e.printStackTrace(); }
-			 */
+			 
 
-			/*
+			
 			 * String serverurl=
 			 * "http://112.196.34.179/playdate/guardian.php?token=&firstname="
 			 * +firstname
@@ -500,7 +500,7 @@ try {
 			 * Log.d("is","message-------"+message); }
 			 * 
 			 * } catch (JSONException e) { // TODO: handle exception }
-			 */
+			 
 
 			return null;
 		}
@@ -511,7 +511,7 @@ try {
 			dialog.dismiss();
 			Intent it = new Intent(MainActivity_login.this, Home.class);
 			startActivity(it);
-			/*
+			
 			 * if (success_login.equals("1")) { Intent it=new
 			 * Intent(MainActivity_login.this,Home.class); startActivity(it); //
 			 * new GetFBfriendId().execute();
@@ -529,14 +529,14 @@ try {
 			 * });
 			 * 
 			 * AlertDialog alert = builder.create(); alert.show(); return; }
-			 */
+			 
 
-			/* new Registration().execute(); */
+			 new Registration().execute(); 
 
 		}
 	}
 
-	/*
+	
 	 * class Registration extends AsyncTask<Context, Void, Void> {
 	 * 
 	 * ProgressDialog dialog = new ProgressDialog(MainActivity_login.this);
@@ -612,9 +612,9 @@ try {
 	 * AlertDialog alert = builder.create(); alert.show(); return; } }
 	 * 
 	 * }
-	 */
+	 
 
-	/*
+	
 	 * class GetFBfriendId extends AsyncTask<Context, Void, Void> {
 	 * 
 	 * ProgressDialog dialog = new ProgressDialog(MainActivity_login.this);
@@ -652,7 +652,7 @@ try {
 	 * getcategory.facebook_id); // Log.d("",
 	 * "getcategory.getcategory.facebook_nic_name" // +
 	 * getcategory.facebook_nic_name);
-	 */
+	 
 	// // JSONArray jsonarray = null;
 	// // try {
 	// // jsonarray = json.getJSONArray("posts");
@@ -757,11 +757,11 @@ try {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		/*
+		
 		 * super.onActivityResult(requestCode, resultCode, data);
 		 * Session.getActiveSession().onActivityResult(this, requestCode,
 		 * resultCode, data);
-		 */
+		 
 		super.onActivityResult(requestCode, resultCode, data);
 		if (Session.getActiveSession() != null)
 			Session.getActiveSession().onActivityResult(this, requestCode,
@@ -793,7 +793,7 @@ try {
 
 }
 
-/*
+
  * 
  * @Override protected void onCreate(Bundle savedInstanceState) {
  * super.onCreate(savedInstanceState); setContentView(R.layout.activity_main);

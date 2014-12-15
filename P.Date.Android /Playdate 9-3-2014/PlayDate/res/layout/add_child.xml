@@ -34,32 +34,38 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
-                android:background="@drawable/register_text_field_bg"
+                android:background="@drawable/container_dropshadow"
                 android:orientation="vertical" >
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="30dp"
+                    android:layout_marginTop="10dp"
                     android:orientation="horizontal" >
-
-                    <TextView
+<TextView 
+                        android:id="@+id/ttt"
+                        
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="10dp"
-                        android:text="*" />
+                        android:text="*"
+                        android:textColor="#0097dc"
+                        android:layout_centerVertical="true"
+                        android:textSize="15dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="5dp"/>
+                    
 
                     <EditText
                         android:id="@+id/edit_childname"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_toLeftOf="@+id/ttt"
+                        android:layout_marginRight="5dp"
                         android:background="@drawable/txt_field"
                         android:ems="10"
+                         android:layout_alignParentLeft="true"
                         android:hint="Child name"
-                        android:inputType="textCapCharacters"
                         android:lines="1"
                         android:padding="15dp"
                         android:paddingLeft="15dp"
@@ -71,31 +77,38 @@
 
                         <requestFocus />
                     </EditText>
-                </LinearLayout>
+                   
+                </RelativeLayout>
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal" >
+                  >
 
-                    <TextView
+                    <TextView 
+                        android:id="@+id/ttt1"
+                        
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="10dp"
-                        android:text="*" />
+                        android:text="*"
+                        android:textColor="#0097dc"
+                          android:layout_centerVertical="true"
+                        android:textSize="15dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="5dp"/>
 
                     <EditText
                         android:id="@+id/edit_Dob"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="15dp"
-                        android:layout_marginTop="15dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_alignParentLeft="true"
                         android:background="@drawable/txt_field"
                         android:ems="10"
                         android:hint="Date of Birth"
-                        android:inputType="textCapCharacters"
+                       android:layout_toLeftOf="@+id/ttt1"
                         android:lines="1"
                         android:padding="15dp"
                         android:paddingLeft="15dp"
@@ -104,12 +117,13 @@
                         android:textSize="13dp"
                         android:textStyle="bold"
                         android:typeface="sans" />
-                </LinearLayout>
+                   
+                </RelativeLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp"
+                    android:layout_marginTop="5dp"
                     android:orientation="horizontal"
                     android:weightSum="10" >
 
@@ -117,7 +131,7 @@
                         android:id="@+id/edit_childfreetime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="15dp"
+                        android:layout_marginLeft="10dp"
                         android:layout_weight="9.5"
                         android:background="@drawable/txt_field"
                         android:ems="10"
@@ -133,10 +147,10 @@
 
                     <Button
                         android:id="@+id/button1_add_moredays"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
                         android:layout_gravity="center_vertical|center_horizontal|right"
-                        android:layout_marginRight="10dp"
+                        android:layout_margin="10dp"
                         android:layout_weight=".5"
                         android:background="@drawable/add_button"
                         android:gravity="center" />
@@ -168,9 +182,9 @@
                     android:id="@+id/edit_childallergies"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
                     android:background="@drawable/txt_field"
                     android:scrollbars="vertical"
                     android:hint="Allergies"
@@ -186,9 +200,9 @@
                     android:id="@+id/edit_childhobbies"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:layout_marginTop="15dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="5dp"
                     android:background="@drawable/txt_field"
                       android:inputType="textMultiLine"
                     android:hint="Hobbies"
@@ -223,13 +237,12 @@
                     android:id="@+id/edit_childschool"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:layout_marginTop="15dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="5dp"
                     android:background="@drawable/txt_field"
                     android:ems="10"
                     android:hint="School"
-                    android:inputType="textCapCharacters"
                     android:lines="1"
                     android:padding="15dp"
                     android:paddingLeft="15dp"
@@ -239,7 +252,7 @@
                     android:textStyle="bold"
                     android:typeface="sans" />
 
-                <EditText
+                <!-- <EditText
                     android:id="@+id/edit_childyouthclub"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -257,17 +270,17 @@
                     android:textColor="#0097dc"
                     android:textSize="13dp"
                     android:textStyle="bold"
-                    android:typeface="sans" />
+                    android:typeface="sans" /> -->
 
                 <Button
                     android:id="@+id/button1_childsubmit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginBottom="50dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="10dp"
                     android:background="@drawable/header"
                     android:gravity="center"
                     android:text="SUBMIT"

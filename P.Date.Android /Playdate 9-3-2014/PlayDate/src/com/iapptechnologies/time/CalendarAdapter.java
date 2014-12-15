@@ -18,6 +18,7 @@ package com.iapptechnologies.time;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import com.iapp.playdate.R;
 
@@ -25,6 +26,7 @@ import com.iapp.playdate.R;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,11 +40,11 @@ public class CalendarAdapter extends BaseAdapter {
 	
 	
 	private Context mContext;
-
+	int i;
     private java.util.Calendar month;
     private Calendar selectedDate;
     private ArrayList<String> items;
-    
+    public static List<String> dayString=null;
     public CalendarAdapter(Context c, Calendar monthCalendar) {
     	month = monthCalendar;
     	selectedDate = (Calendar)monthCalendar.clone();
@@ -53,12 +55,14 @@ public class CalendarAdapter extends BaseAdapter {
     }
     
     public void setItems(ArrayList<String> items) {
-    	for(int i = 0;i != items.size();i++){
+    	for( i = 0;i != items.size();i++){
     		if(items.get(i).length()==1) {
     		items.set(i, "0" + items.get(i));
     		}
     	}
     	this.items = items;
+//    	String item=items.get(i);
+//    	Log.e("Items==",""+item);
     }
     
     /*public void setItems(ArrayList<String> items) {
@@ -69,8 +73,8 @@ public class CalendarAdapter extends BaseAdapter {
     	}
     	this.items = items;
     }*/
-
-    
+//
+//	CalendarAdapter.dayString = new ArrayList<String>();
 
     public int getCount() {
         return days.length;
@@ -94,6 +98,7 @@ public class CalendarAdapter extends BaseAdapter {
         	
         }
         dayView = (TextView)v.findViewById(R.id.date);
+        
         
         // disable empty days from the beginning
         if(days[position].equals("")) {
@@ -123,11 +128,16 @@ public class CalendarAdapter extends BaseAdapter {
     	if(monthStr.length()==1) {
     		monthStr = "0"+monthStr;
     	}
+    	int year=month.get(Calendar.YEAR);
+    //	Log.e("Year==",""+year);
        
         // show icon if date is not empty and it exists in the items array
         ImageView iw = (ImageView)v.findViewById(R.id.date_icon);
-        if(date.length()>0 && items!=null && items.contains(date)) {        	
+        
+     	iw.setVisibility(View.GONE);
+        if(date.length()>0 && items!=null && items.contains(date)) {   
         	iw.setVisibility(View.VISIBLE);
+       // 	Log.e("Visible==","Visible");
         }
         else {
         	iw.setVisibility(View.INVISIBLE);

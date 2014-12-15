@@ -11,6 +11,7 @@ public class childname {
     public String school;
     public String youthclub;
     public String child_profile;
+    public String g_id;
 
     /*public String getName() {
         return name;

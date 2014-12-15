@@ -18,8 +18,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="20dp"
-           android:adjustViewBounds="true"
-                    android:scaleType="centerInside"
             android:padding="1dp"
           
            />

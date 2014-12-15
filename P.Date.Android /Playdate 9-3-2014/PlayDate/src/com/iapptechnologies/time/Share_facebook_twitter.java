@@ -21,8 +21,6 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
 import com.facebook.Session;
 import com.facebook.SessionState;
-import com.facebook.widget.WebDialog;
-import com.facebook.widget.WebDialog.OnCompleteListener;
 import com.iapp.playdate.R;
 
 
@@ -168,7 +166,7 @@ if(isInternetPresent){
 	 Intent shareIntent = new Intent();
      shareIntent.setAction(Intent.ACTION_SEND);
      shareIntent.setType("text/plain");
-     shareIntent.putExtra(Intent.EXTRA_TEXT, " “I’ve started using Playdate by JAGO, an awesome app to arrange & manage my kids social lives.  Check it out and get your download here www.jago.nu”");
+     shareIntent.putExtra(Intent.EXTRA_TEXT, " ï¿½Iï¿½ve started using Playdate by JAGO, an awesome app to arrange & manage my kids social lives.  Check it out and get your download here www.jago.nuï¿½");
      startActivity(Intent.createChooser(shareIntent, "Share your thoughts"));
 
    /*  mTwitter = new TwitterApp(getActivity(), CONSUMER_KEY, CONSUMER_SECRET);
@@ -279,7 +277,7 @@ if(isInternetPresent){
 					 // email.putExtra(Intent.EXTRA_EMAIL, new String[]{ to});
 					  //email.putExtra(Intent.EXTRA_CC, new String[]{ to});
 					  //email.putExtra(Intent.EXTRA_BCC, new String[]{to});
-					  email.putExtra(Intent.EXTRA_TEXT, "I’ve started using Playdate by JAGO, an awesome app to arrange & manage my kids social lives.  Check it out and get your download here www.jago.nu");
+					  email.putExtra(Intent.EXTRA_TEXT, "Iï¿½ve started using Playdate by JAGO, an awesome app to arrange & manage my kids social lives.  Check it out and get your download here www.jago.nu");
 					  email.putExtra(Intent.EXTRA_SUBJECT, "App Request");
 		 
 					  //need this to prompts email client only
@@ -379,23 +377,23 @@ if(isInternetPresent){
 		    Bundle params = new Bundle();
 		    params.putString("name", "Playdate App");
 		    params.putString("caption", "Playdate App");
-		    params.putString("description", "I’ve started using Playdate by JAGO, an awesome app to arrange & manage my kids social lives.  Check it out and get your download here www.jago.nu");
+		    params.putString("description", "Iï¿½ve started using Playdate by JAGO, an awesome app to arrange & manage my kids social lives.  Check it out and get your download here www.jago.nu");
 		    params.putString("link", "https://developers.facebook.com/android");
 		    params.putString("picture", "http://112.196.34.179/playdate.png");
 
 
-		        WebDialog feedDialog = (
+		      /*  WebDialog feedDialog = (
 		                new WebDialog.FeedDialogBuilder(getActivity(),
 		                        Session.getActiveSession(),
 		                        params))
 		                        .setOnCompleteListener(new OnCompleteListener() {
 
-		                           /* @Override
+		                            @Override
 		                            public void onComplete(Bundle values,FacebookException error) {
 
 		                               
 		                            }
-		*/
+		
 		       @Override
 		       public void onComplete(Bundle values,
 		         FacebookException error) {
@@ -422,7 +420,7 @@ if(isInternetPresent){
 
 		                        })
 		                        .build();
-		        feedDialog.show();
+		        feedDialog.show();*/
 		    }
 	
 	private void onClickLogin()
